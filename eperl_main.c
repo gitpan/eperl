@@ -573,7 +573,7 @@ int main(int argc, char **argv, char **env)
             while ((c = fgetc(stdin)) != EOF) {
                 fputc(c, fp);
             }
-            fclose(fp);
+            fclose(fp); fp = NULL;
 
             /* stdin script implies keeping of cwd */
             keepcwd = TRUE;
@@ -898,8 +898,10 @@ int main(int argc, char **argv, char **env)
     cp[strlen(cp)-1] = NUL;
     env = mysetenv(env, "SCRIPT_SRC_MODIFIED_CTIME", "%s", cp);
     env = mysetenv(env, "SCRIPT_SRC_MODIFIED_ISOTIME", "%s", isotime(&(st.st_mtime)));
-    pw = getpwuid(st.st_uid);
-    env = mysetenv(env, "SCRIPT_SRC_OWNER", "%s", pw->pw_name);
+    if ((pw = getpwuid(st.st_uid)) != NULL)
+        env = mysetenv(env, "SCRIPT_SRC_OWNER", "%s", pw->pw_name);
+    else
+        env = mysetenv(env, "SCRIPT_SRC_OWNER", "unknown-uid-%d", st.st_uid);
     env = mysetenv(env, "VERSION_INTERPRETER", "%s", ePerl_WebID);
     env = mysetenv(env, "VERSION_LANGUAGE", "Perl/%s", AC_perl_vers);
 
@@ -939,7 +941,7 @@ int main(int argc, char **argv, char **env)
         CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
     fwrite(cpScript, strlen(cpScript), 1, fp);
-    fclose(fp);
+    fclose(fp); fp = NULL;
 
     /* in Debug mode output the script to the console */
     if (fDebug) {
@@ -954,7 +956,7 @@ int main(int argc, char **argv, char **env)
         else 
             fprintf(fp, "%c\n", cpScript[strlen(cpScript)-1]);
         fprintf(fp, "----internally created Perl script-----------------------------------\n");
-        fclose(fp);
+        fclose(fp); fp = NULL;
     }
 
     /* open a file for Perl's STDOUT channel
@@ -985,7 +987,13 @@ int main(int argc, char **argv, char **env)
     my_perl = perl_alloc();   
     perl_construct(my_perl); 
     /* perl_destruct_level = 1; */
-    /* perl_init_i18nl10n(1); */
+
+    /*  initialise the Perl Locale environment  */
+#if AC_perl_vnum < 500400
+    perl_init_i18nl14n(1); /* Perl 5.003 or lower */
+#else
+    perl_init_i18nl10n(1); /* Perl 5.004 or higher */
+#endif
 
     /*  create command line...  */
     myargc = 0;
@@ -1013,7 +1021,7 @@ int main(int argc, char **argv, char **env)
 #endif
     if (rc != 0) { 
         if (fCheck && mode == MODE_FILTER) {
-            fclose(er);
+            fclose(er); er = NULL;
             IO_restore_stdout();
             IO_restore_stderr();
             if ((cpBuf = ePerl_ReadErrorFile(perlstderr, perlscript, source)) != NULL) {
@@ -1022,7 +1030,7 @@ int main(int argc, char **argv, char **env)
             CU(EX_IOERR);
         }
         else {
-            fclose(er);
+            fclose(er); er = NULL;
             PrintError(mode, source, perlscript, perlstderr, "Perl parsing error (interpreter rc=%d)", rc);
             CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
@@ -1030,7 +1038,7 @@ int main(int argc, char **argv, char **env)
 
     /* Stop when we are just doing a syntax check */
     if (fCheck && mode == MODE_FILTER) {
-        fclose(er);
+        fclose(er); er = NULL;
         IO_restore_stdout();
         IO_restore_stderr();
         fprintf(stderr, "%s syntax OK\n", source);
@@ -1133,7 +1141,7 @@ int main(int argc, char **argv, char **env)
                 CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
             }
             fwrite(cpOut, nOut, 1, fp);
-            fclose(fp);
+            fclose(fp); fp = NULL;
         }
         else {
             /* data just goes to stdout */

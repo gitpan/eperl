@@ -9,6 +9,7 @@
 
 #define AC_perl_prog      "@perl_prog@"
 #define AC_perl_vers      "@perl_vers@"
+#define AC_perl_vnum      @perl_vnum@
 #define AC_perl_archlib   "@perl_archlib@"
 #define AC_perl_libs      "@perl_libs@"
 #define AC_perl_dla       "@perl_dla@"

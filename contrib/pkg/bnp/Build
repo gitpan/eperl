@@ -1,8 +1,8 @@
 :
-eval 'exec ./BnP/BnP.aux.perl -S $0 ${1+"$@"}'
+eval 'exec ../BnP/BnP.aux.perl -S $0 ${1+"$@"}'
     if $running_under_some_shell;
 require 5.000;
-BEGIN { push(@INC, "BnP"); }
+BEGIN { push(@INC, "../BnP"); }
 use BnP;
 
 #####################################################################
@@ -31,15 +31,13 @@ BnP::cmd(0, "mkdir work");
 BnP::chdir("work");
 
 BnP::fetch("http://www.engelschall.com/sw/eperl/distrib/",
-           "eperl-2.2.6.tar.gz", "../dist.eperl/");
+           "eperl-2.2.11.tar.gz", "../dist/");
 
-BnP::cmd(0, "gunzip -c ../dist.eperl/eperl-2.2.6.tar.gz | tar xvf -");
-BnP::chdir("eperl-2.2.6");
+BnP::cmd(0, "gunzip -c ../dist.eperl/eperl-2.2.11.tar.gz | tar xvf -");
+BnP::chdir("eperl-2.2.11");
 BnP::cmd(0, "CC=$cc; export CC; ./configure --prefix=$prefix");
 BnP::cmd(0, "make");
 BnP::cmd(0, "make install");
 BnP::chdir("..");
-
-BnP::cmd(0, "strip $prefix/bin/* || true");
 
 ##EOF##

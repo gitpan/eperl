@@ -1,9 +1,9 @@
 Summary: Embedded Perl Language
 Name: eperl
-Version: 2.2.0
+Version: 2.2.11
 Release: 1
 Group: Utilities/System
-Source: http://www.engelschall.com/sw/eperl/distrib/eperl-2.2.0.tar.gz
+Source: http://www.engelschall.com/sw/eperl/distrib/eperl-2.2.11.tar.gz
 Copyright: GPL or Artistic
 Requires: perl
 

@@ -51,7 +51,7 @@ use File::Basename qw(dirname);
 use Parse::ePerl;
 
 #   private version number
-$VERSION = do { my @v=("2.2.8"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
+$VERSION = do { my @v=("2.2.12"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
 
 #   globals
 $nDone  = 0;

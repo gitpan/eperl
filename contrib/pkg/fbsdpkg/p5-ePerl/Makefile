@@ -1,17 +1,18 @@
 # New ports collection makefile for:	p5-ePerl
-# Version required:	2.2.5
-# Date created:		Wed Sep  3 12:31:36 MET DST 1997
+# Version required:	2.2.10
+# Date created:		03-Sep-1997
 # Whom:	      		Ralf S. Engelschall <rse@engelschall.com>
 #
-# $Id: Makefile,v 1.5 1997/09/03 10:34:13 rse Exp $
+# $Id: Makefile,v 1.11 1997/12/28 17:11:46 rse Exp $
 #
 
-DISTNAME=	eperl-2.2.5
-PKGNAME=	p5-ePerl-2.2.5
+DISTNAME=	eperl-2.2.10
+PKGNAME=	p5-ePerl-2.2.10
 CATEGORIES=	lang www perl5
 MASTER_SITES=	${MASTER_SITE_PERL_CPAN} \
 		http://www.engelschall.com/sw/eperl/distrib/ \
-		ftp://ftp.engelschall.com/sw/
+		ftp://ftp.engelschall.com/sw/eperl/ \
+		ftp://ftp.hyperreal.org/software/engelschall/eperl/
 MASTER_SITE_SUBDIR=Parse
 
 MAINTAINER=	rse@engelschall.com

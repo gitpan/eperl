@@ -53,7 +53,7 @@ use Cwd qw(fastcwd);
 @EXPORT = qw();
 
 #   private version number
-$VERSION = do { my @v=("2.2.8"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
+$VERSION = do { my @v=("2.2.12"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
 
 #   dynaloader bootstrapping
 bootstrap Parse::ePerl $VERSION;

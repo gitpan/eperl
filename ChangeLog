@@ -2,6 +2,47 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2.11 and 2.2.12
+  ---------------------------------
+  [Bugfix only]
+
+  971231 o ARGL! We really need 1998 now: Yesterday
+           I've released 2.2.11 with two nasty syntax errors in
+           the configure script. Hmmmmm... 1998 is now really
+           needed, I think.  [Thanks to Anthony Fok
+           <foka@gpu.srv.ualberta.ca> and ??? <djk@tobit.co.uk>
+           for quick response and patch]
+
+  Changes between 2.2.10 and 2.2.11
+  ---------------------------------
+  [Bugfix only]
+
+  971230 o Activated Perl Locale support for both Perl 5.003 
+           and Perl 5.004 variants.
+         o Fixed owner determination in eperl_main.c: ePerl core
+           dumped when the owner of the script does not exists in
+           the passwd database.
+         o Updated contrib/pkg/ files
+         o Updated VERSIONS file
+
+  Changes between 2.2.9 and 2.2.10
+  --------------------------------
+  [Bugfix only]
+
+  971228 o little distribution bug: the asc2c was not run before
+           the 2.2.9 release, so it has to be run by the builder
+           which is not what was intended.
+
+  Changes between 2.2.8 and 2.2.9
+  -------------------------------
+  [Bugfix only]
+
+  971120 o fixed demo.image.phtml description
+  971221 o fixed a really nasty fclose() bug in eperl_main.c
+           which caused core dumps under Debian GNU/Linux with
+           libc6.  [Thanks to <tv@havoc.fi> and Anthony Fok
+           <foka@gpu.srv.ualberta.ca> for hints]
+
   Changes between 2.2.7 and 2.2.8
   -------------------------------
   [Bugfix and Minor Enhancement]

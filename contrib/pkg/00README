@@ -3,7 +3,7 @@
   for building ePerl with various packaging/installation systems.
 
   bnp .......... Files to build with RSE's Build'n'Play mechanism
-                 Put stuff into /sw/BnP/ and run "./Build.eperl"
+                 Put stuff into /sw/BnP/BnP.eperl and run "./Build"
                  Author: Ralf S. Engelschall
 
   fbsdpkg ...... Files to build as a FreeBSD package
