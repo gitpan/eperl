@@ -1,0 +1,20 @@
+<html>
+<head>
+<title>demo-03: Programming a loop</title>
+</head>
+<body>
+<h1>demo-03: Programming a loop</h1>
+
+Our CGI Environment looks like this:
+
+<ul>
+<pre>
+<? foreach $key (sort(keys(%ENV))) {
+       print "$key=$ENV{$key}\n";
+   }
+!>
+</pre>
+</ul>
+
+</body>
+</html>

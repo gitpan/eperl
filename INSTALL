@@ -1,21 +1,24 @@
 
-INSTALLATION
-============
+  I N S T A L L A T I O N
 
-1. Make sure you have Perl 5.002 or higher already
-   installed on your system. The perl program should be in your path. If you
-   have different perl binaries in your path the program with the latest
-   version number will be used.
+  1. Make sure you have Perl 5.003 or higher already
+	 installed on your system. The perl program should be in your path. If you
+	 have different perl binaries in your path the program with the latest
+	 version number will be used.
 
-2. Compile the ePerl interpreter
+  2. Compile the ePerl interpreter
+  
+     $ ./configure
+     $ make
 
-   $ ./configure
-   $ make
+  3. Install it into your HTTP Server
+  
+     $ cp nph-eperl /path/to/apache/cgi-bin/
+     
+  4. Configure your webserver to process all pages with extension '.phtml' via
+     the ePerl NPH-CGI/1.0 program. For an Apache webserver add the following
+     to your httpd.conf file:
 
-3. Install it into your HTTP Server. For Apache 1.1.1 the following will
-   work:
-
-   ScriptAlias  /internal/cgi              /sw/lib/apache/cgi-bin
-   AddType      application/x-httpd-eperl  phtml eperl epl
-   Action       application/x-httpd-eperl  /internal/cgi/user/eperl
-
+     AddType      application/x-httpd-eperl  .phtml .eperl .epl
+     Action       application/x-httpd-eperl  /internal/cgi/nph-eperl
+     ScriptAlias  /internal/cgi              /path/to/apache/cgi-bin

@@ -1,11 +1,9 @@
-/* ac.h.in.  Generated automatically from configure.in by autoheader.  */
-#ifndef AC_H
-#define AC_H
+/* config_ac.h.in.  Generated automatically from configure.in by autoheader.  */
+#ifndef CONFIG_AC_H
+#define CONFIG_AC_H
 /*
-**
-**  ac.h -- AUTO configuration header file
-**  Copyright (c) Ralf S. Engelschall, <rse@en.muc.de>
-**
+**  config_ac.h -- AUTO configuration header file
+**  Copyright (c) Ralf S. Engelschall, <rse@engelschall.com>
 */
 
 
@@ -14,6 +12,10 @@
 
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
+
+/*  defined if Perl support the DynLoader
+    interface for dynamic library loading */
+#undef HAVE_PERL_DYNALOADER
 
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H
@@ -27,4 +29,4 @@
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
 
-#endif /* AC_H */
+#endif /* CONFIG_AC_H */

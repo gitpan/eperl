@@ -1,23 +1,16 @@
-#ifndef AC_H
-#define AC_H
+#ifndef CONFIG_AC_H
+#define CONFIG_AC_H
 /*
-**
-**  ac.h -- AUTO configuration header file
-**  Copyright (c) Ralf S. Engelschall, <rse@en.muc.de>
-**
+**  config_ac.h -- AUTO configuration header file
+**  Copyright (c) Ralf S. Engelschall, <rse@engelschall.com>
 */
 
 @TOP@
 
-
-/* Define if system supports prototypes, i.e. the compiler
-   may be a real ANSI compiler */
-#undef HAVE_PROTOTYPES
-
-/* Define if g++ is of old brainded version 2.5.8 which
-   doesn't support __FUNCTION__ while its gcc does */
-#undef HAVE_GXX_NO_FUNCTION_DEFINE
+/*  defined if Perl support the DynLoader
+    interface for dynamic library loading */
+#undef HAVE_PERL_DYNALOADER
 
 @BOTTOM@
 
-#endif /* AC_H */
+#endif /* CONFIG_AC_H */

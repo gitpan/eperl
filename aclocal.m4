@@ -1,6 +1,6 @@
 dnl #
-dnl #  aclocal.m4 -- Local M4 functions for GNU autoconf 2.1
-dnl #  Copyright (c) Ralf S. Engelschall, <rse@en.muc.de>
+dnl #  aclocal.m4 -- Local M4 functions for GNU autoconf
+dnl #  Copyright (c) Ralf S. Engelschall, <rse@engelschall.com>
 dnl #
 dnl #  NOTICE:
 dnl #      all defined macros are named AC_*

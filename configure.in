@@ -5,41 +5,90 @@ dnl #
 dnl #  Process this file with ``autoconf'' to produce a configure script.
 dnl #
 
-AC_PREREQ(2.3)dnl
+AC_PREREQ(2.10)dnl
 AC_REVISION($Revision: 1.12$)
+echo "Configuring for ePerl `./aux/newvers -l c -d eperl_version.c`"
 
+AC_CONFIG_AUX_DIR(aux)
 AC_INIT(README)
-AC_CONFIG_HEADER(ac.h)dnl
+AC_CONFIG_HEADER(config_ac.h)dnl
 AC_PREFIX_DEFAULT(/usr/local)
 
 AC_CONFIGURE_PART(CHECK: C/C++ Compiler)
 AC_PROG_CC
 AC_PROG_CPP
 
+AC_CONFIGURE_PART(CHECK: Build Tools)
+AC_PROG_RANLIB
+AC_PROGRAM_CHECK(AR, ar, ar,)
+if test -z "$AR"; then
+    AC_ERROR([required program ``ar'' not found])
+fi
 AC_SET_MAKE
 AC_PROG_INSTALL
 INSTALL_DATA='${INSTALL} -m 664'
 INSTALL_PROGRAM="${INSTALL_PROGRAM} -s"
 AC_PATH_PROGS(PATH_BOURNESHELL, bash sh, /bin/sh) 
 
-AC_MSG_CHECKING([for (latest) Perl])
+AC_CONFIGURE_PART(CHECK: Perl Language)
+AC_MSG_CHECKING([for Perl language])
 TMPFILE=/tmp/x
-for dir in `echo $PATH | sed -e 's/:/ /g'`; do
-    for perl in perl5 perl perl4; do
+rm -f $TMPFILE
+touch $TMPFILE
+c=0
+for dir in `echo $PATH | sed -e 's/:/ /g'` /tmp; do
+    for perl in perl5 perl miniperl; do
          if test -f "$dir/$perl"; then
-			 perl="$dir/$perl"
-			 version=`$perl -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
-			 versionnum="`echo $version | sed -e 's/\.//g'`"
-			 echo "$versionnum $version $perl" >>$TMPFILE
-		 fi
-	done
+             perl="$dir/$perl"
+             version=`$perl -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
+             versionnum="`echo $version | sed -e 's/\.//g'`"
+             versionnum=`expr $versionnum - $c`
+             echo "$versionnum $version $perl" >>$TMPFILE
+         fi
+    done
+    c=`expr $c + 1`
 done
 perlvers="`cat $TMPFILE | sort -u | tail -1 | cut '-d ' -f2`"
 perlprog="`cat $TMPFILE | sort -u | tail -1 | cut '-d ' -f3`"
-rm $TMPFILE
+rm -f $TMPFILE
 PATH_PERL=$perlprog
 AC_MSG_RESULT([$perlprog v$perlvers])
 AC_SUBST(PATH_PERL)
+AC_SUBST(perlprog)
+AC_SUBST(perlvers)
+if test -f $PATH_PERL; then
+	:
+else
+    AC_ERROR([required program ``perl'' not found])
+fi
+
+AC_MSG_CHECKING([for Perl architecture directory])
+perlarch="`$perlprog -e 'use Config; print $Config{archlib}'`";
+AC_MSG_RESULT([$perlarch])
+AC_SUBST(perlarch)
+
+AC_MSG_CHECKING([for Perl library files])
+perllibs="`$perlprog -e 'use Config; print $Config{ldflags}'`";
+perllibs="$perllibs `$perlprog -e 'use Config; print $Config{libs}'`"
+AC_MSG_RESULT([$perllibs])
+AC_SUBST(perllibs)
+
+AC_MSG_CHECKING([for Perl DynaLoader support])
+usedl="`$perlprog -e 'use Config; print $Config{usedl}'`";
+case $usedl in
+    define )
+	    rc=yes
+        AC_DEFINE(HAVE_PERL_DYNALOADER)
+		perldla=$perlarch/auto/DynaLoader/DynaLoader.a
+		;;
+	* )
+	    rc=no
+		perldla=
+		;;
+esac
+AC_SUBST(perldla)
+AC_MSG_RESULT([$rc])
+
 
 AC_CONFIGURE_PART(CHECK: C/C++ Dependencies)
 AC_CONST
@@ -118,6 +167,7 @@ AC_UVAR_OUTPUT
 AC_CONFIGURE_PART(RESULT: Sourcefile Substitution)
 AC_OUTPUT(dnl
 Makefile dnl
+config_sc.h dnl
 ,dnl
 )dnl
 

@@ -1,63 +1,97 @@
 ##
-##  Makefile.in -- ePerl Makefile
+##  Makefile -- ePerl Makefile
 ##
+
 @SET_MAKE@
 
 # ------------------------------------------------
 
-PERL=@PATH_PERL@
-CC=@CC@
-CFLAGS = @CFLAGS@
-LDFLAGS = @LDFLAGS@
+#   compiler tools
+CC      = @CC@
+AR      = @AR@
+RANLIB  = @RANLIB@
+CFLAGS  = @CFLAGS@ -I.
+LDFLAGS = @LDFLAGS@ -L.
+
+#   Perl 5 language
+perlprog    = @perlprog@
+perlccflags = -I@perlarch@/CORE
+perlldflags = -L@perlarch@/CORE -lperl @perllibs@
+perldla     = @perldla@
 
 # ------------------------------------------------
 
-all: config eperl
+all: config nph-eperl
 
 # ------------------------------------------------
 
-config: configure ac.h.in
+config: configure config_ac.h.in
 
 configure: configure.in aclocal.m4 acconfig.h
 	rm -f configure
 	autoconf configure.in >configure
-	./fixconfigure configure
+	./aux/fixconfigure configure
 	chmod 770 configure
 
-ac.h.in: configure.in acconfig.h
-	rm -f ac.h.in
-	autoheader configure.in >ac.h.in
+config_ac.h.in: configure.in acconfig.h
+	rm -f config_ac.h.in
+	autoheader configure.in >config_ac.h.in
 
 # ------------------------------------------------
 
-eperl: eperl.o
-	-@LIBDIR="`$(PERL) -e 'use Config; print $$Config{archlib}'`/CORE";\
-	INCDIR=$$LIBDIR; \
-	LIBFILES="-lperl `$(PERL) -e 'use Config; print $$Config{libs}'`"; \
-	echo "$(CC) $(CFLAGS) -o eperl eperl.o $(LDFLAGS) -L$$INCDIR $$LIBFILES"; \
-	$(CC) $(CFLAGS) -o eperl eperl.o $(LDFLAGS) -L$$INCDIR $$LIBFILES; \
-	strip eperl; \
-	ls -l eperl; size eperl
+nph-eperl: eperl_nphcgi.o libeperl.a
+	$(CC) $(CFLAGS) -o nph-eperl eperl_nphcgi.o libeperl.a $(LDFLAGS) $(perldla) $(perlldflags)
+	strip nph-eperl; ls -l nph-eperl; size nph-eperl
 
-eperl.o: eperl.c
-	-@LIBDIR="`$(PERL) -e 'use Config; print $$Config{archlib}'`/CORE";\
-	INCDIR=$$LIBDIR; \
-	echo "$(CC) $(CFLAGS) -I$$INCDIR -o eperl.o -c eperl.c"; \
-	$(CC) $(CFLAGS) -I$$INCDIR -o eperl.o -c eperl.c
+libeperl.a: eperl_lib.o eperl_version.o
+	$(AR) r libeperl.a eperl_lib.o eperl_version.o
+	$(RANLIB) libeperl.a 
+
+eperl_nphcgi.o: eperl_nphcgi.c
+	$(CC) $(CFLAGS) $(perlccflags) -o eperl_nphcgi.o -c eperl_nphcgi.c
+
+eperl_lib.o: eperl_lib.c
+	$(CC) $(CFLAGS) -o eperl_lib.o -c eperl_lib.c
+
+eperl_version.o: eperl_version.c
+	$(CC) $(CFLAGS) -o eperl_version.o -c eperl_version.c
 
 # ------------------------------------------------
+
+newvers:
+	./aux/newvers -l c -p ePerl eperl_version.c
+	V=`./aux/newvers -l c -D eperl_version.c`;\
+	sed -e "s/Version .*(.*)/Version $$V/g" <ANNOUNCE >ANNOUNCE.n && mv ANNOUNCE.n ANNOUNCE; \
+	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 
 install:
-	@echo "Just copy 'eperl' to your cgi-bin directory"
+	-@echo ""
+	-@echo "    To install ePerl just copy 'nph-eperl' to your cgi-bin directory"
+	-@echo "    and configure your webserver to process all pages with extension"
+	-@echo "    '.phtml' via this NPH-CGI/1.0 program."
+	-@echo ""
+	-@echo "    For an Apache webserver e.g. do..."
+	-@echo ""
+	-@echo "       % cp nph-eperl /path/to/apache/cgi-bin/"
+	-@echo ""
+	-@echo "    ...and then add the following to your httpd.conf file:"
+	-@echo ""
+	-@echo "       AddType      application/x-httpd-eperl  .phtml .eperl .epl"
+	-@echo "       Action       application/x-httpd-eperl  /internal/cgi/nph-eperl"
+	-@echo "       ScriptAlias  /internal/cgi              /path/to/apache/cgi-bin"
+	-@echo ""
 
 # ------------------------------------------------
 
 clean:
-	-rm -f eperl.o eperl
+	-rm -f eperl_nphcgi.o eperl_lib.o eperl_version.o
+	-rm -f libeperl.a 
+	-rm -f nph-eperl
+	-rm -f core *.core
 
 distclean:
 	-@make clean
-	-rm -f ac.h
+	-rm -f config_ac.h config_sc.h
 	-rm -f config.status config.cache config.log
 	-rm -f Makefile
 

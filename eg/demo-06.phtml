@@ -1,0 +1,25 @@
+<? use GD;
+
+$im = new GD::Image(190,130);
+$im->interlaced('true');
+
+for ($b = 0; $b <= 255; $b += 51) {
+    for ($r = 0; $r <= 255; $r += 51) {
+        for ($g = 0; $g <= 255; $g += 51) {
+            $x = (($b / 51) % 3)*60 + (60-($r / 51) * 10);
+            $y = (($b / 51) < 3 ? 0 : 1)*60 + (60-($g / 51) * 10);
+
+            $col = $im->colorAllocate($r,$g,$b);
+            $im->rectangle($x, $y, $x+9, $y+9,$col);
+            $im->fill($x+2, $y+2, $col);
+        }
+    }
+}
+$C = $im->gif;
+
+print "Content-Type: image/gif\n";
+print "Content-Length: " . length($C) . "\n"; # strips the newline avove
+print "\n";
+print $C;
+
+!>
