@@ -53,7 +53,7 @@ print ($rc == 0 ? "ok\n" : "not ok\n");
 
 #   test for working implicit CGI mode
 $tempfile2 = &TEST::tmpfile;
-$rc = &TEST::system("PATH_TRANSLATED=$testfile1; export PATH_TRANSLATED; ../eperl -m n | sed -e 's/^Server:.*/Server: XXXX/' -e 's/^Date:.*/Date: XXXX/' >$tempfile2");
+$rc = &TEST::system("export PATH_TRANSLATED=$testfile1; ../eperl -m n | sed -e 's/^Server:.*/Server: XXXX/' -e 's/^Date:.*/Date: XXXX/' >$tempfile2");
 print ($rc == 0 ? "ok\n" : "not ok\n");
 $rc = &TEST::system("cmp $testfile1b $tempfile2");
 print ($rc == 0 ? "ok\n" : "not ok\n");

@@ -71,6 +71,8 @@
 
 /* eperl_main.c */
 extern int mode;
+extern char *begin_delimiter;
+extern char *end_delimiter;
 extern char *allowed_file_ext[];
 extern char *allowed_caller_uid[];
 extern void PrintError P_((int mode, char *scripturl, char *scriptfile, char *logfile, char *str, ...));
@@ -80,46 +82,32 @@ extern void give_readme P_((void));
 extern void give_license P_((void));
 extern void give_img_logo P_((void));
 extern void give_usage P_((char *name));
+extern char **set_variable P_((char **env, char *str));
+extern char *remembered_perl_scalars[100];
+extern void remember_perl_scalar P_((char *str));
+extern void set_perl_scalars P_((void));
 extern void mysighandler P_((int rc));
 extern void myinit P_((void));
 extern void myexit P_((int rc));
 extern int main P_((int argc, char **argv, char **env));
 
 /* eperl_perl5.c */
-extern void Perl5_XSInit P_((void));
-extern void Perl5_ForceUnbufferedStdout P_((void));
-extern void Perl5_EvalCmd P_((char *cmd));
-extern char **Perl5_SetEnvVar P_((char **env, char *str));
-extern void Perl5_SetScalar P_((char *pname, char *vname, char *vvalue));
-extern char *Perl5_RememberedScalars[1024];
-extern void Perl5_RememberScalar P_((char *str));
-extern void Perl5_SetRememberedScalars P_((void));
-extern char *Perl5_RememberedINC[1024];
-extern void Perl5_RememberINC P_((char *str));
-extern void Perl5_SetRememberedINC P_((void));
+extern void ePerl_xs_init P_((void));
+extern void ePerl_SetScalar P_((char *pname, char *vname, char *vvalue));
+extern void ePerl_ForceUnbufferedStdout P_((void));
 
 /* eperl_parse.c */
-extern char *ePerl_begin_delimiter;
-extern char *ePerl_end_delimiter;
-extern int ePerl_case_sensitive_delimiters;
-extern int ePerl_convert_entities;
 extern void ePerl_SetError P_((char *str, ...));
 extern char *ePerl_GetError P_((void));
 extern char *ePerl_fprintf P_((char *cpOut, char *str, ...));
 extern char *ePerl_fwrite P_((char *cpBuf, int nBuf, int cNum, char *cpOut));
 extern char *ePerl_Efwrite P_((char *cpBuf, int nBuf, int cNum, char *cpOut));
-extern char *ePerl_Cfwrite P_((char *cpBuf, int nBuf, int cNum, char *cpOut));
-extern char *strnchr P_((char *buf, char chr, int n));
-extern char *strnstr P_((char *buf, char *str, int n));
-extern char *strncasestr P_((char *buf, char *str, int n));
-extern char *strndup P_((char *buf, int n));
-extern char *ePerl_Bristled2Plain P_((char *cpBuf));
-
-/* eperl_pp.c */
-extern void ePerl_PP_SetError P_((char *str, ...));
-extern char *ePerl_PP_GetError P_((void));
-extern char *ePerl_PP_Include P_((char *cpInput, char **cppINC, int mode));
-extern char *ePerl_PP P_((char *cpBuf, char **cppINC));
+extern char *ePerl_ReadSourceFile P_((char *filename, char **cpBufC, int *nBufC));
+extern char *ePerl_ReadErrorFile P_((char *filename, char *scriptfile, char *scripturl));
+extern char *ePerl_Bristled2Perl P_((char *cpBuf));
+extern int ePerl_IsHeaderLine P_((char *cp1, char *cp2));
+extern int ePerl_HeadersExists P_((char *cpBuf));
+extern void ePerl_StripHTTPHeaders P_((char **cpBuf, int *nBuf));
 
 /* eperl_sys.c */
 extern char **mysetenv P_((char **env, char *var, char *str, ...));
@@ -134,20 +122,14 @@ extern void IO_restore_stdout P_((void));
 extern void IO_restore_stderr P_((void));
 extern char *mytmpfile P_((char *id));
 extern void remove_mytmpfiles P_((void));
+extern char *strnchr P_((char *buf, char chr, int n));
+extern char *strnstr P_((char *buf, char *str, int n));
+extern char *strndup P_((char *buf, int n));
 extern char *isotime P_((time_t *t));
-extern char *ePerl_ReadSourceFile P_((char *filename, char **cpBufC, int *nBufC));
-extern char *ePerl_ReadErrorFile P_((char *filename, char *scriptfile, char *scripturl));
-extern char *filename P_((char *path));
-extern char *dirname P_((char *path));
-extern char *abspath P_((char *path));
 
 /* eperl_http.c */
-extern void HTTP_PrintResponseHeaders P_((void));
-extern void HTTP_StripResponseHeaders P_((char **cpBuf, int *nBuf));
-extern int HTTP_IsHeaderLine P_((char *cp1, char *cp2));
-extern int HTTP_HeadersExists P_((char *cpBuf));
+extern void PrintHTTPResponse P_((void));
 extern char *WebTime P_((void));
-extern FILE *HTTP_openURLasFP P_((char *url));
 
 /* eperl_getopt.c */
 extern int opterr;
@@ -174,7 +156,6 @@ extern char ePerl_GNUVersion[];
 extern char ePerl_WhatID[];
 extern char ePerl_RCSIdentID[];
 extern char ePerl_WebID[];
-extern char ePerl_PlainID[];
 
 /* eperl_readme.c */
 extern char *ePerl_README;

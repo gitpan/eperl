@@ -21,7 +21,7 @@
 **  only under the terms of either the Artistic License or the GNU General
 **  Public License, which may be found in the ePerl source distribution.
 **  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
-**  a built-in copy of both license files.
+**  a builtin copy of both license files.
 **
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of

@@ -21,7 +21,7 @@
 **  only under the terms of either the Artistic License or the GNU General
 **  Public License, which may be found in the ePerl source distribution.
 **  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
-**  a built-in copy of both license files.
+**  a builtin copy of both license files.
 **
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,7 +30,7 @@
 **
 **  ======================================================================
 **
-**  eperl_main.c -- ePerl main procedure 
+**  eperl_nphcgi.c -- ePerl stand-alone NPH-CGI/1.1 program
 */
 
 #include "eperl_global.h"
@@ -41,6 +41,9 @@
 #include <perl.h>                 
 
 int mode = MODE_UNKNOWN;
+
+char *begin_delimiter = NULL;
+char   *end_delimiter = NULL;
 
 char *allowed_file_ext[]   = LIST_OF_ALLOWED_FILE_EXT;
 char *allowed_caller_uid[] = LIST_OF_ALLOWED_CALLER_UID;
@@ -63,7 +66,7 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
 
     if (mode == MODE_CGI || mode == MODE_NPHCGI) {
         if (mode == MODE_NPHCGI)
-            HTTP_PrintResponseHeaders();
+            PrintHTTPResponse();
         printf("Content-Type: text/html\n\n");
         printf("<html>\n");
         printf("<head>\n");
@@ -167,8 +170,9 @@ void give_license(void)
 
 void give_img_logo(void)
 {
-    if (mode == MODE_NPHCGI)
-        HTTP_PrintResponseHeaders();
+    if (mode == MODE_NPHCGI) {
+        PrintHTTPResponse();
+    }
     printf("Content-Type: image/gif\n\n");
     fwrite(ePerl_LOGO_data, ePerl_LOGO_size, 1, stdout);
 }
@@ -182,22 +186,53 @@ void give_usage(char *name)
     fprintf(stderr, "   -D name=value  define environment variable ($ENV{'name'})\n");
     fprintf(stderr, "   -B str         set begin block delimiter\n");
     fprintf(stderr, "   -E str         set end block delimiter\n");
-    fprintf(stderr, "   -i             block delimiters are case-insensitive\n");
     fprintf(stderr, "   -m f|c|n       force runtime mode to FILTER, CGI or NPH-CGI\n");
     fprintf(stderr, "   -o outputfile  force the output to be send to this file (default=stdout)\n");
     fprintf(stderr, "   -k             force keeping of current working directory\n");
     fprintf(stderr, "   -x             force debugging output to console (/dev/tty)\n");
-    fprintf(stderr, "   -I directory   specify @INC/#include directory\n");
-    fprintf(stderr, "   -P             enable ePerl Preprocessor\n");
-    fprintf(stderr, "   -C             enable HTML entity conversion for ePerl blocks\n");
-    fprintf(stderr, "   -T             enable Perl Tainting\n");
-    fprintf(stderr, "   -w             enable Perl Warnings\n");
     fprintf(stderr, "   -c             run syntax check only and exit (no execution)\n");
     fprintf(stderr, "   -r             display ePerl README file\n");
     fprintf(stderr, "   -l             display ePerl license files (COPYING and ARTISTIC)\n");
     fprintf(stderr, "   -v             display ePerl VERSION id\n");
     fprintf(stderr, "   -V             display ePerl VERSION id & compilation parameters\n");
-    fprintf(stderr, "   -h             display ePerl usage list (this one)\n");
+}
+
+char **set_variable(char **env, char *str) 
+{
+    char ca[1024];
+    char *cp;
+
+    strcpy(ca, str);
+    cp = strchr(ca, '=');
+    *cp++ = '\0';
+    return mysetenv(env, ca, cp);
+}
+
+char *remembered_perl_scalars[100] = { NULL };
+
+void remember_perl_scalar(char *str) 
+{
+    int i;
+
+    for (i = 0; remembered_perl_scalars[i] != NULL; i++)
+        ;
+    remembered_perl_scalars[i++] = strdup(str);
+    remembered_perl_scalars[i++] = NULL;
+    return;
+}
+
+void set_perl_scalars(void) 
+{
+    char ca[1024];
+    char *cp;
+    int i;
+
+    for (i = 0; remembered_perl_scalars[i] != NULL; i++) {
+        strcpy(ca, remembered_perl_scalars[i]);
+        cp = strchr(ca, '=');
+        *cp++ = '\0';
+        ePerl_SetScalar("main", ca, cp);
+    }
 }
 
 void mysighandler(int rc)
@@ -256,7 +291,6 @@ int main(int argc, char **argv, char **env)
     FILE *out = NULL;
     char *cpBuf = NULL;
     char *cpBuf2 = NULL;
-    char *cpBuf3 = NULL;
     char perlscript[1024] = "";
     char perlstderr[1024] = "";
     char perlstdout[1024] = "";
@@ -281,22 +315,15 @@ int main(int argc, char **argv, char **env)
     struct group *gr;
     int uid, gid;
     int keepcwd = FALSE;
-    int c;
+    char c;
     char *cpScript = NULL;
     int allow;
     int i, n, k;
     char *outputfile = NULL;
     char cwd[MAXPATHLEN];
     int fCheck = FALSE;
-    int fTaint = FALSE;
-    int fWarn = FALSE;
-    int fNoCase = FALSE;
-    int fPP = FALSE;
     char *cwd2;
     int fOkSwitch;
-    char *cpHost;
-    char *cpPort;
-    char *cpPath;
 
     /*  first step: our process initialisation */
     myinit();
@@ -314,7 +341,7 @@ int main(int argc, char **argv, char **env)
     optstart = "-+";
 
     /*  parse the option arguments */
-    while ((c = egetopt(argc, argv, "m+B+E+id+D+a+o+kxI+PCTwcvVrlh")) != EOF) {
+    while ((c = egetopt(argc, argv, "m+B+E+d+D+a+o+kxcvVrl")) != EOF) {
         if (optarg == NULL) 
             optarg = "(null)";
         switch (c) {
@@ -334,19 +361,16 @@ int main(int argc, char **argv, char **env)
                 }
                 break;
             case 'B':
-                ePerl_begin_delimiter = strdup(optarg);
+                begin_delimiter = strdup(optarg);
                 break;
             case 'E':
-                ePerl_end_delimiter = strdup(optarg);
-                break;
-            case 'i':
-                fNoCase = TRUE;
+                end_delimiter = strdup(optarg);
                 break;
             case 'd':
-                Perl5_RememberScalar(optarg);
+                remember_perl_scalar(optarg);
                 break;
             case 'D':
-                env = Perl5_SetEnvVar(env, optarg);
+                env = set_variable(env, optarg);
                 break;
             case 'o':
                 outputfile = strdup(optarg);
@@ -356,21 +380,6 @@ int main(int argc, char **argv, char **env)
                 break;
             case 'x':
                 fDebug = TRUE;
-                break;
-            case 'I':
-                Perl5_RememberINC(optarg);
-                break;
-            case 'P':
-                fPP = TRUE;
-                break;
-            case 'C':
-                ePerl_convert_entities = TRUE;
-                break;
-            case 'T':
-                fTaint = TRUE;
-                break;
-            case 'w':
-                fWarn = TRUE;
                 break;
             case 'c':
                 fCheck = TRUE;
@@ -386,9 +395,6 @@ int main(int argc, char **argv, char **env)
                 myexit(EX_OK);
             case 'l':
                 give_license();
-                myexit(EX_OK);
-            case 'h':
-                give_usage(progname);
                 myexit(EX_OK);
             case '!':
                 give_usage(progname);
@@ -450,35 +456,25 @@ int main(int argc, char **argv, char **env)
     }
 
     /* set default delimiters */
-    if (ePerl_begin_delimiter == NULL) {
+    if (begin_delimiter == NULL) {
         if (mode == MODE_FILTER)
-            ePerl_begin_delimiter = BEGIN_DELIMITER_FILTER;
+            begin_delimiter = BEGIN_DELIMITER_FILTER;
         else
-            ePerl_begin_delimiter = BEGIN_DELIMITER_CGI;
+            begin_delimiter = BEGIN_DELIMITER_CGI;
     }
-    if (ePerl_end_delimiter == NULL) {
+    if (end_delimiter == NULL) {
         if (mode == MODE_FILTER)
-            ePerl_end_delimiter = END_DELIMITER_FILTER;
+            end_delimiter = END_DELIMITER_FILTER;
         else
-            ePerl_end_delimiter = END_DELIMITER_CGI;
+            end_delimiter = END_DELIMITER_CGI;
     }
-    if (fNoCase)
-        ePerl_case_sensitive_delimiters = FALSE;
-    else
-        ePerl_case_sensitive_delimiters = TRUE;
 
-    /* the built-in GIF images */
+    /* the builtin GIF images */
     if ((mode == MODE_CGI || mode == MODE_NPHCGI) && (cp = getenv("PATH_INFO")) != NULL) { 
         if (strcmp(cp, "/logo.gif") == 0) {
             give_img_logo();
             myexit(0);
         }
-    }
-
-    /* CGI modes imply Preprocessor usage and HTML entity conversions */
-    if (mode == MODE_CGI || mode == MODE_NPHCGI) {
-        fPP = TRUE;
-        ePerl_convert_entities = TRUE;
     }
 
     /* check for valid source file */
@@ -512,20 +508,6 @@ int main(int argc, char **argv, char **env)
                 CU(EX_OK);
             }
         }
-
-        /*
-         *
-         *  == Perl Security ==
-         *
-         */
-
-        /* perhaps force Taint mode */
-        if (CGI_MODES_FORCE_TAINTING)
-            fTaint = TRUE;
-
-        /* perhaps force Warnings */
-        if (CGI_MODES_FORCE_WARNINGS)
-            fWarn = TRUE;
 
         /*
          *
@@ -717,27 +699,6 @@ int main(int argc, char **argv, char **env)
         cpScript = cpBuf;
 
     /* now set the additional env vars */
-    env = mysetenv(env, "SCRIPT_SRC_PATH", "%s", abspath(source));
-    env = mysetenv(env, "SCRIPT_SRC_PATH_FILE", "%s", filename(source));
-    env = mysetenv(env, "SCRIPT_SRC_PATH_DIR", "%s", abspath(dirname(source)));
-    if ((cpPath = getenv("PATH_INFO")) != NULL) {
-        if ((cpHost = getenv("SERVER_NAME")) == NULL)
-            cpHost = "localhost";
-        cpPort = getenv("SERVER_PORT");
-        if (strcmp(cpPort, "80") == 0)
-            cpPort = NULL;
-        sprintf(ca, "http://%s%s%s%s", 
-                cpHost, cpPort != NULL ? ":" : "", cpPort != NULL ? cpPort : "", cpPath);
-        env = mysetenv(env, "SCRIPT_SRC_URL", "%s", ca);
-        env = mysetenv(env, "SCRIPT_SRC_URL_FILE", "%s", filename(ca));
-        env = mysetenv(env, "SCRIPT_SRC_URL_DIR", "%s", dirname(ca));
-    }
-    else {
-        env = mysetenv(env, "SCRIPT_SRC_URL", "file://%s", abspath(source));
-        env = mysetenv(env, "SCRIPT_SRC_URL_FILE", "%s", filename(source));
-        env = mysetenv(env, "SCRIPT_SRC_URL_DIR", "file://%s", abspath(source));
-    }
-
     env = mysetenv(env, "SCRIPT_SRC_SIZE", "%d", nBuf);
     stat(source, &st);
     env = mysetenv(env, "SCRIPT_SRC_MODIFIED", "%d", st.st_mtime);
@@ -750,17 +711,8 @@ int main(int argc, char **argv, char **env)
     env = mysetenv(env, "VERSION_INTERPRETER", "%s", ePerl_WebID);
     env = mysetenv(env, "VERSION_LANGUAGE", "Perl/%s", AC_perlvers);
 
-    /* optionally run the ePerl preprocessor */
-    if (fPP) {
-        if ((cpBuf3 = ePerl_PP(cpScript, Perl5_RememberedINC)) == NULL) {
-            PrintError(mode, source, NULL, NULL, "Preprocessing failed for `%s': %s", source, ePerl_PP_GetError());
-            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
-        }
-        cpScript = cpBuf3;
-    }
-
     /* convert bristled source to valid Perl code */
-    if ((cpBuf2 = ePerl_Bristled2Plain(cpScript)) == NULL) {
+    if ((cpBuf2 = ePerl_Bristled2Perl(cpScript)) == NULL) {
         PrintError(mode, source, NULL, NULL, "Cannot convert bristled code file `%s' to pure HTML", source);
         CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
@@ -829,13 +781,9 @@ int main(int argc, char **argv, char **env)
                only _parsed_, not evaluated/executed! */
     myargc = 0;
     myargv[myargc++] = progname;
-    if (fTaint) 
-        myargv[myargc++] = "-T";
-    if (fWarn) 
-        myargv[myargc++] = "-w";
     myargv[myargc++] = perlscript;   
 #ifdef HAVE_PERL_DYNALOADER
-    rc = perl_parse(my_perl, Perl5_XSInit, myargc, myargv, env);
+    rc = perl_parse(my_perl, ePerl_xs_init, myargc, myargv, env);
 #else
     rc = perl_parse(my_perl, NULL, myargc, myargv, env);
 #endif
@@ -855,7 +803,6 @@ int main(int argc, char **argv, char **env)
             CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
     }
-
     /* Stop when we are just doing a syntax check */
     if (fCheck && mode == MODE_FILTER) {
         fclose(er);
@@ -881,21 +828,16 @@ int main(int argc, char **argv, char **env)
         chdir(sourcedir);
     }
 
-    /*  Set the previously remembered Perl 5 scalars (option -d) */
-    Perl5_SetRememberedScalars();
-    /*  Set the previously remembered Perl 5 INC entries (option -I) */
-    Perl5_SetRememberedINC();
-
-    /*  Force unbuffered I/O */
-    Perl5_ForceUnbufferedStdout();
-
     /*  NOW IT IS TIME to evaluate/execute the script!!! */
+    set_perl_scalars();
+    ePerl_ForceUnbufferedStdout();
     rc = perl_run(my_perl);
 
     /*  pre-close the handles, to be able to check
         its size and to be able to display the contents */
     fclose(out); out = NULL;
     fclose(er);  er  = NULL;
+
 
     /*  when the Perl interpreter failed or there
         is data on stderr, we print a error page */
@@ -919,29 +861,29 @@ int main(int argc, char **argv, char **env)
     /*  if we are running as a NPH-CGI/1.1 script
         we had to provide the HTTP reponse headers ourself */
     if (mode == MODE_NPHCGI) {
-        HTTP_PrintResponseHeaders();
+        PrintHTTPResponse();
 
         /* if there are no HTTP header lines, we print a basic
            Content-Type header which should be ok */
-        if (!HTTP_HeadersExists(cpOut)) {
+        if (!ePerl_HeadersExists(cpOut)) {
             printf("Content-Type: text/html\n");
             printf("Content-Length: %d\n", nOut);
             printf("\n");
         }
     }
     else if (mode == MODE_CGI) {
-        HTTP_StripResponseHeaders(&cpOut, &nOut);
+        ePerl_StripHTTPHeaders(&cpOut, &nOut);
 
         /* if there are no HTTP header lines, we print a basic
            Content-Type header which should be ok */
-        if (!HTTP_HeadersExists(cpOut)) {
+        if (!ePerl_HeadersExists(cpOut)) {
             printf("Content-Type: text/html\n");
             printf("Content-Length: %d\n", nOut);
             printf("\n");
         }
     }
     else if (mode == MODE_FILTER) {
-        HTTP_StripResponseHeaders(&cpOut, &nOut);
+        ePerl_StripHTTPHeaders(&cpOut, &nOut);
     }
 
     /* ok, now recover the stdout and stderr and
@@ -997,16 +939,6 @@ int main(int argc, char **argv, char **env)
         free(cpBuf2);
     if (cpOut)
         free(cpOut);
-
-    /* remove temporary files */
-#ifndef DEBUG_ENABLED
-    if (*perlstderr != NUL)
-        unlink(perlstderr);
-    if (*perlstdout != NUL)
-        unlink(perlstdout);
-    if (*perlscript != NUL)
-        unlink(perlscript);
-#endif
 
     myexit(EXRC);
     return EXRC; /* make -Wall happy ;-) */

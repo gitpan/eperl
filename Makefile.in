@@ -30,12 +30,11 @@ libdir          = @libdir@
 mandir          = @mandir@
 
 #   Perl 5 language
-perlprog       = @perlprog@
-perlccflags    = -I@perlarch@/CORE
-perlldflags    = -L@perlarch@/CORE -lperl @perllibs@
-perldla        = @perldla@
-perlccdlflags  = @perlccdlflags@
-perlcccdlflags = @perlcccdlflags@
+perlprog      = @perlprog@
+perlccflags   = -I@perlarch@/CORE
+perlldflags   = -L@perlarch@/CORE -lperl @perllibs@
+perldla       = @perldla@
+perlccdlflags = @perlccdlflags@
 
 
 # ------------------------------------------------
@@ -81,19 +80,13 @@ _BUILDDIST = \
 _NEWVERS = \
 	./etc/newvers -lc -p ePerl $$OPT eperl_version.c; \
 	V=`./etc/newvers -lc -D eperl_version.c`;\
-	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
-	V=`./etc/newvers -lc -d eperl_version.c`;\
-	sed -e "s/$VERSION = \".*\";/$VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
-	sed -e "s/$VERSION = \".*\";/$VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
+	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 
 _UPDATEVERS = \
 	V=`./etc/newvers -lc -d eperl_version.c`;\
 	./etc/newvers -lc -p ePerl -r $$V eperl_version.c; \
 	V=`./etc/newvers -lc -D eperl_version.c`;\
-	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
-	V=`./etc/newvers -lc -d eperl_version.c`;\
-	sed -e "s/$VERSION = \".*\";/$VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
-	sed -e "s/$VERSION = \".*\";/$VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
+	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 
 release: distclean fixperm
 	@$(_GETDISTINFO) \
@@ -117,17 +110,11 @@ new-version:
 new-revision:
 	OPT=-ir; $(_NEWVERS)
 
-new-patchlevel:
-	OPT=-iP; $(_NEWVERS)
-
 new-betalevel:
 	OPT=-ib; $(_NEWVERS)
 
-new-alphalevel:
-	OPT=-ia; $(_NEWVERS)
-
-new-snaplevel:
-	OPT=-is; $(_NEWVERS)
+new-patchlevel:
+	OPT=-iP; $(_NEWVERS)
 
 new-release:
 	OPT=-r$(R); $(_NEWVERS)
@@ -144,7 +131,6 @@ PROTO_SRCS = \
  eperl_main.c \
  eperl_perl5.c \
  eperl_parse.c \
- eperl_pp.c \
  eperl_sys.c \
  eperl_http.c \
  eperl_getopt.c \
@@ -158,7 +144,6 @@ SRCS = \
  eperl_main.c \
  eperl_perl5.c \
  eperl_parse.c \
- eperl_pp.o \
  eperl_sys.c \
  eperl_http.c \
  eperl_getopt.c \
@@ -172,7 +157,6 @@ OBJS = \
  eperl_main.o \
  eperl_perl5.o \
  eperl_parse.o \
- eperl_pp.o \
  eperl_sys.o \
  eperl_http.o \
  eperl_getopt.o \
@@ -197,9 +181,6 @@ eperl_getopt.o: eperl_getopt.c
 
 eperl_parse.o: eperl_parse.c
 	$(CC) $(CFLAGS) -c eperl_parse.c
-
-eperl_pp.o: eperl_pp.c
-	$(CC) $(CFLAGS) -c eperl_pp.c
 
 eperl_sys.o: eperl_sys.c
 	$(CC) $(CFLAGS) -c eperl_sys.c
@@ -260,31 +241,6 @@ eperl.1: eperl.pod eperl_version.c
 			/tmp/eperl.pod >eperl.1 && \
 	rm -f /tmp/eperl.pod
 
-# ------------------------------------------------
-#   THE SHARED LIBRARY
-# ------------------------------------------------
-
-SOBJS = \
- eperl_parse.so \
- eperl_pp.so \
- eperl_http.so \
- eperl_version.so 
-
-libeperl.a: $(SOBJS)
-	$(AR) r libeperl.a $(SOBJS)
-	$(RANLIB) libeperl.a
-
-eperl_parse.so: eperl_parse.c
-	$(CC) $(CFLAGS) $(perlcccdlflags) -o eperl_parse.so -c eperl_parse.c
-
-eperl_pp.so: eperl_pp.c
-	$(CC) $(CFLAGS) $(perlcccdlflags) -o eperl_pp.so -c eperl_pp.c
-
-eperl_http.so: eperl_http.c
-	$(CC) $(CFLAGS) $(perlcccdlflags) -o eperl_http.so -c eperl_http.c
-
-eperl_version.so: eperl_version.c
-	$(CC) $(CFLAGS) $(perlcccdlflags) -o eperl_version.so -c eperl_version.c
 
 # ------------------------------------------------
 #   TEST SUITE
@@ -311,26 +267,16 @@ install: all
 clean:
 	-rm -f $(OBJS)
 	-rm -f eperl
-	-rm -f $(SOBJS)
-	-rm -f libeperl.a
 	-rm -f core *.core
 
 realclean:
-	-rm -f $(OBJS)
-	-rm -f eperl
-	-rm -f $(SOBJS)
-	-rm -f libeperl.a
-	-rm -f core *.core
+	-@make clean
 	-rm -f eperl.1
 	-rm -f eperl_readme.[ch]
 	-rm -f eperl_license.[ch]
 
 distclean:
-	-rm -f $(OBJS)
-	-rm -f eperl
-	-rm -f $(SOBJS)
-	-rm -f libeperl.a
-	-rm -f core *.core
+	-@make clean
 	-rm -f config_ac.h config_sc.h
 	-rm -f config.status config.cache config.log
 	-rm -f Makefile

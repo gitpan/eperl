@@ -21,7 +21,7 @@
 **  only under the terms of either the Artistic License or the GNU General
 **  Public License, which may be found in the ePerl source distribution.
 **  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
-**  a built-in copy of both license files.
+**  a builtin copy of both license files.
 **
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,18 +36,9 @@
 #define EPERL_SECURITY_H 1
 
 
-/*
- * General security for CGI modes
- */
+/* General security for CGI modes */
 #define CGI_NEEDS_ALLOWED_FILE_EXT       TRUE
-#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".ephtml", ".epl", ".pl", ".cgi", NULL };
 
-/* 
- * Perl security 
- * (BE CAREFUL HERE, THIS CAN MAKE YOUR LIVE HARD!) 
- */
-#define CGI_MODES_FORCE_TAINTING         FALSE
-#define CGI_MODES_FORCE_WARNINGS         FALSE
 
 /*
  * SetUID security checks for CGI modes:
@@ -58,7 +49,10 @@
 #define SETUID_NEEDS_VALID_OWNER_UID     TRUE
 #define SETUID_NEEDS_VALID_OWNER_GID     TRUE
 #define SETUID_NEEDS_BELOW_OWNER_HOME    TRUE
+
+#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".ephtml", ".epl", ".pl", ".cgi", NULL }
 #define LIST_OF_ALLOWED_CALLER_UID       { "nobody", "root", NULL }
+
 
 /* 
  * Action when a SetUID security check failed.

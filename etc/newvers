@@ -8,8 +8,8 @@
 ##           used as a version display tool in "./configire" steps...
 ##
 
-VERSION="2.2.0"
-   DATE="26-05-1997"
+VERSION="2.1.1"
+   DATE="02-04-1997"
 
 #   print version information line
 print_version () {
@@ -40,7 +40,7 @@ Usage: newvers [options] versionfile
         -l<lang>          set language to one of "txt", "c" or "perl" 
         -p<progname>      set program name
         -r<v>.<r>[.pb]<p> set release version string
-        -i{v|r|P|p|b|a|s} increase version, revision or {alpha,batch,patch,snap}level
+        -i{v|r|P|p|b}     increase version, revision or {batch,patch}level
         -d                display current version only
         -D                display current version only (incl. date)
         -V                print NEWVERS version
@@ -55,48 +55,7 @@ VERSION=unknown
 REPORT=NO
 REPORTFULL=NO
 INCREASE=P
-
-#   fallback if "getopt" is not available on system
-getopt=getopt
-eval "$getopt" >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-    if [ ! -x /tmp/getopt ]; then
-        rm -f /tmp/getopt.c >/dev/null 2>&1
-        cat >/tmp/getopt.c <<EOT
-#include <stdio.h>
-main(argc, argv)
-int argc;
-char *argv[];
-{
-    extern int optind;
-    extern char *optarg;
-    int c;
-    int status = 0;
-    optind = 2; /* Past the program name and the option letters. */
-    while ((c = getopt(argc, argv, argv[1])) != EOF)
-        switch (c) {
-        case '?':
-            status = 1; /* getopt routine gave message */
-            break;
-        default:
-            if (optarg != NULL)
-                printf(" -%c %s", c, optarg);
-            else
-                printf(" -%c", c);
-            break;
-        }
-    printf(" --");
-    for (; optind < argc; optind++)
-        printf(" %s", argv[optind]);
-    printf("\n");
-    exit(status);
-}
-EOT
-        cc -o /tmp/getopt /tmp/getopt.c
-    fi
-    getopt=/tmp/getopt
-fi
-set -- `$getopt l:p:r:i:dDVh $*`
+set -- `getopt l:p:r:i:dDVh $*`
 if [ $? != 0 ]; then
     print_usage
     exit 2
@@ -125,7 +84,7 @@ if [ "$LANG" = "unknown" ]; then
         *.txt )       LANG=txt  ;;
         *.c )         LANG=c    ;;
         *.pl | *.pm ) LANG=perl ;;
-        * )           echo "Unkown language type"; exit 1 ;;
+		* )           echo "Unkown language type"; exit 1 ;;
     esac
 fi
 
@@ -133,9 +92,9 @@ fi
 if [ "$VERSION" = "unknown" ]; then
     if [ -r "$VERSIONFILE" ]; then
         #   grep out current information
-        id=`grep 'Version [0-9]*.[0-9]*[.abps][0-9]* ([0-9]*-[0-9]*-[0-9]*)' $VERSIONFILE | \
+        id=`grep 'Version [0-9]*.[0-9]*[.bp][0-9]* ([0-9]*-[0-9]*-[0-9]*)' $VERSIONFILE | \
             head -1 | \
-            sed -e 's%.*Version \([0-9]*\)\.\([0-9]*\)\([.abps]\)\([0-9]*\) (\([0-9]*-[0-9]*-[0-9]*\)).*%\1:\2:\3:\4:\5%'`
+            sed -e 's%.*Version \([0-9]*\)\.\([0-9]*\)\([.bp]\)\([0-9]*\) (\([0-9]*-[0-9]*-[0-9]*\)).*%\1:\2:\3:\4:\5%'`
         version=`echo $id | awk -F: '{ print $1 }'`
         revision=`echo $id | awk -F: '{ print $2 }'`
         bptype=`echo $id | awk -F: '{ print $3 }'`
@@ -146,23 +105,15 @@ if [ "$VERSION" = "unknown" ]; then
             case $INCREASE in
                 b )
                     bplevel=`expr $bplevel + 1`
-                    bptype=b
-                    ;;
-                a )
-                    bplevel=`expr $bplevel + 1`
-                    bptype=a
-                    ;;
-                s )
-                    bplevel=`expr $bplevel + 1`
-                    bptype=s
+					bptype=b
                     ;;
                 P )
                     bplevel=`expr $bplevel + 1`
-                    bptype=.
+					bptype=.
                     ;;
                 p )
                     bplevel=`expr $bplevel + 1`
-                    bptype=p
+					bptype=p
                     ;;
                 r ) 
                     revision=`expr $revision + 1`
@@ -187,7 +138,7 @@ if [ "$VERSION" = "unknown" ]; then
     fi
 else
     #   take given version
-    VERSION=`echo $VERSION | sed -e 's%\([0-9]*\)\.\([0-9]*\)\([.abps]\)\([0-9]*\).*%\1:\2:\3:\4%'`
+    VERSION=`echo $VERSION | sed -e 's%\([0-9]*\)\.\([0-9]*\)\([.bp]\)\([0-9]*\).*%\1:\2:\3:\4%'`
     version=`echo $VERSION | awk -F: '{ print $1 }'`
     revision=`echo $VERSION | awk -F: '{ print $2 }'`
     bptype=`echo $VERSION | awk -F: '{ print $3 }'`
@@ -250,10 +201,6 @@ char @PROGNAME@_RCSIdentID[] =
 char @PROGNAME@_WebID[] =
     "@PROGNAME@/@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 
-/* a plain id string */
-char @PROGNAME@_PlainID[] =
-    "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
-
 EOF
         ;;
     perl )
@@ -285,11 +232,6 @@ $@PROGNAME@_RCSIdentID =
 # a WWW id string
 $@PROGNAME@_WebID =
     "@PROGNAME@/@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
-
-# a plain id string
-$@PROGNAME@_PlainID =
-    "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
-
 1;
 EOF
         ;;
