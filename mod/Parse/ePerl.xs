@@ -115,6 +115,7 @@ PPCODE:
     cppINC = (char **)malloc(sizeof(char *) * (n+2));
     for (i = 0; i <= n; i++) {
         sv = av_shift(avINC);
+        /* XXX SvREFCNT_dec(sv); */
         cp = SvPV(sv, l);
         cppINC[i] = (char *)malloc(sizeof(char)*(l+1));
         strncpy(cppINC[i], cp, l);

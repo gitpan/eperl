@@ -15,7 +15,7 @@
 **
 **  ======================================================================
 **
-**  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
+**  Copyright (c) 1996,1997,1998 Ralf S. Engelschall <rse@engelschall.com>
 **
 **  This program is free software; it may be redistributed and/or modified
 **  only under the terms of either the Artistic License or the GNU General

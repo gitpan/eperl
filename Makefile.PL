@@ -6,14 +6,18 @@
 require 5.00325;
 use Config; 
 
+$vers = `etc/newvers -l c -D eperl_version.c`;
+$vers =~ s|\n$||;
+print STDERR "Configuring for ePerl $vers\n";
+
 $perl = $Config{bin} . "/perl";
 $args = join(' ', @ARGV);
 
 $cc = $Config{cc};
 $ccarg = "";
 if ($args =~ m|CC=(\S+)|) {
-	$cc = $1;
-	$ccarg = "CC=$1 ";
+    $cc = $1;
+    $ccarg = "CC=$1 ";
 }
 
 unlink("Makefile");
@@ -64,5 +68,7 @@ distclean:
 
 EOT
 close(MK);
+
+print STDERR "Now please type 'make' to compile. Good luck.\n";
 
 ##EOF##

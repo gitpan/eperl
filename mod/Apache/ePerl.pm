@@ -51,7 +51,7 @@ use File::Basename qw(dirname);
 use Parse::ePerl;
 
 #   private version number
-$VERSION = do { my @v=("2.2.12"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
+$VERSION = do { my @v=("2.2.13"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
 
 #   globals
 $nDone  = 0;
@@ -186,7 +186,7 @@ sub handler {
              and $Cache->{$filename}->{CODE}
              and $Cache->{$filename}->{SIZE}  == $size
              and $Cache->{$filename}->{MTIME} == $mtime
-             and $Cache->{$filename}->{OWNER} == $owner)) {
+             and $Cache->{$filename}->{OWNER} eq $owner)) {
         #   read script
         local ($/) = undef;
         $fh = new FileHandle $filename;
@@ -252,7 +252,7 @@ sub handler {
 
     $path  = 'http://';
     $path .= $r->server->server_hostname;
-    $path .= $r->server->port if $r->server->port != 80;
+    $path .= sprintf(':%d', $r->server->port) if ($r->server->port != 80);
     $path .= $r->uri;
     ($dir, $file) = ($path =~ m|^(.*/)([^/]*)$|);
     $env{'SCRIPT_SRC_URL'}      = $path;

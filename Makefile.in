@@ -311,16 +311,16 @@ libeperl.a: $(SOBJS)
 	$(RANLIB) libeperl.a
 
 eperl_parse.so: eperl_parse.c
-	$(CC) $(DLCFLAGS) -o eperl_parse.so -c eperl_parse.c
+	$(CC) $(DLCFLAGS) -o eperl_parse.o -c eperl_parse.c && mv eperl_parse.o eperl_parse.so
 
 eperl_pp.so: eperl_pp.c
-	$(CC) $(DLCFLAGS) -o eperl_pp.so -c eperl_pp.c
+	$(CC) $(DLCFLAGS) -o eperl_pp.o -c eperl_pp.c && mv eperl_pp.o eperl_pp.so
 
 eperl_http.so: eperl_http.c
-	$(CC) $(DLCFLAGS) -o eperl_http.so -c eperl_http.c
+	$(CC) $(DLCFLAGS) -o eperl_http.o -c eperl_http.c && mv eperl_http.o eperl_http.so
 
 eperl_version.so: eperl_version.c
-	$(CC) $(DLCFLAGS) -o eperl_version.so -c eperl_version.c
+	$(CC) $(DLCFLAGS) -o eperl_version.o -c eperl_version.c && mv eperl_version.o eperl_version.so
 
 
 # ------------------------------------------------

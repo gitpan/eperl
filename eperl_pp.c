@@ -15,7 +15,7 @@
 **
 **  ======================================================================
 **
-**  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
+**  Copyright (c) 1996,1997,1998 Ralf S. Engelschall <rse@engelschall.com>
 **
 **  This program is free software; it may be redistributed and/or modified
 **  only under the terms of either the Artistic License or the GNU General
@@ -409,6 +409,7 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
             if ((cp2 = (char *)realloc(cpOutBuf, nOutBuf)) == NULL) {
                 ePerl_PP_SetError("Failed on realloc(buf, %d)", nOutBuf);
                 free(cpOutBuf);
+				/* XXX free(cp); */
                 return NULL;
             }
             cpOutBuf = cp2;

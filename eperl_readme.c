@@ -9,7 +9,7 @@ char *ePerl_README = \
 "                         \n"\
 "  ePerl -- Embedded Perl 5 Language\n"\
 "\n"\
-"  Version 2.2.12 (31-12-1997)\n"\
+"  Version 2.2.13 (10-07-1998)\n"\
 "\n"\
 "  ePerl interprets an ASCII file bristled with Perl 5 program statements by\n"\
 "  evaluating the Perl 5 code while passing through the plain ASCII data. It\n"\
@@ -20,7 +20,7 @@ char *ePerl_README = \
 "  The documentation and latest release can be found on\n"\
 "  http://www.engelschall.com/sw/eperl/\n"\
 "\n"\
-"  Copyright (c) 1996-1997 Ralf S. Engelschall, All rights reserved.\n"\
+"  Copyright (c) 1996,1997,1998 Ralf S. Engelschall <rse@engelschall.com>\n"\
 "\n"\
 "  This program is free software; it may be redistributed and/or modified only\n"\
 "  under the terms of either the Artistic License or the GNU General Public\n"\

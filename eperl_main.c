@@ -15,7 +15,7 @@
 **
 **  ======================================================================
 **
-**  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
+**  Copyright (c) 1996,1997,1998 Ralf S. Engelschall <rse@engelschall.com>
 **
 **  This program is free software; it may be redistributed and/or modified
 **  only under the terms of either the Artistic License or the GNU General
@@ -135,7 +135,7 @@ void give_version(void)
 {
     fprintf(stdout, "%s\n", ePerl_Hello);
     fprintf(stdout, "\n");
-    fprintf(stdout, "Copyright (c) 1996-1997 Ralf S. Engelschall, All rights reserved.\n");
+    fprintf(stdout, "Copyright (c) 1996,1997,1998 Ralf S. Engelschall <rse@engelschall.com>\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "This program is distributed in the hope that it will be useful,\n");
     fprintf(stdout, "but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
@@ -351,6 +351,9 @@ int main(int argc, char **argv, char **env)
     char *cpHost;
     char *cpPort;
     char *cpPath;
+    char *cpCGIgi;
+    char *cpCGIpt;
+    char *cpCGIqs;
 
     /*  first step: our process initialisation */
     myinit();
@@ -468,25 +471,42 @@ int main(int argc, char **argv, char **env)
      *  determine source filename and runtime mode 
      */
 
-    if (optind == argc &&
-        getenv("GATEWAY_INTERFACE") != NULL &&
-        getenv("PATH_TRANSLATED")   != NULL   ) {
+    if ((cpCGIgi = getenv("GATEWAY_INTERFACE")) == NULL)
+        cpCGIgi = "";
+    if ((cpCGIpt = getenv("PATH_TRANSLATED")) == NULL)
+        cpCGIpt = "";
+    if ((cpCGIqs = getenv("QUERY_STRING")) == NULL)
+        cpCGIqs = "";
+
+    if (cpCGIgi[0] != NUL &&
+        cpCGIpt[0] != NUL &&
+        (optind == argc || 
+         (optind == argc-1 && 
+          strcmp(argv[optind], cpCGIqs) == 0) ) ) {
         /*
-        **
-        **  Server-Side-Scripting-Language
-        **  (i.e. /url/to/nph-eperl/path/to/script.phtml)
-        **
+        **  Server-Side-Scripting-Language:
+        ** 
+        **  Request:
+        **      /url/to/nph-eperl/url/to/script.phtml[?query-string]
+        **  Environment:
+        **      GATEWAY_INTERFACE=CGI/1.1
+        **      SCRIPT_NAME=/url/to/nph-eperl
+        **      SCRIPT_FILENAME=/path/to/nph-eperl
+        **      PATH_INFO=/url/to/script.phtml
+        **      PATH_TRANSLATED=/path/to/script.phtml
+        **      QUERY_STRING=query-string
+        **      a) optind=argc 
+        **      b) optind=argc-1, argv[optind]=query-string
         */
         
-        cp = getenv("GATEWAY_INTERFACE");
-        if (strncasecmp(cp, "CGI/1", 5) != 0) {
+        if (strncasecmp(cpCGIgi, "CGI/1", 5) != 0) {
             fprintf(stderr, "ePerl:Error: Unknown gateway interface: NOT CGI/1.x\n");
             CU(EX_IOERR);
         }
 
         /*  CGI/1.1 or NPH-CGI/1.1 script, 
             source in PATH_TRANSLATED. */
-        source = getenv("PATH_TRANSLATED");
+        source = cpCGIpt;
 
         /*  determine whether pure CGI or NPH-CGI mode */ 
         if ((cp = getenv("SCRIPT_FILENAME")) != NULL) { 
@@ -508,17 +528,33 @@ int main(int argc, char **argv, char **env)
         sprintf(ca, "%s %s [%sCGI]", argv[0], source, mode == MODE_NPHCGI ? "NPH-" : "");
         argv[0] = strdup(ca);
     }
-    else if (optind == argc-1 &&
-             getenv("GATEWAY_INTERFACE") != NULL) {
+
+    else if (cpCGIgi[0] != NUL &&
+             ((optind == argc-1 && 
+               cpCGIqs[0] == NUL  ) ||
+              (optind == argc-2 && 
+               strcmp(argv[optind+1], cpCGIqs) == 0) ) ) {
         /*
         **
-        **  Stand-Alone inside Webserver environment
-        **  (i.e. CGI-script with shebang #!/path/to/eperl)
+        **  Stand-Alone inside Webserver environment:
+        **
+        **  Request:
+        **      /url/to/script.cgi[/path-info][?query-string]
+        **      [script.cgi has shebang #!/path/to/eperl]
+        **  Environment:
+        **      GATEWAY_INTERFACE=CGI/1.1
+        **      SCRIPT_NAME=/url/to/script.cgi
+        **      SCRIPT_FILENAME=/path/to/script.cgi
+        **      PATH_INFO=/path-info
+        **      PATH_TRANSLATED=/path/to/docroot/path-info
+        **      QUERY_STRING=query-string
+        **      a) optind=argc-1, argv[optind]=/path/to/script.cgi
+        **      b) optind=argc-2, argv[optind]=/path/to/script.cgi
+        **                        argv[optind+1]=query-string
         **
         */
 
-        cp = getenv("GATEWAY_INTERFACE");
-        if (strncasecmp(cp, "CGI/1", 5) != 0) {
+        if (strncasecmp(cpCGIgi, "CGI/1", 5) != 0) {
             fprintf(stderr, "ePerl:Error: Unknown gateway interface: NOT CGI/1.x\n");
             CU(EX_IOERR);
         }
@@ -547,13 +583,25 @@ int main(int argc, char **argv, char **env)
         sprintf(ca, "%s %s [%sCGI]", argv[0], source, mode == MODE_NPHCGI ? "NPH-" : "");
         argv[0] = strdup(ca);
     }
-    else if (optind == argc-1 && 
-             getenv("GATEWAY_INTERFACE") == NULL &&
-             getenv("PATH_TRANSLATED")   == NULL &&
-             getenv("QUERY_STRING")      == NULL   ) {
+
+    else if (cpCGIgi[0] == NUL &&
+             cpCGIpt[0] == NUL &&
+             cpCGIqs[0] == NUL &&
+             optind == argc-1    ) {
         /*
         **
-        **  Stand-Alone outside Webserver environment
+        **  Stand-Alone outside Webserver environment:
+        **
+        **  Request:
+        **      eperl script
+        **  Environment:
+        **      GATEWAY_INTERFACE=<empty>
+        **      SCRIPT_NAME=<empty>
+        **      SCRIPT_FILENAME=<empty>
+        **      PATH_INFO=<empty>
+        **      PATH_TRANSLATED=<empty>
+        **      QUERY_STRING=<empty>
+        **      optind=argc-1, argv[optind]=script
         **
         */
 
@@ -579,6 +627,7 @@ int main(int argc, char **argv, char **env)
             keepcwd = TRUE;
         }
     }
+
     else {
         /* else we are used in a wrong way... */
         fprintf(stderr, "ePerl:Error: Missing required file to process\n");

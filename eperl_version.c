@@ -2,29 +2,29 @@
 
 /* for logfiles, etc. */
 char ePerl_Version[] =
-    "2.2.12 (31-12-1997)";
+    "2.2.13 (10-07-1998)";
 
 /* interactive 'hello' string to identify us to the user */
 char ePerl_Hello[] = 
-    "This is ePerl Version 2.2.12 (31-12-1997)";
+    "This is ePerl Version 2.2.13 (10-07-1998)";
 
 /* a GNU --version output */
 char ePerl_GNUVersion[] =
-    "ePerl Version 2.2.12";
+    "ePerl Version 2.2.13";
 
 /* a UNIX what(1) id string */
 char ePerl_WhatID[] =
-    "@(#)ePerl Version 2.2.12 (31-12-1997)";
+    "@(#)ePerl Version 2.2.13 (10-07-1998)";
 
 /* a RCS ident(1) id string */
 char ePerl_RCSIdentID[] =
-    "$Id: ePerl 2.2.12 31-12-1997 $";
+    "$Id: ePerl 2.2.13 10-07-1998 $";
 
 /* a WWW id string */
 char ePerl_WebID[] =
-    "ePerl/2.2.12";
+    "ePerl/2.2.13";
 
 /* a plain id string */
 char ePerl_PlainID[] =
-    "2.2.12";
+    "2.2.13";
 

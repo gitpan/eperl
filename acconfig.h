@@ -2,7 +2,7 @@
 #define CONFIG_AC_H
 /*
 **  config_ac.h -- AUTO configuration header file
-**  Copyright (c) Ralf S. Engelschall, <rse@engelschall.com>
+**  Copyright (c) 1996,1997,1998 Ralf S. Engelschall <rse@engelschall.com>
 */
 
 @TOP@

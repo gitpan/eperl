@@ -2,6 +2,30 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2.12 and 2.2.13
+  ---------------------------------
+  [Security and Bug Fixes]
+
+  980120 o Fixed construction of URLs inside Apache::ePerl for
+           cases where the server port is not 80.  [Thanks to Jim
+           O'Quinn <oquinn@fsonline.com> for hint]
+  980202 o Changed .so generation to be more compatible
+  980404 o Made etc/newvers more portable
+  980605 o Fix a minor comparison bug in Apache::ePerl
+           [Thanks to Eric Howe <mu@trends.net> for hint]
+  980705 o Fixed copyright statements by adding 1998 and 
+           removing the "All Rights Reserved" part because
+           this is incompatible with the GPL.
+  980710 o Fix again a non-trivial-to-fix security bug related to the 
+           inconsitency way webservers handle QUERY_STRINGs: this time by
+           making more exact parameter comparison.  Now we check
+           back even the argv[optind] against the provided
+           QUERY_STRING, etc. Now the determination of the three
+           runtime modes (CGI, NPH-CGI, FILTER) should be
+           correct.  [Thanks to Tiago Luz Pinto
+           <tiago@EPS.UFSC.BR> who reported this security hole on
+           bugtraq]
+
   Changes between 2.2.11 and 2.2.12
   ---------------------------------
   [Bugfix only]
