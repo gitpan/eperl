@@ -21,11 +21,13 @@ B<eperl>
 [B<-o> I<outputfile>]
 [B<-k>]
 [B<-x>]
-[B<-v>]
-[B<-V>]
 [B<-r>]
 [B<-l>]
 [I<inputfile>]
+
+B<eperl>
+[B<-v>]
+[B<-V>]
 
 =head1 DESCRIPTION
 
@@ -217,7 +219,8 @@ environment.
 
 Forces the output to be written to F<outputfile> instead of F<stdout>. Use
 this option when using ePerl as a filter. The outputfile ``F<->'' sets stdout
-as the output handle explicitly.
+as the output handle explicitly. Notice that this file is relative to the
+source file directory when the runtime mode is forced to CGI or NPH-CGI.
 
 =item B<-k>
 

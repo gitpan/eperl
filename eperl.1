@@ -73,7 +73,7 @@
 .nr % 0
 .rr F
 .\}
-.TH EPERL 1 "EN" "22/Mar/97" "Ralf S. Engelschall"
+.TH EPERL 1 "EN" "3/Apr/97" "Ralf S. Engelschall"
 .IX Title "EPERL 1"
 .UC
 .IX Name "ePerl - Embedded Perl 5 Language"
@@ -174,7 +174,7 @@
 ePerl \- Embedded Perl 5 Language
 .SH "VERSION"
 .IX Header "VERSION"
-2.1b0 (22-03-1997)
+2.1b4 (03-04-1997)
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \fBeperl\fR
@@ -186,11 +186,13 @@ ePerl \- Embedded Perl 5 Language
 [\fB\-o\fR \fIoutputfile\fR]
 [\fB\-k\fR]
 [\fB\-x\fR]
-[\fB\-v\fR]
-[\fB\-V\fR]
 [\fB\-r\fR]
 [\fB\-l\fR]
 [\fIinputfile\fR]
+.PP
+\fBeperl\fR
+[\fB\-v\fR]
+[\fB\-V\fR]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 .Sh "Abstract"
@@ -375,7 +377,8 @@ environment.
 .IX Item "\fB\-o\fR \fIoutputfile\fR"
 Forces the output to be written to \fIoutputfile\fR instead of \fIstdout\fR. Use
 this option when using ePerl as a filter. The outputfile ``\fI\-\fR'\*(R' sets stdout
-as the output handle explicitly.
+as the output handle explicitly. Notice that this file is relative to the
+source file directory when the runtime mode is forced to \s-1CGI\s0 or \s-1NPH\s0\-\s-1CGI\s0.
 .Ip "\fB\-k\fR" 5
 .IX Item "\fB\-k\fR"
 Forces ePerl to keep the current working directory from where it was started.

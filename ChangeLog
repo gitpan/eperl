@@ -2,11 +2,48 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
-  Changes between 2.1.1 and 2.1.0
+  Changes between 2.1b3 and 2.1b4
   -------------------------------
 
-  Changes between 2.0.3 and 2.1.0
+  970403 o fixed a bug in the b3 distribution:
+           autoheader was not run, so to _compile_
+           ePerl GNU autoconf was needed. :-(
+         o slight adjustments to eperl.pod
+
+  Changes between 2.1b2 and 2.1b3
   -------------------------------
+
+  970402 o starting with Perl 5.003_96 the dXSUB_SYS define
+           is empty.  Removed the call and the gcc -Wall 
+           kludge from eperl_perl5.c
+         o fixed etc/newvers
+         o add "none" to configure DynaLoader check
+
+  Changes between 2.1b1 and 2.1b2
+  -------------------------------
+  
+  970330 o reduced the logo GIF image in size to fit betteri
+           into the browser window. The reduced one also has 
+           10 KB less bytes.
+         o made the Error HTML page nicer
+         o removed the not used -a (age) option
+
+  Changes between 2.1b0 and 2.1b1
+  -------------------------------
+
+  970326 o added "-o file" to the usage message
+         o when running as a Unix filter the current
+           working directory is restored before the
+           final outputfile (-o) is created.
+         o documented that "-o outputfile" is
+           relative to source file dir when
+           runtime mode is CGI or NPH-CGI
+         o added new-betalevel to Makefile.in
+
+  Changes between 2.0.3 and 2.1b0
+  -------------------------------
+
+  970322 o released as 2.1b0 for first test
 
   970310 o added --with-perl=/path/to/perl option
            to ./configure to force a specific perl

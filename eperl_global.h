@@ -73,6 +73,7 @@
 #include <grp.h>                          
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 
 /* from our own */
 #include "config_ac.h"

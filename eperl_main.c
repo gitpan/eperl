@@ -92,20 +92,37 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
             PrintHTTPResponse();
         printf("Content-Type: text/html\n\n");
         printf("<html>\n");
+        printf("<head>\n");
+        printf("<title>ePerl: ERROR: %s</title>\n", ca);
+        printf("</head>\n");
         printf("<body bgcolor=\"#cccccc\">\n");
+        printf("<blockquote>\n");
         cp = getenv("SCRIPT_NAME");
         if (cp == NULL)
             cp = "UNKNOWN_IMG_DIR";
-        printf("<img src=\"%s/logo.gif\" alt=\"Embedded Perl 5 for HTML\">\n", cp);
-        printf("<hr>\n");
-        printf("<h1>ePerl ERROR:<br><font color=\"#d04040\">%s</font></h1>\n", ca);
+        printf("<table cellspacing=0 cellpadding=0 border=0>\n");
+		printf("<tr>\n");
+        printf("<td><img src=\"%s/logo.gif\" alt=\"Embedded Perl 5 Language\"></td>\n", cp);
+		printf("</tr>\n");
+		printf("<tr>\n");
+        printf("<td align=right><b>Version %s</b></td>\n", ePerl_Version);
+		printf("</tr>\n");
+		printf("</table>\n");
+        printf("<p>\n");
+        printf("<table bgcolor=\"#f0d0d0\" cellspacing=0 cellpadding=10 border=0>\n");
+        printf("<tr><td bgcolor=\"#d0c0c0\">\n");
+        printf("<font face=\"Arial, Helvetica\"><b>ERROR message:</b></font>\n");
+        printf("</td></tr>\n");
+        printf("<tr><td>\n");
+        printf("<h1><font color=\"#cc3333\">%s</font></h1>\n", ca);
+        printf("</td></tr>\n");
+        printf("</table>\n");
         if (logfile != NULL) {
             if ((cpBuf = ePerl_ReadErrorFile(logfile, scriptfile, scripturl)) != NULL) {
-                printf("<hr>\n");
                 printf("<p>");
                 printf("<table bgcolor=\"#e0e0e0\" cellspacing=0 cellpadding=10 border=0>\n");
                 printf("<tr><td bgcolor=\"#d0d0d0\">\n");
-                printf("Contents of STDERR channel:\n");
+                printf("<font face=\"Arial, Helvetica\"><b>Contents of STDERR channel:</b></font>\n");
                 printf("</td></tr>\n");
                 printf("<tr><td>\n");
                 printf("<pre>\n");
@@ -115,13 +132,12 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
                 printf("</table>\n");
             }
         }
-        printf("<hr>\n");
-        printf("<center><b>ePerl %s</b></center>\n", ePerl_Version);
+        printf("</blockquote>\n");
         printf("</body>\n");
         printf("</html>\n");
     }
     else {
-        printf("ePerl ERROR: %s\n", ca);
+        printf("ERROR message: %s\n", ca);
         if (logfile != NULL) {
             if ((cpBuf = ePerl_ReadErrorFile(logfile, scriptfile, scripturl)) != NULL) {
                 printf("\n");
@@ -186,7 +202,7 @@ void give_usage(char *name)
     fprintf(stderr, "   -e str         set   end delimiter (default is '%s')\n", END_DELIMITER);
     fprintf(stderr, "   -D name=value  define global Perl variable ($main::name)\n");
     fprintf(stderr, "   -E name=value  define environment variable ($ENV{'name'})\n");
-    fprintf(stderr, "   -a seconds     define a max. age for content regeneration (default is unlimited)\n");
+    fprintf(stderr, "   -o outputfile  force the output to be send to this file (default is stdout)\n");
     fprintf(stderr, "   -k             keep current working directory\n");
     fprintf(stderr, "   -r             display ePerl README file\n");
     fprintf(stderr, "   -l             display ePerl LICENSE file\n");
@@ -313,7 +329,7 @@ int main(int argc, char **argv, char **env)
     int allow;
     int i, n, k;
     char *outputfile = NULL;
-    int age = -1;
+    char cwd[MAXPATHLEN];
 
 
     /*  first step: our process initialisation */
@@ -362,9 +378,6 @@ int main(int argc, char **argv, char **env)
                 break;
             case 'E':
                 env = set_variable(env, optarg);
-                break;
-            case 'a':
-                age = atoi(optarg);
                 break;
             case 'o':
                 outputfile = strdup(optarg);
@@ -614,7 +627,12 @@ int main(int argc, char **argv, char **env)
     /* change to directory of script:
        this actually is not important to us, but really useful 
        for the ePerl source file programmer!! */
+    cwd[0] = NUL;
     if (!keepcwd) {
+        /* if running as a Unix filter remember the cwd for outputfile */
+        if (mode == MODE_FILTER)
+            getcwd(cwd, MAXPATHLEN);
+        /* determine dir of source file and switch to it */
         strcpy(sourcedir, source);
         for (cp = sourcedir+strlen(sourcedir); cp > sourcedir && *cp != '/'; cp--)
             ;
@@ -688,6 +706,10 @@ int main(int argc, char **argv, char **env)
     IO_restore_stderr();
 
     if (outputfile != NULL && strcmp(outputfile, "-") != 0) {
+        /* if we remembered current working dir, restore it now */
+        if (mode == MODE_FILTER && cwd[0] != NUL)
+            chdir(cwd);
+        /* open outputfile and write out the data */
         if ((fp = fopen(outputfile, "w")) == NULL) {
             PrintError(mode, source, NULL, NULL, "Cannot open output file `%s' for writing", outputfile);
             CU(EX_OK);
@@ -696,6 +718,7 @@ int main(int argc, char **argv, char **env)
         fclose(fp);
     }
     else {
+        /* data just goes to stdout */
         fwrite(cpOut, nOut, 1, stdout);
     }
 

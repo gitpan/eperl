@@ -1,15 +1,15 @@
 
-  New from ePerl Version 2.0.3 to 2.1.0
+  New from ePerl Version 2.0.3 to 2.1b0
   =====================================
 
   o   now compiles and runs out-of-the-box under
-      Solaris, SunOS, HP/UX, FreeBSD and Linux with Perl 5.003, 5.003_93.
+      Solaris, SunOS, HP/UX, FreeBSD and Linux with Perl 5.003 and 5.003_94
 
   o   new runtime modes: FILTER CGI AND NPHCGI
 
   o   all builtin: README, LICENSE, VERSION and GIF IMAGES
 
-  o   more IO: can read von stdin and can write through explicit outpugile
+  o   more IO: can read von stdin and can write through explicit output
 
   o   shebang support
 

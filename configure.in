@@ -167,7 +167,11 @@ AC_MSG_RESULT([$rc])
 
 AC_MSG_CHECKING([for Perl DynaLoader compilation flags])
 perlccdlflags="`$perlprog -e 'use Config; print $Config{ccdlflags}'`";
-AC_MSG_RESULT([$perlccdlflags])
+case $perlccdlflags in
+    " " ) x="none" ;;
+    * )   x="$perlccdlflags" ;;
+esac
+AC_MSG_RESULT([$x])
 AC_SUBST(perlccdlflags)
 
 

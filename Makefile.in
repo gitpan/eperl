@@ -111,6 +111,9 @@ new-version:
 new-revision:
 	OPT=-ir; $(_NEWVERS)
 
+new-betalevel:
+	OPT=-ib; $(_NEWVERS)
+
 new-patchlevel:
 	OPT=-ip; $(_NEWVERS)
 

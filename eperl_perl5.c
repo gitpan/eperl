@@ -74,10 +74,10 @@ extern void boot_DynaLoader _((CV* cv));
  */
 void ePerl_xs_init(void)
 {
-   dXSUB_SYS; 
+   /* dXSUB_SYS; */
    char *file = __FILE__;
 
-   dummy = 0; /* make gcc -Wall happy ;-) */
+   /* dummy = 0; */ /* make gcc -Wall happy ;-) */
    newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
 }
 #endif

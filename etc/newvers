@@ -8,8 +8,8 @@
 ##           used as a version display tool in "./configire" steps...
 ##
 
-VERSION="2.1.0"
-   DATE="22 Mar 1997"
+VERSION="2.1.1"
+   DATE="02-04-1997"
 
 #   print version information line
 print_version () {
@@ -121,6 +121,7 @@ if [ "$VERSION" = "unknown" ]; then
                     bplevel=0
                     ;;
             esac
+            date=`date '+%d-%m-19%y'`
         fi
 
     else
