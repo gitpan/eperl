@@ -9,24 +9,29 @@
 
   <URL:http://www.engelschall.com/sw/eperl/>
 
-  Version 2.1.0 (xx-04-1997)
+  Version 2.1.0 (26-04-1997)
 
-  ePerl interprets an ASCII file bristled with Perl 5 program statements by
-  evaluating the Perl 5 code while passing through the plain ASCII data. It
-  can operate both as a standard Unix filter for file generation and as a
-  Webserver scripting language for dynamic HTML page programming. 
+  ePerl interprets an ASCII file bristled with Perl 5 program statements
+  by evaluating the Perl 5 code while passing through the plain ASCII
+  data. It can operate both as a standard Unix filter for general file
+  generation tasks and as a powerful Webserver scripting language for
+  dynamic HTML page programming. 
 
-  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
+  Copyright (c) 1996-1997 Ralf S. Engelschall, All rights reserved.
   ______________________________________________________________________
 
-  Implementation:  - ANSI C compiler
+  Implementation:  - ANSI C
+
   Requirements:    - underlaying Unix derivate
-                   - installed Perl 5.003 or higher
+                   - ANSI C compiler
+                   - installed Perl 5.003 (+EMBED) or 5.003_XX
+
   Distribution:    - freely available
                    - no charge
-                   - Engelschall Private License (EPL)
+                   - GNU General Public License or Artistic License
+
   Status:          - Genesis: Februar 1996
-                   - First public release: March 1996  (1.0)
+                   - First public release: March  1996 (1.0)
                    - Last  public release: Januar 1997 (2.0.3)
                    - stable
   ______________________________________________________________________

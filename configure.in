@@ -6,7 +6,7 @@ dnl #  Process this file with ``autoconf'' to produce a configure script.
 dnl #
 
 AC_PREREQ(2.10)dnl
-AC_REVISION($Revision: 1.12$)
+AC_REVISION($Revision: 2.0$)
 echo "Configuring for ePerl `./etc/newvers -l c -d eperl_version.c`"
 
 AC_CONFIG_AUX_DIR(etc)
@@ -18,39 +18,6 @@ AC_CONFIGURE_PART(CHECK: Build Tools)
 AC_PROG_CC
 AC_PROG_CPP
 
-AC_MSG_CHECKING(for logfile support)
-AC_ARG_ENABLE(logfile,dnl
-[  --enable-logfile        to enable the security logfile],
-if test $enable_logfile = yes; then
-    logfile="$prefix/lib/eperl.log" 
-else
-    logfile="$enable_logfile"
-fi
-x="enabled ($logfile)"
-,
-logfile=""
-x=disabled
-)dnl
-AC_SUBST(logfile)
-AC_MSG_RESULT([$x])
-
-
-dnl AC_MSG_CHECKING(for CGI brainfile support)
-dnl AC_ARG_ENABLE(brainfile,dnl
-dnl [  --enable-brainfile      to enable the global brain file],
-dnl if test $enable_brainfile = yes; then
-    dnl brainfile="$prefix/lib/eperl.cgi.brain" 
-dnl else
-    dnl brainfile="$enable_brainfile"
-dnl fi
-dnl x="enabled ($brainfile)"
-dnl ,
-dnl brainfile=""
-dnl x=disabled
-dnl )dnl
-dnl AC_SUBST(brainfile)
-dnl AC_MSG_RESULT([$x])
-
 AC_MSG_CHECKING(for compilation debug mode)
 AC_ARG_ENABLE(debug,dnl
 [  --enable-debug          to enable the debugging options for compilation],
@@ -61,7 +28,10 @@ debug=on
 AC_DEFINE(DEBUG_ENABLED)
 ,
 x=disabled
-CFLAGS="-O2"
+CFLAGS="-O"
+if test ".$ac_cv_prog_gcc" = ".yes"; then
+    CFLAGS="-O2"
+fi
 LDFLAGS=""
 debug=off
 )dnl
@@ -85,11 +55,6 @@ if test "$debug" = "on"; then
     AC_MSG_RESULT([$x])
 fi
 
-dnl AC_PROG_RANLIB
-dnl AC_PROGRAM_CHECK(AR, ar, ar,)
-dnl if test -z "$AR"; then
-dnl AC_ERROR([required program ``ar'' not found])
-dnl fi
 AC_SET_MAKE
 AC_PROG_INSTALL
 INSTALL_DATA='${INSTALL} -m 664'
@@ -103,7 +68,7 @@ AC_ARG_WITH(perl,dnl
 perlprog=$with_perl
 perlvers=`$perlprog -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
 ,
-TMPFILE=/tmp/x
+TMPFILE=/tmp/x.$$
 rm -f $TMPFILE
 touch $TMPFILE
 c=0
@@ -178,10 +143,13 @@ AC_SUBST(perlccdlflags)
 AC_CONFIGURE_PART(CHECK: Header and Libraries)
 AC_CONST
 AC_STDC_HEADERS
-AC_HAVE_HEADERS(stdio.h stddef.h string.h stdlib.h)
+AC_HAVE_HEADERS(stdio.h stdarg.h stdlib.h string.h ctype.h dnl
+                unistd.h time.h signal.h pwd.h grp.h dnl
+				sys/types.h sys/stat.h sys/param.h)
 AC_CHECK_TYPE(bool, char)
 AC_CHECK_FUNCS(memmove)
-
+AC_CHECK_FUNCS(seteuid)
+AC_CHECK_FUNCS(setegid)
 
 AC_UVAR_INIT
 AC_UVAR_VERB([dnl

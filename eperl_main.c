@@ -5,56 +5,30 @@
 **  |  __/  __/  __/ |  | |
 **   \___|_|   \___|_|  |_|
 ** 
-**  ePerl -- Embedded Perl 5 for HTML
+**  ePerl -- Embedded Perl 5 Language
 **
-**  ePerl interprets a HTML markup file bristled with Perl 5 program
-**  statements by expanding the Perl 5 code. It operates as a stand-alone 
-**  NPH-CGI/1.1 compliant Unix program and produces pure HTML markup code 
-**  as the resulting data.
+**  ePerl interprets an ASCII file bristled with Perl 5 program statements
+**  by evaluating the Perl 5 code while passing through the plain ASCII
+**  data. It can operate both as a standard Unix filter for general file
+**  generation tasks and as a powerful Webserver scripting language for
+**  dynamic HTML page programming. 
 **
-**  =====================================================================
+**  ======================================================================
 **
 **  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
-**  
-**  Redistribution and use in source and binary forms, with or without
-**  modification, are permitted provided that the following conditions
-**  are met:
-**  
-**  1. Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer. 
-**  
-**  2. Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**  
-**  3. All advertising materials mentioning features or use of this
-**     software must display the following acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  4. Redistributions of any form whatsoever must retain the following
-**     acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  5. The names "ePerl" and "Embedded Perl 5 for HTML" must not be used to
-**     endorse or promote products derived from this software without
-**     prior written permission.
-**  
-**  THIS SOFTWARE IS PROVIDED BY RALF S. ENGELSCHALL ``AS IS'' AND ANY
-**  EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-**  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-**  ARE DISCLAIMED.  IN NO EVENT SHALL RALF S. ENGELSCHALL OR HIS CONTRIBUTORS
-**  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-**  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-**  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-**  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-**  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-**  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-**  POSSIBILITY OF SUCH DAMAGE.
 **
-**  =====================================================================
+**  This program is free software; it may be redistributed and/or modified
+**  only under the terms of either the Artistic License or the GNU General
+**  Public License, which may be found in the ePerl source distribution.
+**  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
+**  a builtin copy of both license files.
+**
+**  This program is distributed in the hope that it will be useful, but
+**  WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
+**  GNU General Public License or the Artistic License for more details.
+**
+**  ======================================================================
 **
 **  eperl_nphcgi.c -- ePerl stand-alone NPH-CGI/1.1 program
 */
@@ -123,7 +97,7 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
             if ((cpBuf = ePerl_ReadErrorFile(logfile, scriptfile, scripturl)) != NULL) {
                 printf("<p>");
                 printf("<table bgcolor=\"#e0e0e0\" cellspacing=0 cellpadding=10 border=0>\n");
-                printf("<tr><td bgcolor=\"#d0d0d0\">\n");
+                printf("<tr><td bgcolor=\"#c0c0c0\">\n");
                 printf("<font face=\"Arial, Helvetica\"><b>Contents of STDERR channel:</b></font>\n");
                 printf("</td></tr>\n");
                 printf("<tr><td>\n");
@@ -160,29 +134,37 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
 
 void give_version(void)
 {
-    fprintf(stderr, "%s\n", ePerl_Hello);
+    fprintf(stdout, "%s\n", ePerl_Hello);
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Copyright (c) 1996-1997 Ralf S. Engelschall, All rights reserved.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "This program is distributed in the hope that it will be useful,\n");
+    fprintf(stdout, "but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
+    fprintf(stdout, "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either\n");
+    fprintf(stdout, "the GNU General Public License or the Artistic License for more details.\n");
+    fprintf(stdout, "\n");
 }
 
 void give_version_extended(void)
 {
-    fprintf(stderr, "%s\n", ePerl_Hello);
-    fprintf(stderr, "\n");
-    fprintf(stderr, "Compilation Parameters:\n");
-    fprintf(stderr, "  Perl 5 Version    : %s (%s)\n", AC_perlvers, AC_perlprog);
-    fprintf(stderr, "  Perl 5 Library    : %s/CORE/libperl.a\n", AC_perlarch);
-    fprintf(stderr, "  Perl 5 DynaLoader : %s\n", AC_perldla);
-    fprintf(stderr, "  Additional Libs   : %s\n", AC_perllibs);
-    fprintf(stderr, "\n");
+    fprintf(stdout, "%s\n", ePerl_Hello);
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Characteristics of this binary:\n");
+    fprintf(stdout, "  Perl 5 Version    : %s (%s)\n", AC_perlvers, AC_perlprog);
+    fprintf(stdout, "  Perl 5 Library    : %s/CORE/libperl.a\n", AC_perlarch);
+    fprintf(stdout, "  Perl 5 DynaLoader : %s\n", AC_perldla);
+    fprintf(stdout, "  Additional Libs   : %s\n", AC_perllibs);
+    fprintf(stdout, "\n");
 }
 
 void give_readme(void)
 {
-    fprintf(stderr, ePerl_README);
+    fprintf(stdout, ePerl_README);
 }
 
 void give_license(void)
 {
-    fprintf(stderr, ePerl_LICENSE);
+    fprintf(stdout, ePerl_LICENSE);
 }
 
 void give_img_logo(void)
@@ -198,18 +180,18 @@ void give_usage(char *name)
 {
     give_version();
     fprintf(stderr, "Usage: %s [options] [file]\n", name);
-    fprintf(stderr, "where options are:\n");
+    fprintf(stderr, "  where options are:\n");
+    fprintf(stderr, "   -d name=value  define global Perl variable ($main::name)\n");
+    fprintf(stderr, "   -D name=value  define environment variable ($ENV{'name'})\n");
+    fprintf(stderr, "   -B str         set begin block delimiter\n");
+    fprintf(stderr, "   -E str         set end block delimiter\n");
     fprintf(stderr, "   -m f|c|n       force runtime mode to FILTER, CGI or NPH-CGI\n");
-    fprintf(stderr, "   -x             run debugging steps\n");
-    fprintf(stderr, "   -c             run syntax check\n");
-    fprintf(stderr, "   -b str         set begin delimiter\n");
-    fprintf(stderr, "   -e str         set end delimiter\n");
-    fprintf(stderr, "   -D name=value  define global Perl variable ($main::name)\n");
-    fprintf(stderr, "   -E name=value  define environment variable ($ENV{'name'})\n");
-    fprintf(stderr, "   -o outputfile  force the output to be send to this file (default is stdout)\n");
-    fprintf(stderr, "   -k             keep current working directory\n");
+    fprintf(stderr, "   -o outputfile  force the output to be send to this file (default=stdout)\n");
+    fprintf(stderr, "   -k             force keeping of current working directory\n");
+    fprintf(stderr, "   -x             force debugging output to console (/dev/tty)\n");
+    fprintf(stderr, "   -c             run syntax check only and exit (no execution)\n");
     fprintf(stderr, "   -r             display ePerl README file\n");
-    fprintf(stderr, "   -l             display ePerl LICENSE file\n");
+    fprintf(stderr, "   -l             display ePerl license files (COPYING and ARTISTIC)\n");
     fprintf(stderr, "   -v             display ePerl VERSION id\n");
     fprintf(stderr, "   -V             display ePerl VERSION id & compilation parameters\n");
 }
@@ -358,7 +340,7 @@ int main(int argc, char **argv, char **env)
     optstart = "-+";
 
     /*  parse the option arguments */
-    while ((c = egetopt(argc, argv, "m+b+e+D+E+a+o+kxcvVrl")) != EOF) {
+    while ((c = egetopt(argc, argv, "m+B+E+d+D+a+o+kxcvVrl")) != EOF) {
         if (optarg == NULL) 
             optarg = "(null)";
         switch (c) {
@@ -377,16 +359,16 @@ int main(int argc, char **argv, char **env)
                     CU(EX_USAGE);
                 }
                 break;
-            case 'b':
+            case 'B':
                 begin_delimiter = strdup(optarg);
                 break;
-            case 'e':
+            case 'E':
                 end_delimiter = strdup(optarg);
                 break;
-            case 'D':
+            case 'd':
                 remember_perl_scalar(optarg);
                 break;
-            case 'E':
+            case 'D':
                 env = set_variable(env, optarg);
                 break;
             case 'o':
@@ -467,6 +449,7 @@ int main(int argc, char **argv, char **env)
         }
     }
     else {
+        /* else we are used in a wrong way... */
         give_usage(progname);
         myexit(EX_USAGE);
     }
@@ -621,11 +604,26 @@ int main(int argc, char **argv, char **env)
                     PrintError(mode, source, NULL, NULL, "Unable to set UID %d: setuid failed", uid);
                     CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
                 }
-                /* eliminate effective root permissions */
-                seteuid(uid);
-                setegid(gid);
             }
         }
+    }
+
+    /* Security! Eliminate effective root permissions if we are running setuid */
+    if (geteuid() == 0) {
+        uid = getuid();
+        gid = getgid();
+#ifdef HAVE_SETEUID
+        seteuid(uid);
+#else
+        /* HP/UX and others eliminate the effective UID with setuid(uid) ! */
+        setuid(uid);
+#endif
+#ifdef HAVE_SETEGID
+        setegid(uid);
+#else
+        /* HP/UX and others eliminate the effective GID with setgid(gid) ! */
+        setgid(gid);
+#endif
     }
 
     /* read source file into internal buffer */
@@ -640,7 +638,6 @@ int main(int argc, char **argv, char **env)
              (*cpScript != ' ' && *cpScript != '\t' && *cpScript != '\n') && (cpScript-cpBuf < nBuf);
              cpScript++)
             ;
-        /* XXX perhaps add code to again getopt() the stuff */
         for (cpScript = cpBuf;
              *cpScript != '\n' && (cpScript-cpBuf < nBuf);
              cpScript++)
@@ -653,7 +650,9 @@ int main(int argc, char **argv, char **env)
     /* now set the additional env vars */
     env = mysetenv(env, "SCRIPT_SRC_SIZE", "%d", nBuf);
     stat(source, &st);
-    env = mysetenv(env, "SCRIPT_SRC_MTIME", "%d", st.st_mtime);
+    env = mysetenv(env, "SCRIPT_SRC_MODIFIED", "%d", st.st_mtime);
+    env = mysetenv(env, "SCRIPT_SRC_MODIFIED_CTIME", "%s", ctime(&(st.st_mtime)));
+    env = mysetenv(env, "SCRIPT_SRC_MODIFIED_ISOTIME", "%s", isotime(&(st.st_mtime)));
     pw = getpwuid(st.st_uid);
     env = mysetenv(env, "SCRIPT_SRC_OWNER", "%s", pw->pw_name);
     env = mysetenv(env, "VERSION_INTERPRETER", "%s", ePerl_WebID);
@@ -678,7 +677,7 @@ int main(int argc, char **argv, char **env)
     fwrite(cpScript, strlen(cpScript), 1, fp);
     fclose(fp);
 
-    /* in Debug mode output the script to the console and exit */
+    /* in Debug mode output the script to the console */
     if (fDebug) {
         if ((fp = fopen("/dev/tty", "w")) == NULL) {
             PrintError(mode, source, NULL, NULL, "Cannot open /dev/tty for debugging message");
@@ -692,7 +691,6 @@ int main(int argc, char **argv, char **env)
             fprintf(fp, "%c\n", cpScript[strlen(cpScript)-1]);
         fprintf(fp, "----internally created Perl script-----------------------------------\n");
         fclose(fp);
-        CU(EX_OK);
     }
 
     /* open a file for Perl's STDOUT channel
@@ -778,11 +776,9 @@ int main(int argc, char **argv, char **env)
     }
 
     /*  NOW IT IS TIME to evaluate/execute the script!!! */
-    /* TAINT; */
     set_perl_scalars();
     ePerl_ForceUnbufferedStdout();
     rc = perl_run(my_perl);
-    /* TAINT_NOT; */
 
     /*  pre-close the handles, to be able to check
         its size and to be able to display the contents */
@@ -842,25 +838,29 @@ int main(int argc, char **argv, char **env)
     IO_restore_stdout();
     IO_restore_stderr();
 
-    if (outputfile != NULL && strcmp(outputfile, "-") != 0) {
-        /* if we remembered current working dir, restore it now */
-        if (mode == MODE_FILTER && cwd[0] != NUL)
-            chdir(cwd);
-        /* open outputfile and write out the data */
-        if ((fp = fopen(outputfile, "w")) == NULL) {
-            PrintError(mode, source, NULL, NULL, "Cannot open output file `%s' for writing", outputfile);
-            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+    /* now when the request was not a HEAD request we create the output */
+    cp = getenv("REQUEST_METHOD");
+    if (! ((mode == MODE_CGI || mode == MODE_NPHCGI) &&
+           cp != NULL && strcmp(cp, "HEAD") == 0)) {
+        if (outputfile != NULL && strcmp(outputfile, "-") != 0) {
+            /* if we remembered current working dir, restore it now */
+            if (mode == MODE_FILTER && cwd[0] != NUL)
+                chdir(cwd);
+            /* open outputfile and write out the data */
+            if ((fp = fopen(outputfile, "w")) == NULL) {
+                PrintError(mode, source, NULL, NULL, "Cannot open output file `%s' for writing", outputfile);
+                CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+            }
+            fwrite(cpOut, nOut, 1, fp);
+            fclose(fp);
         }
-        fwrite(cpOut, nOut, 1, fp);
-        fclose(fp);
+        else {
+            /* data just goes to stdout */
+            fwrite(cpOut, nOut, 1, stdout);
+            /* make sure that the data is out before we exit */
+            fflush(stdout);
+        }
     }
-    else {
-        /* data just goes to stdout */
-        fwrite(cpOut, nOut, 1, stdout);
-    }
-
-    /* make sure that the data is out before we exit */
-    fflush(stdout);
 
     CUS: /* the Clean Up Sequence */
 

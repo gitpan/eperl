@@ -5,56 +5,30 @@
 **  |  __/  __/  __/ |  | |
 **   \___|_|   \___|_|  |_|
 ** 
-**  ePerl -- Embedded Perl 5 for HTML
+**  ePerl -- Embedded Perl 5 Language
 **
-**  ePerl interprets a HTML markup file bristled with Perl 5 program
-**  statements by expanding the Perl 5 code. It operates as a stand-alone 
-**  NPH-CGI/1.1 compliant Unix program and produces pure HTML markup code 
-**  as the resulting data.
+**  ePerl interprets an ASCII file bristled with Perl 5 program statements
+**  by evaluating the Perl 5 code while passing through the plain ASCII
+**  data. It can operate both as a standard Unix filter for general file
+**  generation tasks and as a powerful Webserver scripting language for
+**  dynamic HTML page programming. 
 **
-**  =====================================================================
+**  ======================================================================
 **
 **  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
-**  
-**  Redistribution and use in source and binary forms, with or without
-**  modification, are permitted provided that the following conditions
-**  are met:
-**  
-**  1. Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer. 
-**  
-**  2. Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**  
-**  3. All advertising materials mentioning features or use of this
-**     software must display the following acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  4. Redistributions of any form whatsoever must retain the following
-**     acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  5. The names "ePerl" and "Embedded Perl 5 for HTML" must not be used to
-**     endorse or promote products derived from this software without
-**     prior written permission.
-**  
-**  THIS SOFTWARE IS PROVIDED BY RALF S. ENGELSCHALL ``AS IS'' AND ANY
-**  EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-**  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-**  ARE DISCLAIMED.  IN NO EVENT SHALL RALF S. ENGELSCHALL OR HIS CONTRIBUTORS
-**  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-**  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-**  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-**  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-**  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-**  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-**  POSSIBILITY OF SUCH DAMAGE.
 **
-**  =====================================================================
+**  This program is free software; it may be redistributed and/or modified
+**  only under the terms of either the Artistic License or the GNU General
+**  Public License, which may be found in the ePerl source distribution.
+**  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
+**  a builtin copy of both license files.
+**
+**  This program is distributed in the hope that it will be useful, but
+**  WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
+**  GNU General Public License or the Artistic License for more details.
+**
+**  ======================================================================
 **
 **  eperl_sys.c -- ePerl system functions
 */
@@ -78,7 +52,7 @@ char **mysetenv(char **env, char *var, char *str, ...)
     int i;
     char **envN;
     extern char **environ;
-	static stillcalled = FALSE;
+    static stillcalled = FALSE;
 
     /*  create the key=val string  */
     va_start(ap, str);
@@ -98,9 +72,9 @@ char **mysetenv(char **env, char *var, char *str, ...)
     envN[i++] = NULL;
 
     /* set the libc/exec variable which Perl uses */
-	if (stillcalled) 
-		free(environ);
-	stillcalled = TRUE;
+    if (stillcalled) 
+        free(environ);
+    stillcalled = TRUE;
     environ = envN;
 
     va_end(ap);
@@ -277,11 +251,29 @@ char *strnstr(char *buf, char *str, int n)
 
 char *strndup(char *buf, int n)
 {
-	char *cp;
+    char *cp;
 
-	cp = (char *)malloc(n+1);
-	strncpy(cp, buf, n);
-	return cp;
+    cp = (char *)malloc(n+1);
+    strncpy(cp, buf, n);
+    return cp;
+}
+
+/*
+**
+**  ISO time
+**
+*/
+
+char *isotime(time_t *t)
+{
+    struct tm *tm;
+    char timestr[128];
+
+    tm = localtime(t);
+    sprintf(timestr, "%02d-%02d-19%02d %02d:%02d",
+                      tm->tm_mday, tm->tm_mon+1, tm->tm_year,
+                      tm->tm_hour, tm->tm_min);
+    return strdup(timestr);
 }
 
 /*EOF*/

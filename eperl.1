@@ -73,7 +73,7 @@
 .nr % 0
 .rr F
 .\}
-.TH EPERL 1 "EN" "18/Apr/97" "Ralf S. Engelschall"
+.TH EPERL 1 "EN" "26/Apr/97" "Ralf S. Engelschall"
 .IX Title "EPERL 1"
 .UC
 .IX Name "ePerl - Embedded Perl 5 Language"
@@ -174,24 +174,24 @@
 ePerl \- Embedded Perl 5 Language
 .SH "VERSION"
 .IX Header "VERSION"
-2.1b6 (10-04-1997)
+2.1.0 (26-04-1997)
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \fBeperl\fR
-[\fB\-m\fR f|c|n]
-[\fB\-b\fR \fIbegin_delimiter\fR]
-[\fB\-e\fR \fIend_delimiter\fR]
+[\fB\-d\fR \fIname\fR=\fIvalue\fR]
 [\fB\-D\fR \fIname\fR=\fIvalue\fR]
-[\fB\-E\fR \fIname\fR=\fIvalue\fR]
+[\fB\-B\fR \fIbegin_delimiter\fR]
+[\fB\-E\fR \fIend_delimiter\fR]
+[\fB\-m\fR \fImode\fR]
 [\fB\-o\fR \fIoutputfile\fR]
 [\fB\-k\fR]
 [\fB\-x\fR]
 [\fB\-c\fR]
-[\fB\-r\fR]
-[\fB\-l\fR]
 [\fIinputfile\fR]
 .PP
 \fBeperl\fR
+[\fB\-r\fR]
+[\fB\-l\fR]
 [\fB\-v\fR]
 [\fB\-V\fR]
 .SH "DESCRIPTION"
@@ -200,272 +200,272 @@ ePerl \- Embedded Perl 5 Language
 .IX Subsection "Abstract"
 ePerl interprets an \s-1ASCII\s0 file bristled with Perl 5 program statements by
 evaluating the Perl 5 code while passing through the plain \s-1ASCII\s0 data. It can
-operate both as a standard Unix filter for file generation and as a Webserver
-scripting language for dynamic \s-1HTML\s0 page programming. 
+operate both as a standard Unix filter for general file generation tasks and
+as a powerful Webserver scripting language for dynamic \s-1HTML\s0 page programming. 
 .Sh "Introduction"
 .IX Subsection "Introduction"
-The \fIeperl\fR program is the \fIEmbedded Perl 5 Language\fR. This really is a
-full-featured Perl 5 interpreter, but with a different calling environment and
-source file format then the default Perl interpreter (the executable \fIperl\fR).
-It is designed for \s-1ASCII\s0 file generation with the philosophy of \fIembedding\fR
-the Perl 5 program code into the \s-1ASCII\s0 data instead of the usual way where you
-embed the \s-1ASCII\s0 data into a Perl 5 program.
+The \fBeperl\fR program is the \fIEmbedded Perl 5 Language\fR interpreter. This
+really is a full-featured Perl 5 interpreter, but with a different calling
+environment and source file layout than the default Perl interpreter (usually
+the executable \fBperl\fR or \fBperl5\fR on most systems).  It is designed for
+general \s-1ASCII\s0 file generation with the philosophy of \fIembedding\fR the Perl 5
+program code into the \s-1ASCII\s0 data instead of the usual way where you embed the
+\s-1ASCII\s0 data into a Perl 5 program (usually by quoting the data and using them
+via \f(CWprint\fR statements).  So, instead of writing a plain Perl script like
 .PP
-Instead of writing a generation program with code like
-.PP
-.Vb 5
-\&   print "foo bar\en";
-\&   print "baz quux\en";
-\&   for ($i = 0; $i < 10; $i++) { print "foo #${i}\en"; }
-\&   print "foo bar\en";
-\&   print "baz quux\en";
+.Vb 6
+\&  #!/path/to/perl
+\&  print "foo bar\en";
+\&  print "baz quux\en";
+\&  for ($i = 0; $i < 10; $i++) { print "foo #${i}\en"; }
+\&  print "foo bar\en";
+\&  print "baz quux\en";
 .Ve
-you now code it as
+you can write it now as an ePerl script:
 .PP
-.Vb 5
-\&   foo bar
-\&   baz quux
-\&   <: for ($i = 0; $i < 10; $i++) { print "foo #${i}\en"; } :>
-\&   foo bar
-\&   baz quux
+.Vb 6
+\&  #!/path/to/eperl
+\&  foo bar
+\&  baz quux
+\&  <: for ($i = 0; $i < 10; $i++) { print "foo #${i}\en"; } :>
+\&  foo bar
+\&  baz quux
 .Ve
+Although the ePerl variant has a different source file layout, the semantic is
+the same, i.e. both scripts create exactly the same resulting data on
+\f(CWSTDOUT\fR.
 .Sh "Intention"
 .IX Subsection "Intention"
 ePerl is simply a glue code which combines the programming power of the Perl 5
-interpreter with a tricky embedding technique.  The embedding trick is:
-ePerl itself only converts the source file into a valid Perl script which then
-gets \fIentirely\fR evaluated by only one internal instance of the Perl 5
-interpreter. To archieve this, ePerl translates all plain code into (escaped)
-Perl 5 \fIprint\fR constructs while passing through all embedded native Perl 5
-code.
+interpreter library with a tricky embedding technique.  The embedding trick is
+this: it converts the source file into a valid Perl script which then gets
+\fIentirely\fR evaluated by only one internal instance of the Perl 5 interpreter.
+To achieve this, ePerl translates all plain code into (escaped) Perl 5 strings
+placed into \fIprint\fR constructs while passing through all embedded native Perl
+5 code. As you can see, ePerl itself does exactly the same internally, a silly
+programmer had to do when writing a plain Perl generation script. 
 .PP
 Due to the nature of such bristled code, ePerl is really the better attempt
 when the generated \s-1ASCII\s0 data contains really more static as dynamic data. Or
-in other words: Use ePerl if you want to keep the most of the \s-1ASCII\s0 data in
-plain format while just programming some bristled stuff. Do not use it when
-generating pure dynamic data. There it brings no advantage to an ordinary
-program code.
+in other words: \fIUse ePerl if you want to keep the most of the generated \s-1ASCII\s0
+data in plain format while just programming some bristled stuff.\fR Do not use it
+when generating pure dynamic data. There it brings no advantage to the
+ordinary program code of a plain Perl script. So, the static part should be at
+least 60% or the advantage becomes a disadvantage.
 .PP
-ePerl was actually designed to be used as a webserver scripting-language for
-\s-1HTML\s0 pages. Here you have the typical case that 90% of the data consists of
-pure static \s-1HTML\s0 tags and plain \s-1ASCII\s0 while the remaining 10% are actually
-dynamically generated stuff. 
-.Sh "Usage"
-.IX Subsection "Usage"
-The \fIeperl\fR program can be used in three different ways of calling:
-.Ip "\fIStand-Alone Unix compliant Filter\fR" 4
-.IX Item "\fIStand-Alone Unix compliant Filter\fR"
-This is the basic operation when used as a generation tool from the Unix shell
-or from within other tools:
+ePerl in its origin was actually designed for an extreme situation: as a
+webserver scripting-language for on-the-fly \s-1HTML\s0 page generation. Here you
+have the typical case that usually 90% of the data consists of pure static
+\s-1HTML\s0 tags and plain \s-1ASCII\s0 while just the remaining 10% are programming
+constructs which dynamically generate more markup code. This is the reason why
+ePerl beside its standard Unix filtering runtime-mode also supports the
+\s-1CGI/1\s0.1 and \s-1NPH\s0\-\s-1CGI/1\s0.1 interfaces.
+.Sh "Runtime Modes"
+.IX Subsection "Runtime Modes"
+ePerl can operate in three different runtime modes:
+.Ip "\fIStand-alone Unix filter mode\fR" 4
+.IX Item "\fIStand-alone Unix filter mode\fR"
+This is the default operation mode when used as a generation tool from the
+Unix shell or as a batch-processing tool from within other programs or
+scripts:
 .Sp
-.Vb 3
+.Vb 4
 \&  $ eperl [options] - < inputfile > outputfile
 \&  $ eperl [options] inputfile > outputfile
+\&  $ eperl [options] -o outputfile - < inputfile
 \&  $ eperl [options] -o outputfile inputfile
 .Ve
-Use this to take advantage of Perl's programming power for generating
-complicated data. 
-.Ip "\fIShebang \s-1NPH\s0\-\s-1CGI/1\s0.1 Script\fR" 4
-.IX Item "\fIShebang \s-1NPH\s0\-\s-1CGI/1\s0.1 Script\fR"
-Here ePerl is used in conjunction with the Unix shebang magic technique to
-directly transform a \s-1HTML\s0 file into a \s-1CGI/1\s0.1 script. First just
-prefix the file with the following (shebang-)line:
+As you can see, ePerl can be used in any combination of \s-1STDIO\s0 and external
+files. Additionally there are two interesting variants of using this mode.
+First you can use ePerl in conjunction with the Unix \fIShebang\fR magic
+technique to implicitly select it as the interpreter for your script similar
+to the way you are used to with the plain Perl interpreter:
+.Sp
+.Vb 4
+\&  #!/path/to/eperl [options]
+\&  foo
+\&  <: print "bar"; :>
+\&  quux
+.Ve
+Second, you can use ePerl in conjunction with the Bourne-Shell \fIHere
+Document\fR technique from within you shell scripts:
+.Sp
+.Vb 8
+\&  #!/bin/sh
+\&  ...
+\&  eperl [options] - <<EOS
+\&  foo
+\&  <: print "quux"; :>
+\&  quux
+\&  EOS
+\&  ...
+.Ve
+.Ip "\fI\s-1CGI/1\s0.1 compliant interface mode\fR" 4
+.IX Item "\fI\s-1CGI/1\s0.1 compliant interface mode\fR"
+This is the runtime mode where ePerl uses the \s-1CGI/1\s0.1 interface of a webserver
+when used as a \fIServer-Side Scripting Language\fR on the Web. ePerl enters this
+mode automatically when the \s-1CGI/1\s0.1 environment variable \f(CWPATH_TRANSLATED\fR is
+set and the scripts filename does \fInot\fR begin with the \s-1NPH\s0 prefix
+``\fInph-\fR'\*(R'.  In this runtime mode it prefixes the resulting data with
+\s-1HTTP/1\s0.0 (default) or \s-1HTTP/1\s0.1 (if identified by the webserver) compliant
+response header lines.
+.Sp
+ePerl also recognizes \s-1HTTP\s0 header lines at the beginning of the scripts
+generated data, i.e. for instance you can generate your own \s-1HTTP\s0 headers like
+.Sp
+.Vb 5
+\&   <? $url = "..";
+\&      print "Location: $url\en";
+\&      print "URI: $url\en\en"; !>
+\&   <html>
+\&   ...
+.Ve
+But notice that while you can output arbitrary headers, all webservers
+restrict the headers which are accepted via the \s-1CGI/1\s0.1 interface. Usually you
+can provide only a few specific \s-1HTTP\s0 headers like \f(CWLocation\fR or \f(CWStatus\fR.
+If you need more control you have to use the \s-1NPH\s0\-\s-1CGI/1\s0.1 interface mode.
+.Sp
+Additionally ePerl provides a useful feature in this mode: It can switch its
+\s-1UID/GID\s0 to the owner of the script if it runs as a Unix \fISetUID\fR program (see
+below under the \fISecurity\fR manpage and the option ``u+s'\*(R' of \fIchmod\fR\|(1)).
+.Sp
+There are two commonly known ways of using this \s-1CGI/1\s0.1 interface mode on the
+Web. First, you can use it to explicitly transform plain \s-1HTML\s0 files into
+\s-1CGI/1\s0.1 scripts via the \fIShebang\fR technique (see above). For an Apache
+webserver just put the following line as the first line of the file:
 .Sp
 .Vb 1
-\&  #!/sw/pkg/eperl/bin/eperl [options]
+\&  #!/path/to/eperl -mc
 .Ve
-Then rename it from \fIfile.html\fR to \fIfile.cgi\fR and set
-its execution bit via
+Then rename the script from \fIfile.html\fR to \fIfile.cgi\fR and set its execution
+bit via
 .Sp
 .Vb 2
 \&  $ mv file.html file.cgi
 \&  $ chmod a+rx file.cgi
 .Ve
-Now when the script \fIfile.cgi\fR is run by the webserver it actually displays
-its \s-1HTML\s0 data. Usually (because up to now the \s-1CGI\s0 script had no advantage over
-the plain \s-1HTML\s0 file) you bristle the file with Perl 5 blocks where you need
-dynamic content.
+Now make sure that Apache accepts \fIfile.cgi\fR as a \s-1CGI\s0 program by enabling \s-1CGI\s0
+support for the directory where \fIfile.cgi\fR resides. For this add the line
 .Sp
-Notice that usually this does only run \fIfile.cgi\fR as pure \s-1CGI/1\s0.1 compliant
-program and not as Non-Parsed-Header (\s-1NPH\s0) \s-1CGI/1\s0.1 one.
-.Ip "\fI\s-1NPH\s0\-\s-1CGI/1\s0.1 compliant Server-Side Scripting Language\fR" 4
-.IX Item "\fI\s-1NPH\s0\-\s-1CGI/1\s0.1 compliant Server-Side Scripting Language\fR"
-Modern webservers (like Apache) provide the ability to integrate server-side
-scripting languages in a really seemless manner. There you can force all files
-with a specific extension (or associated \s-1MIME\s0\-type) to be on-the-fly filtered
-by a script. Use this feature to use ePerl as a fully integrated server-side
-scripting language.
+.Vb 1
+\&  Options +ExecCGI
+.Ve
+to the \fI.htaccess\fR file in this directory. Finally make sure that Apache
+really recognizes the extension \fI.cgi\fR. Perhaps you additionally have to add
+the following line to your \fIhttpd.conf\fR file:
 .Sp
-For Apache you can transform any \s-1HTML\s0 page into a ePerl source file by just
-renaming it from \fIfile.html\fR to \fIfile.phtml\fR while setting up the following
-directives in the \fIhttpd.conf\fR file
+.Vb 1
+\&  AddHandler cgi-script .cgi
+.Ve
+Now you can use \fIfile.cgi\fR instead of \fIfile.html\fR and make advantage of the
+achieved programming capability by bristling \fIfile.cgi\fR with wanted Perl
+blocks (or the tranformation into a \s-1CGI\s0 script was useless).
+.Sp
+Alternatively (or even additionally) a webmaster can enable ePerl support in a
+more seemless way by configuring ePerl as a real implicit server-side
+scripting language. This is done by assigning a \s-1MIME\s0\-type to the various valid
+ePerl file extensions and forcing all files with this \s-1MIME\s0\-type to be
+internally processed via the ePerl interpreter. You can accomplish this for
+Apache by adding the following to your \fIhttpd.conf\fR file
+.Sp
+.Vb 3
+\&  AddType      application/x-httpd-eperl  .phtml .eperl .epl
+\&  Action       application/x-httpd-eperl  /internal/cgi/eperl
+\&  ScriptAlias  /internal/cgi              /path/to/apache/cgi-bin
+.Ve
+and creating a copy of the \fIeperl\fR program in your \s-1CGI\s0\-directory:
+.Sp
+.Vb 1
+\&  $ cp -p /path/to/eperl /path/to/apache/cgi-bin/eperl
+.Ve
+Now all files with the extensions \fI.phtml\fR, \fI.eperl\fR and \fI.epl\fR are
+automatically processed by the ePerl interpreter. There is no need for a
+\fIShebang\fR line or any locally enabled \s-1CGI\s0 mode.
+.Sp
+One final hint: When you want to test your scripts offline, just run them with
+forced \s-1CGI/1\s0.1 mode from your shell. But make sure you prepare all environment
+variables your script depends on, e.g. \f(CWQUERY_STRING\fR or \f(CWPATH_INFO\fR.
+.Sp
+.Vb 2
+\&  $ export QUERY_STRING="key1=value1&key2=value2"
+\&  $ eperl -mc file.phtml
+.Ve
+.Ip "\fI\s-1NPH\s0\-\s-1CGI/1\s0.1 compliant interface mode\fR" 4
+.IX Item "\fI\s-1NPH\s0\-\s-1CGI/1\s0.1 compliant interface mode\fR"
+This runtime mode is a special variant of the \s-1CGI/1\s0.1 interface mode, because
+most webservers (e.g. Apache) provide it for special purposes.   It is known
+as \fINon-Parsed-Header\fR (\s-1NPH\s0) \s-1CGI/1\s0.1 mode and is usually used by the
+webserver when the filename of the \s-1CGI\s0 program is prefixed with ``\f(CWnph-\fR'\*(R'.
+In this mode the webserver does no processing on the \s-1HTTP\s0 reponse headers and
+no buffering of the resulting data, i.e. the \s-1CGI\s0 program actually has to
+provide a complete \s-1HTTP\s0 response itself. The advantage is that the program can
+generate arbitrary \s-1HTTP\s0 headers or \s-1MIME\s0\-encoded multiblock messages.
+.Sp
+So, 
+above we have renamed the file to \fIfile.cgi\fR which restricted us a little
+bit. When we alternatively rename \fIfile.html\fR to \fInph-file.cgi\fR and force
+the \s-1NPH\s0\-\s-1CGI/1\s0.1 interface mode via option \fB\-mn\fR then this file becomes a
+\s-1NPH\s0\-\s-1CGI/1\s0.1 compliant program under Apache and other webservers. Now our
+script can provide its own \s-1HTTP\s0 response (it need not, because when absent
+ePerl provides a default one for it).
+.Sp
+.Vb 6
+\&  #!/path/to/bin/eperl -mn
+\&  <? print "HTTP/1.0 200 Ok\en";
+\&     print "X-MyHeader: Foo Bar Quux\en";
+\&     print "Content-type: text/html\en\en";
+\&  <html>
+\&  ...
+.Ve
+As you expect this can be also used with the implicit Server-Side Scripting
+Language technique. Put  
 .Sp
 .Vb 3
 \&  AddType      application/x-httpd-eperl  .phtml .eperl .epl
 \&  Action       application/x-httpd-eperl  /internal/cgi/nph-eperl
 \&  ScriptAlias  /internal/cgi              /path/to/apache/cgi-bin
 .Ve
-and creating a symlink to the \fIeperl\fR program:
+into your \fIhttpd.conf\fR and run the command
 .Sp
 .Vb 1
-\&  $ ln -s /sw/pkg/eperl/bin/eperl /path/to/apache/cgi-bin/nph-eperl
+\&  $ cp -p /path/to/eperl /path/to/apache/cgi-bin/nph-eperl
 .Ve
-.SH "OPTIONS"
-.IX Header "OPTIONS"
-.Ip "\fB\-m\fR f|c|n" 5
-.IX Item "\fB\-m\fR f|c|n"
-This forces ePerl to act in a specific runtime mode.  Either as a stand-alone
-filter (\fB\-mf\fR), where no \s-1HTTP\s0 response headers are printed and errors are
-displayed without surrounding \s-1HTML\s0 code. This mode is choosen per default when
-no \s-1CGI/1\s0.1 variables are set in the environment.
-.Sp
-Or as a \s-1CGI/1\s0.1 (\fB\-mc\fR) compliant program, where \s-1HTTP\s0 response headers are
-printed and errors are encapsulated in \s-1HTML\s0 code. In this mode only a few
-specific \s-1HTTP\s0 headers can be generated like \f(CWLocation\fR.  Because these
-headers are post-processed by the webserver. This mode is automatically
-choosen when \s-1CGI/1\s0.1 variables exists in the environment and the script
-filename does \fBnot\fR begin with the \s-1NPH\s0 prefix ``\fInph-\fR'\*(R'.
-.Sp
-Additionally \fB\-mn\fR forces the \s-1NPH\s0\-\s-1CGI/1\s0.1 mode which is similar to \s-1CGI\s0 but
-here \fINo-Parseable-Header\fR mode is also switched on, i.e. any \s-1HTTP\s0 response
-headers can be generated while ePerl fills the missing gaps. The result is a
-full \s-1HTTP\s0 response which is not further processed by the webserver. This mode
-is automatically choosen when \s-1CGI/1\s0.1 variables exists in the environment and
-the script does begin with the \s-1NPH\s0 prefix ``\fInph-\fR'\*(R'.
-.Ip "\fB\-c\fR" 5
-.IX Item "\fB\-c\fR"
-This forces ePerl to act as a \s-1NPH\s0\-\s-1CGI/1\s0.1 compliant program, i.e. \s-1HTTP\s0
-response headers are printed in front of the \s-1HTML\s0 code and errors are
-displayed as \s-1HTML\s0 error pages.
-.Ip "\fB\-b\fR \fIbegin_delimiter\fR" 5
-.IX Item "\fB\-b\fR \fIbegin_delimiter\fR"
-Sets the Perl block begin delimiter string. Use this in conjunction with \f(CW-e\fR
-to set different delimiters when using ePerl as a offline \s-1HTML\s0
-creation-language while still using it as a online \s-1HTML\s0 scripting-language.
-.Sp
-Default delimiters are \f(CW<?\fR and \f(CW!>\fR for \s-1CGI\s0 modes and \f(CW<:\fR and
-\f(CW:>\fR for standalone Unix filtering mode.
-.Sp
-Here are some possible variations you could choose:
-.Sp
-.Vb 2
-\&  "<?" and "!>"
-\&  default ePerl CGI mode delimiters
-.Ve
-.Vb 2
-\&  "<:" and ":>"
-\&  default ePerl stand-alone filtering mode delimiters
-.Ve
-.Vb 2
-\&  "<script language='ePerl'>" and "</script>" 
-\&  standard HTML scripting language style
-.Ve
-.Vb 2
-\&  "<!--#eperl code='" and "' -->"
-\&  NeoScript style
-.Ve
-.Vb 4
-\&  "<?" and ">"
-\&  PHP/FI style (no longer recommended because can lead 
-\&  to parsing problems. Should be used only for backward 
-\&  compatibility to old ePerl versions 1.x)
-.Ve
-.Ip "\fB\-e\fR \fIend_delimiter\fR" 5
-.IX Item "\fB\-e\fR \fIend_delimiter\fR"
-Sets the Perl block end delimiter string. See option \fB\-b\fR
-.Ip "\fB\-D\fR \fIname\fR=\fIvalue\fR" 5
-.IX Item "\fB\-D\fR \fIname\fR=\fIvalue\fR"
-Sets a Perl variable in the package \f(CWmain\fR which can be referenced
-via \f(CW$name\fR or more explicitly via \f(CW$main::name\fR. The command
+from your shell. \fIThis is the preferred way of using ePerl as a Server-Side
+Scripting Language, because it provides most flexibility\fR.
+.Sh "Security"
+.IX Subsection "Security"
+When you are installing ePerl as a \s-1CGI/1\s0.1 or \s-1NPH\s0\-\s-1CGI/1\s0.1 compliant program
+(see above for detailed description of these modes) via
 .Sp
 .Vb 3
-\&  eperl -D name=value ..
-\&  
-\&is actually equivalent to having
+\&  $ cp -p /path/to/eperl /path/to/apache/cgi-bin/eperl
+\&  $ chown root /path/to/apache/cgi-bin/eperl
+\&  $ chmod u+s  /path/to/apache/cgi-bin/eperl
 .Ve
-.Vb 1
-\&  <? $name = value; !>
-.Ve
-at the beginning of \fIinputfile\fR.
-.Ip "\fB\-E\fR \fIname\fR=\fIvalue\fR" 5
-.IX Item "\fB\-E\fR \fIname\fR=\fIvalue\fR"
-Sets a environment variable which can be referenced via \f(CW$ENV{'variable'}\fR
-inside the Perl blocks. The command
+or
 .Sp
 .Vb 3
-\&  eperl -E name=value ..
-\&  
-\&is actually equivalent to 
+\&  $ cp -p /path/to/eperl /path/to/apache/cgi-bin/nph-eperl
+\&  $ chown root /path/to/apache/cgi-bin/nph-eperl
+\&  $ chmod u+s  /path/to/apache/cgi-bin/nph-eperl
 .Ve
-.Vb 1
-\&  export name=value; eperl ...
-.Ve
-but the advantage of this option is that it doesn't manipulate the callers
-environment.
-.Ip "\fB\-o\fR \fIoutputfile\fR" 5
-.IX Item "\fB\-o\fR \fIoutputfile\fR"
-Forces the output to be written to \fIoutputfile\fR instead of \fIstdout\fR. Use
-this option when using ePerl as a filter. The outputfile ``\fI\-\fR'\*(R' sets stdout
-as the output handle explicitly. Notice that this file is relative to the
-source file directory when the runtime mode is forced to \s-1CGI\s0 or \s-1NPH\s0\-\s-1CGI\s0.
-.Ip "\fB\-k\fR" 5
-.IX Item "\fB\-k\fR"
-Forces ePerl to keep the current working directory from where it was started.
-Per default ePerl will change to the directory where the file to be executed
-stays. This option is useful if you use ePerl as a offline filter on
-a temporary file.
-.Ip "\fB\-x\fR" 5
-.IX Item "\fB\-x\fR"
-This sets debug mode where ePerl outputs some interesting information to the
-console.
-.Ip "\fB\-c\fR" 5
-.IX Item "\fB\-c\fR"
-This runs a pure syntax check which is similar to \f(CWperl -c\fR.
-.Ip "\fB\-v\fR" 5
-.IX Item "\fB\-v\fR"
-This prints ePerl version information to the console.
-.Ip "\fB\-V\fR" 5
-.IX Item "\fB\-V\fR"
-Same as option \fB\-v\fR but additionally shows the Perl compilation parameters.
-.Ip "\fB\-r\fR" 5
-.IX Item "\fB\-r\fR"
-This prints the internal ePerl \s-1README\s0 file to the console.
-.Ip "\fB\-l\fR" 5
-.IX Item "\fB\-l\fR"
-This prints the internal ePerl \s-1LICENSE\s0 file to the console.
-.SH "INTERNALS"
-.IX Header "INTERNALS"
-It is simply a tricky glue code which only combines the programming power of
-Perl 5 with the markup power of HTML. 
-.PP
-A pure standard HTML document will be bristled with native Perl 5 code to
-create a so-called HTML document with embedded Perl 5 code. This document is
-then on-the-fly piped through the NPH\-CGI program \f(CWnph-eperl\fR when the webserver
-receives a request for this document from the client. At this preprocessing
-pass ePerl expands the mixed language (HTML and Perl) to pure HTML by
-evaluating all Perl statements and passing through (without changing) all HTML
-statements.  The result is send back to the webbrowser. 
-.PP
-The trick is: ePerl itself only converts the ePerl source file into a valid
-Perl program file which then gets entirely evaluated by only one internal
-instance of the Perl 5 interpreter.  To archieve this, ePerl translates all
-HTML markup code into (escaped) Perl 5 print constructs while passing through
-all embedded native Perl 5 code. 
-.SH "SECURITY"
-.IX Header "SECURITY"
-When you are installing ePerl as a NPH\-CGI/1.1 program (\fInph-eperl\fR) with
-setuid bit enabled (\f(CWchmod u+s\fR!) then ePerl can switch to the uid/gid of the
-\fBscript owner\fR. Although this is a very useful feature for script programmers
-it can be to risky for you when you are paranoid about security of setuid
-programs. If so just don't install ePerl with enabled setuid bit! This is the
-reason why ePerl is not installed per default as \fInph-eperl\fR for your
-webserver. For those who decided that this feature is essential for them ePerl
-tries hard to make it secure. The following steps have to be successfully
-passed before ePerl actually switches its uid/gid (in this order):
-.PP
+i.e. with \fISetUID\fR bit enabled for the \fBroot\fR user, ePerl can switch to the
+\s-1UID/GID\s0 of the \fIscripts owner\fR. Although this is a very useful feature for
+script programmers (because one no longer need to make auxiliary files
+world-readable and temporary files world-writable!), it can be to risky for
+you when you are paranoid about security of SetUID programs. If so just don't
+install ePerl with enabled SetUID bit! This is the reason why ePerl is per
+default only installed as a Stand-Alone Unix filter which never needs this
+feature.
+.Sp
+For those of us who decided that this feature is essential for them ePerl
+tries really hard to make it secure. The following steps have to be
+successfully passed before ePerl actually switches its \s-1UID/GID\s0 (in this
+order):
+.Sp
 .Vb 11
 \&  1. The script has to match the following extensions:
-\&     .html, .phtml, .ephtml, .epl, .pl
+\&     .html, .phtml, .ephtml, .epl, .pl, .cgi
 \&  2. The UID of the calling process has to be a valid UID,
 \&     i.e. it has to be found in the systems password file
 \&  3. The UID of the calling process has to match the 
@@ -476,14 +476,135 @@ passed before ePerl actually switches its uid/gid (in this order):
 \&     i.e. it has to be found in the systems group file
 \&  6. The script has to stay below or in the owners homedir
 .Ve
-\fBIF ONLY ONE OF THOSE STEPS FAIL, NO UID/GID SWITCHING TAKES PLACE!\fR
-You can only disable some steps at compile time. See \fIeperl_global.h\fR.
+\fB\s-1IF\s0 \s-1ONLY\s0 \s-1ONE\s0 \s-1OF\s0 \s-1THOSE\s0 \s-1STEPS\s0 \s-1FAIL\s0, \s-1NO\s0 \s-1UID\s0/\s-1GID\s0 \s-1SWITCHING\s0 \s-1TAKES\s0 \s-1PLACE\s0!\fR You can
+only disable some steps at compile time. See \fIeperl_global.h\fR.
+.Sp
+\fBAlso remember that ePerl always eliminates the effective \s-1UID/GID\s0,
+independent of the runtime mode and independent if ePerl has switched to the
+\s-1UID/GID\s0 of the owner. For security reasons, the effective \s-1UID/GID\s0 is always
+destroyed before the script is executed.\fR
+.SH "OPTIONS"
+.IX Header "OPTIONS"
+.Ip "\fB\-d\fR \fIname\fR=\fIvalue\fR" 4
+.IX Item "\fB\-d\fR \fIname\fR=\fIvalue\fR"
+Sets a Perl variable in the package \f(CWmain\fR which can be referenced
+via \f(CW$name\fR or more explicitly via \f(CW$main::name\fR. The command
+.Sp
+.Vb 3
+\&  eperl -d name=value ..
+\&  
+\&is actually equivalent to having
+.Ve
+.Vb 1
+\&  <? $name = value; !>
+.Ve
+at the beginning of \fIinputfile\fR.
+.Ip "\fB\-D\fR \fIname\fR=\fIvalue\fR" 4
+.IX Item "\fB\-D\fR \fIname\fR=\fIvalue\fR"
+Sets a environment variable which can be referenced via \f(CW$ENV{'variable'}\fR
+inside the Perl blocks. The command
+.Sp
+.Vb 3
+\&  eperl -D name=value ..
+\&  
+\&is actually equivalent to 
+.Ve
+.Vb 1
+\&  export name=value; eperl ...
+.Ve
+but the advantage of this option is that it doesn't manipulate the callers
+environment.
+.Ip "\fB\-B\fR \fIbegin_delimiter\fR" 4
+.IX Item "\fB\-B\fR \fIbegin_delimiter\fR"
+Sets the Perl block begin delimiter string. Use this in conjunction with \f(CW-E\fR
+to set different delimiters when using ePerl as an offline \s-1HTML\s0
+creation-language while still using it as an online \s-1HTML\s0 scripting-language.
+Default delimiters are \f(CW<?\fR and \f(CW!>\fR for \s-1CGI\s0 modes and \f(CW<:\fR and
+\f(CW:>\fR for standalone Unix filtering mode.
+.Sp
+There are a lot of possible variations you could choose: \*(L"\f(CW<:\fR\*(R" and
+\*(L"\f(CW:>\fR\*(R" (the default ePerl stand-alone filtering mode delimiters),
+\*(L"\f(CW<?\fR\*(R" and \*(L"\f(CW!>\fR\*(R" (the default ePerl \s-1CGI\s0 interface mode delimiters),
+\*(L"\f(CW<script language='ePerl'>\fR\*(R" and \*(L"\f(CW</script>\fR\*(R" (standard
+\s-1HTML\s0 scripting language style), \*(L"\f(CW<!--#eperl code='\fR\*(R" and \*(L"\f(CW' -->\fR\*(R"
+(NeoScript and \s-1SSI\s0 style) or even \*(L"\f(CW<?\fR\*(R" and \*(L"\f(CW>\fR\*(R" (\s-1PHP/FI\s0 style;
+but this no longer recommended because it can lead to parsing problems. Should
+be used only for backward compatibility to old ePerl versions 1.x).
+.Ip "\fB\-E\fR \fIend_delimiter\fR" 4
+.IX Item "\fB\-E\fR \fIend_delimiter\fR"
+Sets the Perl block end delimiter string. See also option \fB\-B\fR.
+.Ip "\fB\-m\fR \fImode\fR" 4
+.IX Item "\fB\-m\fR \fImode\fR"
+This forces ePerl to act in a specific runtime mode.  See above for a detailed
+description of the three possible modes: Stand-alone filter (\fImode\fR=\f(CWf\fR,
+i.e. option \fB\-mf\fR), \s-1CGI/1\s0.1 interface mode (\fImode\fR=\f(CWc\fR, i.e. option \fB\-mc\fR)
+or the \s-1NPH\s0\-\s-1CGI/1\s0.1 interface mode (\fImode\fR=\f(CWn\fR, i.e. option \fB\-mn\fR).
+.Ip "\fB\-o\fR \fIoutputfile\fR" 4
+.IX Item "\fB\-o\fR \fIoutputfile\fR"
+Forces the output to be written to \fIoutputfile\fR instead of \fIstdout\fR. Use
+this option when using ePerl as a filter. The outputfile ``\fI\-\fR'\*(R' sets stdout
+as the output handle explicitly. Notice that this file is relative to the
+source file directory when the runtime mode is forced to \s-1CGI\s0 or \s-1NPH\s0\-\s-1CGI\s0.
+.Ip "\fB\-k\fR" 4
+.IX Item "\fB\-k\fR"
+Forces ePerl to keep the current working directory from where it was started.
+Per default ePerl will change to the directory where the file to be executed
+stays. This option is useful if you use ePerl as an offline filter on
+a temporary file.
+.Ip "\fB\-x\fR" 4
+.IX Item "\fB\-x\fR"
+This sets debug mode where ePerl outputs the internally created Perl script to
+the console (\fI/dev/tty\fR) before executing it. Only for debugging problems with
+the inputfile conversion.
+.Ip "\fB\-c\fR" 4
+.IX Item "\fB\-c\fR"
+This runs a pure syntax check which is similar to ``\f(CWperl -c\fR'\*(R'.
+.Ip "\fB\-r\fR" 4
+.IX Item "\fB\-r\fR"
+This prints the internal ePerl \s-1README\s0 file to the console.
+.Ip "\fB\-l\fR" 4
+.IX Item "\fB\-l\fR"
+This prints the internal ePerl \s-1LICENSE\s0 file to the console.
+.Ip "\fB\-v\fR" 4
+.IX Item "\fB\-v\fR"
+This prints ePerl version information to the console.
+.Ip "\fB\-V\fR" 4
+.IX Item "\fB\-V\fR"
+Same as option \fB\-v\fR but additionally shows the Perl compilation parameters.
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
-.Ip "\f(CWPATH_TRANSLATED\fR" 5
+.Sh "Used Variables"
+.IX Subsection "Used Variables"
+.Ip "\f(CWPATH_TRANSLATED\fR" 4
 .IX Item "\f(CWPATH_TRANSLATED\fR"
 This \s-1CGI/1\s0.1 variable is used to determine the source file when ePerl operates
 as a \s-1NPH\s0\-\s-1CGI/1\s0.1 program under the environment of a webserver.
+.Sh "Provided Variables"
+.IX Subsection "Provided Variables"
+.Ip "\f(CWSCRIPT_SRC_SIZE\fR" 4
+.IX Item "\f(CWSCRIPT_SRC_SIZE\fR"
+The filesize of the script, in bytes.
+.Ip "\f(CWSCRIPT_SRC_MODIFIED\fR" 4
+.IX Item "\f(CWSCRIPT_SRC_MODIFIED\fR"
+The last modification time of the script, in seconds since 0 hours, 0 minutes,
+0 seconds, January 1, 1970, Coordinated Universal Time.
+.Ip "\f(CWSCRIPT_SRC_MODIFIED_CTIME\fR" 4
+.IX Item "\f(CWSCRIPT_SRC_MODIFIED_CTIME\fR"
+The last modification time of the script, in \fIctime\fR\|(3) format (``\s-1WDAY\s0 \s-1MMM\s0 \s-1DD\s0
+\s-1HH:MM:SS\s0 \s-1YYYY\s0\en'').
+.Ip "\f(CWSCRIPT_SRC_MODIFIED_ISOTIME\fR" 4
+.IX Item "\f(CWSCRIPT_SRC_MODIFIED_ISOTIME\fR"
+The last modification time of the script, in \s-1ISO\s0 format (``\s-1DD\s0\-\s-1MM\s0\-\s-1YYYY\s0
+\s-1HH:MM\s0'').
+.Ip "\f(CWSCRIPT_SRC_OWNER\fR" 4
+.IX Item "\f(CWSCRIPT_SRC_OWNER\fR"
+The username of the script owner.
+.Ip "\f(CWVERSION_INTERPRETER\fR" 4
+.IX Item "\f(CWVERSION_INTERPRETER\fR"
+The ePerl identification string.
+.Ip "\f(CWVERSION_LANGUAGE\fR" 4
+.IX Item "\f(CWVERSION_LANGUAGE\fR"
+The identification string of the used Perl interpreter library.
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 .PP
@@ -491,6 +612,14 @@ as a \s-1NPH\s0\-\s-1CGI/1\s0.1 program under the environment of a webserver.
 \&  Ralf S. Engelschall
 \&  rse@engelschall.com
 \&  www.engelschall.com
+.Ve
+.SH "SEEALSO"
+.IX Header "SEEALSO"
+.PP
+.Vb 3
+\&  ePerl:  http://www.engelschall.com/sw/eperl/
+\&  Perl:   perl(1),  http://www.perl.com/perl/
+\&  Apache: httpd(8), http://www.apache.org/
 .Ve
 
 .rn }` ''

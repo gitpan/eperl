@@ -2,6 +2,61 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.1b8 and 2.1.0
+  -------------------------------
+
+  970426 o removed more obsolete @logfile@ stuff
+         o again revised eperl.pod
+         o !! CHANGED LICENSE !!
+           NOW ePerl IS DISTRIBUTED AT THE TERMS
+           OF EITHER THE GPL OR THE ARTISTIC LICENSE
+           LIKE THE Perl 5.0 INTERPRETER ITSELF
+         o fixed /tmp/x usage in configure
+         o created PORTING file
+         o tested ePerl on various platforms
+         o made seteuid/setegid configureable
+           via GNU autoconf for HP/UX and others
+         o made the include files in eperl_globa.h
+           conditional
+         o made the -O2 conditional for GCC only
+
+  Changes between 2.1b7 and 2.1b8
+  -------------------------------
+
+  970425 o fixed installation manpath
+         o fixed a security hole: the
+           effective uid/gid have to be eliminated
+           independend of mode and uid switching
+         o fixed some typos in eperl.pod
+         o rewritten the NEWS file
+         o renamed the options:
+           -D => -d, -E => -D (more intuitive)
+           -b => -B, -e => -E (prevent conflicts)
+         o fixed the order of command line
+           option descriptions
+         o removed the @logfile@ stuff from Makefile
+
+  Changes between 2.1b6 and 2.1b7
+  -------------------------------
+
+  970425 o fixed error page colors
+         o changed some aux files: NEWS, TODO
+         o added .cgi to allowed extensions
+           for using shebang CGI/ePerl scripts 
+         o added more clear info about shebang
+           to eperl.pod
+         o fixed more bugs in eperl.pod
+         o removed the exit on debug
+         o finished the test suite
+         o slightly fixed the usage output
+         o added support for HEAD requests in
+           case the server does not do it for us
+         o documented provided env variables
+         o created new isotime() function
+           for SCRIPT_SRC_MODIFIED_ISOTIME variable
+         o removed eperl_log.c because this 
+           will be used in later versions only
+
   Changes between 2.1b5 and 2.1b6
   -------------------------------
 

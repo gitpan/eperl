@@ -5,26 +5,26 @@ require "TEST.pl";
 print "1..6\n";
 
 #   setup test files
-$testfile1 = &TEST::tmpfile_with_name("page.html", <<"EOT"
+$testfile1 = &TEST::tmpfile_with_name("page.html", <<"EOT");
 some stuff
 some more stuff
 EOT
-);
-$testfile1b = &TEST::tmpfile(<<"EOT"
+
+$testfile1b = &TEST::tmpfile(<<"EOT");
 Content-Type: text/html
 Content-Length: 27
 
 some stuff
 some more stuff
 EOT
-);
-$testfile2 = &TEST::tmpfile_with_name("page2.html", <<"EOT"
+
+$testfile2 = &TEST::tmpfile_with_name("page2.html", <<"EOT");
 some stuff
 <? print "foo bar"; !>
 some more stuff
 EOT
-);
-$testfile3 = &TEST::tmpfile(<<"EOT"
+
+$testfile3 = &TEST::tmpfile(<<"EOT");
 Content-Type: text/html
 Content-Length: 35
 
@@ -32,7 +32,6 @@ some stuff
 foo bar
 some more stuff
 EOT
-);
 
 #   test for working forced CGI mode
 $tempfile1 = &TEST::tmpfile;
@@ -59,4 +58,5 @@ $rc = &TEST::system("cmp $tempfile3 $testfile3");
 print ($rc == 0 ? "ok\n" : "not ok\n");
 
 #&TEST::cleanup;
+sleep(2);
 

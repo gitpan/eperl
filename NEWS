@@ -1,34 +1,137 @@
 
-  New from ePerl Version 2.0.3 to 2.1b0
-  =====================================
+  Major Changes from ePerl Version 2.0.3 to 2.1.0
+  ===============================================
 
-  o   now compiles and runs out-of-the-box under
-      Solaris, SunOS, HP/UX, FreeBSD and Linux with Perl 5.003 and 5.003_94
+  License:
 
-  o   new runtime modes: FILTER CGI AND NPHCGI
+   o  License changed to GNU General Public License and Artistic License
 
-  o   all builtin: README, LICENSE, VERSION and GIF IMAGES
+      ePerl now is distributed the same way as Perl itself, i.e.  under the
+      terms of the GNU General Public License or the Artistic License from the
+      Perl 5.0 source kit. The more old and more restrictive license was
+      removed.
 
-  o   more IO: can read von stdin and can write through explicit output
+  Runtime Behavior:
 
-  o   shebang support
+   o  Can operate in three runtime modes: FILTER, CGI and NPH-CGI.
 
-  o   begin and end delimiter are variable now
+      ePerl now can operate in three runtime modes: First a real Unix
+      filtering mode (the default when not run from within a webserver
+      environment), second a CGI/1.1 compliant mode which uses the CGI/1.1
+      environment to find the script and generates HTTP header lines. Third a
+      NPH-CGI/1.1 complaint mode which is similar to the plain CGI mode, but
+      here a complete HTTP response is created as a result. 
 
-  o   env and real perl variables can be set via -D and -E
+   o  Can be used as a Shebang (#!) interpreter.
 
-  o   new -k option to keep the cwd
+      ePerl now supports the Unix shebang technique for implicit script
+      interpreter usage via the ``#!/path/to/eperl'' lines preceding the
+      script. These get stripped on output.
 
-  o   now there is a real Unix manpage which describes all
-      neccessary things.
+   o  New CGI security check: Script has to end in hard-coded extensions.
+    
+      A important security check for the CGI and NPH-CGI modes were added. The
+      script has to end in one of the following extensions which are
+      hard-coded into the ePerl executable at compile time:
+      .html, .phtml, .ephtml, .epl, .pl, .cgi
 
-  o   big source code changes, mkproto, no lib.a etc.
-
-  o   now contains a test suite based on the
-      Perl module Test::Harness
+   o  Can switch to UID/GID of script owner.
   
-  o   new feature: now can write a logfile for security reasons
-  o   new feature: setuid switching
-  o   new security checks: file has to end in .phtml
-  o   new security checks: existing uid
+      In CGI and NPH-CGI mode ePerl now can switch to the UID/GID of the
+      script owner in a secure way when running as a setuid program. This is
+      useful because it makes the owners data more secure ( aux files no
+      longer need to be world-readable and temporary files and dirs no longer
+      need to be world-writable!). ePerl tries hard to make both the setuid
+      environment and this transition secure: The transition is only done when
+      various security checks are passed successfully and the setuid
+      environment is always discarded, even when no switching was done. For
+      details in the manpage.
+
+   o  Provides own environment variables to the script.
+
+      ePerl now provides some useful environment variables which can be
+      interpolated via $ENV{'VARIABLE'} in the script. There are variables for
+      the size of the script, the last modification time, the script owner,
+      the ePerl interpreter version and the Perl language version.
+
+  Command Line Options:
+
+   o  ePerl block delimiters adjustable.
+   
+      Now you can set the ePerl block delimiters on the command line. Per
+      default ``<?'' and ``!>'' are set for CGI and NPH-CGI runtime modes,
+      while for the FILTER runtime mode the delimiters now are ``<:'' and
+      ``:>''. This way ePerl can be easily used for instance both as a
+      offline HTML generation language and as a online scripting language.
+      The Website META Language (WML; http://www.engelschall.com/sw/wml) is an
+      example of this usage.
+
+   o  CGI and NPH-CGI modes can be tested offline.
+
+      The runtime mode can be forced on the command line, so one now can test
+      the CGI and NPH-CGI modes offline from the shell.
+
+   o  Optionally keeps the current working directory.
+
+      ePerl usually changes the CWD under runtime to the directory where the
+      executed script resides. This is useful for CGI scripts to be able to
+      use relative paths when accessing aux files). For FILTER mode this is
+      disabled per default. With the command line option one can force this
+      for CGI and NPH-CGI modes, too.
+
+   o  Custom environment and real Perl variables can be set.
+
+      ePerl now provides the -E and -D command line options which can be used
+      to define either environment variables ($ENV{'VARIABLE'}) or real Perl
+      variables ($[main::]VARIABLE) for the script. This is a useful way of
+      sending information to the script when using ePerl in FILTER mode.
+
+   o  Enhanced I/O: Can read/write both from STDIO and external files.
+
+      ePerl now can either read the script to execute from STDIN or external
+      files. And it can write the result either to STDOUT or an explicitly
+      specified file. With this ePerl can be used in all batch processing
+      steps.  
+
+  Documentation:
+
+   o  Unix Manpage was created.
+  
+      Now ePerl has a real Unix manpage which documents the whole
+      functionality of the program: Runtime modes, Command line options,
+      environment variables, etc.
+  
+  Compilation:
+
+   o  Automatically finds latest Perl.
+      Can be forced to use a particular Perl.
+
+      When configuring the ePerl source tree via ``configure'', now the latest
+      Perl on your system is automatically found per default. If this is not
+      what you want you can force the use of a particular Perl via configure
+      option ``--with-perl=/path/to/perl''.
+
+   o  Auxiliary files built-in.
+  
+      Now all auxiliary files get built-in directly into the ``eperl''
+      executable, even the GIF image file which contains the ePerl logo for
+      error messages. This way no filesystem paths or URLs need to be compiled
+      into the ePerl binary. 
+
+   o  Contains a Test::Harness test suite.
+   
+      ePerl now contains a test suite based on the Perl module Test::Harness
+      which can be run after compilation via ``make test'' from to make sure
+      the compiled ePerl binary works correct.
+
+   o  Source code was completely reorganized.
+  
+      The sources of ePerl were completely reorganized in the last months. Now
+      prototypes are automatically generated, the library file was removed,
+      the aux files are converted to C code, etc.
+
+   o  Compiles out-of-the-box on major Unix derivates.
+  
+      ePerl now compiles out-of-the box with Perl 5.003 (EMBED) and 5.003_97
+      (development version) under FreeBSD, Linux, SunOS, Solaris and HP/UX.
 

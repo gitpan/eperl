@@ -29,7 +29,7 @@ foobar<?!>bazquux
 foo bar baz quux
 EOT
 );
-&TEST::system("../eperl -b '<:' -e ':>' $tmpfile1 >$tmpfile2");
+&TEST::system("../eperl -B '<:' -E ':>' $tmpfile1 >$tmpfile2");
 $rc = &TEST::system("cmp $tmpfile2 $tmpfile3");
 print ($rc == 0 ? "ok\n" : "not ok\n");
 

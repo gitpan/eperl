@@ -5,56 +5,30 @@
 **  |  __/  __/  __/ |  | |
 **   \___|_|   \___|_|  |_|
 ** 
-**  ePerl -- Embedded Perl 5 for HTML
+**  ePerl -- Embedded Perl 5 Language
 **
-**  ePerl interprets a HTML markup file bristled with Perl 5 program
-**  statements by expanding the Perl 5 code. It operates as a stand-alone 
-**  NPH-CGI/1.1 compliant Unix program and produces pure HTML markup code 
-**  as the resulting data.
+**  ePerl interprets an ASCII file bristled with Perl 5 program statements
+**  by evaluating the Perl 5 code while passing through the plain ASCII
+**  data. It can operate both as a standard Unix filter for general file
+**  generation tasks and as a powerful Webserver scripting language for
+**  dynamic HTML page programming. 
 **
-**  =====================================================================
+**  ======================================================================
 **
 **  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
-**  
-**  Redistribution and use in source and binary forms, with or without
-**  modification, are permitted provided that the following conditions
-**  are met:
-**  
-**  1. Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer. 
-**  
-**  2. Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**  
-**  3. All advertising materials mentioning features or use of this
-**     software must display the following acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  4. Redistributions of any form whatsoever must retain the following
-**     acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  5. The names "ePerl" and "Embedded Perl 5 for HTML" must not be used to
-**     endorse or promote products derived from this software without
-**     prior written permission.
-**  
-**  THIS SOFTWARE IS PROVIDED BY RALF S. ENGELSCHALL ``AS IS'' AND ANY
-**  EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-**  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-**  ARE DISCLAIMED.  IN NO EVENT SHALL RALF S. ENGELSCHALL OR HIS CONTRIBUTORS
-**  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-**  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-**  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-**  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-**  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-**  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-**  POSSIBILITY OF SUCH DAMAGE.
 **
-**  =====================================================================
+**  This program is free software; it may be redistributed and/or modified
+**  only under the terms of either the Artistic License or the GNU General
+**  Public License, which may be found in the ePerl source distribution.
+**  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
+**  a builtin copy of both license files.
+**
+**  This program is distributed in the hope that it will be useful, but
+**  WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
+**  GNU General Public License or the Artistic License for more details.
+**
+**  ======================================================================
 **
 **  eperl_parse.c -- ePerl parser stuff
 */
@@ -98,7 +72,7 @@ void ePerl_SetError(char *str, ...)
 */
 char *ePerl_GetError(void)
 {
-	return ePerl_ErrorString;
+    return ePerl_ErrorString;
 }
 
 /*
@@ -119,13 +93,13 @@ char *ePerl_fprintf(char *cpOut, char *str, ...)
 */
 char *ePerl_fwrite(char *cpBuf, int nBuf, int cNum, char *cpOut)
 {
-	char *cp;
-	int n;
+    char *cp;
+    int n;
 
-	n = nBuf*cNum;
+    n = nBuf*cNum;
     (void)strncpy(cpOut, cpBuf, n);
-	cp = cpOut + n;
-	*cp = NUL;
+    cp = cpOut + n;
+    *cp = NUL;
     return cp;
 }
 
@@ -188,11 +162,11 @@ char *ePerl_ReadSourceFile(char *filename, char **cpBufC, int *nBufC)
     }
     fseek(fp, 0, SEEK_END);
     nBuf = ftell(fp);
-	if (nBuf == 0) {
+    if (nBuf == 0) {
         cpBuf = (char *)malloc(sizeof(char) * 1);
-		*cpBuf = NUL;
-	}
-	else {
+        *cpBuf = NUL;
+    }
+    else {
         if ((cpBuf = (char *)malloc(sizeof(char) * nBuf+1)) == NULL) {
             ePerl_SetError("Cannot allocate %d bytes of memory", nBuf);
             CU(NULL);
@@ -203,7 +177,7 @@ char *ePerl_ReadSourceFile(char *filename, char **cpBufC, int *nBufC)
             CU(NULL);
         }
         cpBuf[nBuf] = '\0';
-	}
+    }
     *cpBufC = cpBuf;
     *nBufC  = nBuf;
     RETURN_WVAL(cpBuf);
@@ -213,8 +187,8 @@ char *ePerl_ReadSourceFile(char *filename, char **cpBufC, int *nBufC)
         free(cpBuf);
     if (fp)
         fclose(fp);
-	if (usetmp)
-		unlink(tmpfile);
+    if (usetmp)
+        unlink(tmpfile);
     RETURN_EXRC;
 }
 
@@ -274,23 +248,23 @@ char *ePerl_Bristled2Perl(char *cpBuf)
     int mode;
     char *cps2, *cpe2;
     int nBuf;
-	char *cpEND;
-	int n;
+    char *cpEND;
+    int n;
 
-	if (strlen(cpBuf) == 0) {
-		/* make sure we return a buffer which the caller can free() */
+    if (strlen(cpBuf) == 0) {
+        /* make sure we return a buffer which the caller can free() */
         cpOutBuf = (char *)malloc(sizeof(char) * 1);
-		*cpOutBuf = NUL;
-		return cpOutBuf;
-	}
+        *cpOutBuf = NUL;
+        return cpOutBuf;
+    }
 
     nBuf = strlen(cpBuf);
-	cpEND = cpBuf+nBuf;
+    cpEND = cpBuf+nBuf;
 
     /* allocate memory for the Perl code */
     n = sizeof(char) * nBuf * 10;
-	if (nBuf < 1024)
-		n = 16384;
+    if (nBuf < 1024)
+        n = 16384;
     if ((cpOutBuf = (char *)malloc(n)) == NULL) {
         ePerl_SetError("Cannot allocate %d bytes of memory", n);
         CU(NULL);
@@ -438,7 +412,7 @@ int ePerl_HeadersExists(char *cpBuf)
 
 void ePerl_StripHTTPHeaders(char **cpBuf, int *nBuf)
 {
-	return;
+    return;
 }
 
 

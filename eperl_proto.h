@@ -125,6 +125,7 @@ extern void remove_mytmpfiles P_((void));
 extern char *strnchr P_((char *buf, char chr, int n));
 extern char *strnstr P_((char *buf, char *str, int n));
 extern char *strndup P_((char *buf, int n));
+extern char *isotime P_((time_t *t));
 
 /* eperl_http.c */
 extern void PrintHTTPResponse P_((void));
@@ -142,9 +143,6 @@ extern int opterrfd;
 extern char *optarg;
 extern char *optstart;
 extern int egetopt P_((int nargc, char **nargv, char *ostr));
-
-/* eperl_log.c */
-extern void Log P_((char *fmtstr, ...));
 
 /* eperl_debug.c */
 extern int fDebug;

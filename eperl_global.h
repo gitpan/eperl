@@ -5,80 +5,142 @@
 **  |  __/  __/  __/ |  | |
 **   \___|_|   \___|_|  |_|
 ** 
-**  ePerl -- Embedded Perl 5 for HTML
+**  ePerl -- Embedded Perl 5 Language
 **
-**  ePerl interprets a HTML markup file bristled with Perl 5 program
-**  statements by expanding the Perl 5 code. It can operate both as a 
-**  stand-alone CGI/1.1 compliant program or as a integrated API module
-**  for the Apache webserver. The resulting data is pure HTML markup code.
-** 
-**  =====================================================================
+**  ePerl interprets an ASCII file bristled with Perl 5 program statements
+**  by evaluating the Perl 5 code while passing through the plain ASCII
+**  data. It can operate both as a standard Unix filter for general file
+**  generation tasks and as a powerful Webserver scripting language for
+**  dynamic HTML page programming. 
+**
+**  ======================================================================
 **
 **  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
-**  
-**  Redistribution and use in source and binary forms, with or without
-**  modification, are permitted provided that the following conditions
-**  are met:
-**  
-**  1. Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer. 
-**  
-**  2. Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**  
-**  3. All advertising materials mentioning features or use of this
-**     software must display the following acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  4. Redistributions of any form whatsoever must retain the following
-**     acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  5. The names "ePerl" and "Embedded Perl 5 for HTML" must not be used to
-**     endorse or promote products derived from this software without
-**     prior written permission.
-**  
-**  THIS SOFTWARE IS PROVIDED BY RALF S. ENGELSCHALL ``AS IS'' AND ANY
-**  EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-**  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-**  ARE DISCLAIMED.  IN NO EVENT SHALL RALF S. ENGELSCHALL OR HIS CONTRIBUTORS
-**  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-**  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-**  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-**  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-**  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-**  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-**  POSSIBILITY OF SUCH DAMAGE.
 **
-**  =====================================================================
+**  This program is free software; it may be redistributed and/or modified
+**  only under the terms of either the Artistic License or the GNU General
+**  Public License, which may be found in the ePerl source distribution.
+**  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
+**  a builtin copy of both license files.
+**
+**  This program is distributed in the hope that it will be useful, but
+**  WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
+**  GNU General Public License or the Artistic License for more details.
+**
+**  ======================================================================
 **
 **  eperl_global.h -- ePerl global header file
 */
 #ifndef EPERL_GLOBAL_H
 #define EPERL_GLOBAL_H 1
 
-/* from the Unix system */
-#include <stdio.h>                          
-#include <stdarg.h>                          
-#include <stdlib.h>                          
-#include <string.h>                          
-#include <ctype.h>
-#include <unistd.h>                          
-#include <time.h>                          
-#include <signal.h>                          
-#include <pwd.h>                          
-#include <grp.h>                          
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/param.h>
-
 /* from our own */
 #include "config_ac.h"
 #include "config_sc.h"
+
+/* from the Unix system */
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+#ifdef HAVE_STDARG_H
+#include <stdarg.h> 
+#else
+#include <varargs.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
+#ifdef HAVE_GRP_H
+#include <grp.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+
+#ifdef SUNOS_LIB_PROTOTYPES
+/* Prototypes needed to get a clean compile with gcc -Wall.
+ * Believe it or not, these do have to be declared, at least on SunOS,
+ * because they aren't mentioned in the relevant system headers.
+ * Sun Quality Software.  Gotta love it.
+ */
+
+int getopt (int, char **, char *);
+
+int strcasecmp (char *, char *);
+int strncasecmp (char *, char *, int);
+int toupper(int);
+int tolower(int);     
+     
+int printf (char *, ...);     
+int fprintf (FILE *, char *, ...);
+int fputs (char *, FILE *);
+int fread (char *, int, int, FILE *);     
+int fwrite (char *, int, int, FILE *);     
+int fflush (FILE *);
+int fclose (FILE *);
+int ungetc (int, FILE *);
+int _filbuf (FILE *);       /* !!! */
+int _flsbuf (unsigned char, FILE *); /* !!! */
+int sscanf (char *, char *, ...);
+void setbuf (FILE *, char *);
+void perror (char *);
+     
+time_t time (time_t *);
+int strftime (char *, int, char *, struct tm *);
+     
+int initgroups (char *, int);     
+int wait3 (int *, int, void*);  /* Close enough for us... */
+int lstat (const char *, struct stat *);
+int stat (const char *, struct stat *);     
+int flock (int, int);
+#ifndef NO_KILLPG
+int killpg(int, int);
+#endif
+int socket (int, int, int);     
+int setsockopt (int, int, int, const char*, int);
+int listen (int, int);     
+int bind (int, struct sockaddr *, int);     
+int connect (int, struct sockaddr *, int);
+int accept (int, struct sockaddr *, int *);
+int shutdown (int, int);     
+
+int getsockname (int s, struct sockaddr *name, int *namelen);
+int getpeername (int s, struct sockaddr *name, int *namelen);
+int gethostname (char *name, int namelen);     
+void syslog (int, char *, ...);
+char *mktemp (char *);
+     
+long vfprintf (FILE *, char *, va_list);
+char *vsprintf (char *, char *, va_list);
+     
+#endif
 
 /* debugging! */
 #ifdef DEBUG_ENABLED
@@ -87,49 +149,6 @@
 #include <dmalloc.h>
 #endif
 #endif
-
-
-/*
-**
-**  The ePerl block delimiters
-**
-*/
-
-#define BEGIN_DELIMITER_FILTER "<:"
-#define   END_DELIMITER_FILTER ":>"
-#define BEGIN_DELIMITER_CGI    "<?"
-#define   END_DELIMITER_CGI    "!>"
-
-
-/*
-**
-**  Security
-**
-*/
-
-/* General security for CGI modes */
-#define CGI_NEEDS_ALLOWED_FILE_EXT       TRUE
-
-/* SetUID security for CGI modes */
-#define SETUID_NEEDS_VALID_CALLER_UID    TRUE
-#define SETUID_NEEDS_ALLOWED_CALLER_UID  TRUE
-#define SETUID_NEEDS_VALID_OWNER_UID     TRUE
-#define SETUID_NEEDS_VALID_OWNER_GID     TRUE
-#define SETUID_NEEDS_BELOW_OWNER_HOME    TRUE
-
-#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".ephtml", ".epl", ".pl", NULL };
-#define LIST_OF_ALLOWED_CALLER_UID       { "nobody", "root", NULL }
-
-/*
-**
-**  The ePerl runtime mode
-**
-*/
-
-#define MODE_UNKNOWN    1
-#define MODE_FILTER     2
-#define MODE_CGI        4
-#define MODE_NPHCGI     8
 
 
 /*
@@ -231,6 +250,16 @@
 
 /*
 **
+**  NULL
+**
+*/
+#ifndef NULL
+#define NULL (void *)0
+#endif
+
+
+/*
+**
 **  Boolean Values -- defined in a general and portable way
 **
 */
@@ -257,63 +286,48 @@
 #define NONE  FALSE
 
 
-#ifdef SUNOS_LIB_PROTOTYPES
-/* Prototypes needed to get a clean compile with gcc -Wall.
- * Believe it or not, these do have to be declared, at least on SunOS,
- * because they aren't mentioned in the relevant system headers.
- * Sun Quality Software.  Gotta love it.
- */
+/*
+**
+**  The ePerl block delimiters
+**
+*/
 
-int getopt (int, char **, char *);
+#define BEGIN_DELIMITER_FILTER "<:"
+#define   END_DELIMITER_FILTER ":>"
+#define BEGIN_DELIMITER_CGI    "<?"
+#define   END_DELIMITER_CGI    "!>"
 
-int strcasecmp (char *, char *);
-int strncasecmp (char *, char *, int);
-int toupper(int);
-int tolower(int);     
-     
-int printf (char *, ...);     
-int fprintf (FILE *, char *, ...);
-int fputs (char *, FILE *);
-int fread (char *, int, int, FILE *);     
-int fwrite (char *, int, int, FILE *);     
-int fflush (FILE *);
-int fclose (FILE *);
-int ungetc (int, FILE *);
-int _filbuf (FILE *);		/* !!! */
-int _flsbuf (unsigned char, FILE *); /* !!! */
-int sscanf (char *, char *, ...);
-void setbuf (FILE *, char *);
-void perror (char *);
-     
-time_t time (time_t *);
-int strftime (char *, int, char *, struct tm *);
-     
-int initgroups (char *, int);     
-int wait3 (int *, int, void*);	/* Close enough for us... */
-int lstat (const char *, struct stat *);
-int stat (const char *, struct stat *);     
-int flock (int, int);
-#ifndef NO_KILLPG
-int killpg(int, int);
-#endif
-int socket (int, int, int);     
-int setsockopt (int, int, int, const char*, int);
-int listen (int, int);     
-int bind (int, struct sockaddr *, int);     
-int connect (int, struct sockaddr *, int);
-int accept (int, struct sockaddr *, int *);
-int shutdown (int, int);     
 
-int getsockname (int s, struct sockaddr *name, int *namelen);
-int getpeername (int s, struct sockaddr *name, int *namelen);
-int gethostname (char *name, int namelen);     
-void syslog (int, char *, ...);
-char *mktemp (char *);
-     
-long vfprintf (FILE *, char *, va_list);
-char *vsprintf (char *, char *, va_list);
-     
-#endif
+/*
+**
+**  Security
+**
+*/
+
+/* General security for CGI modes */
+#define CGI_NEEDS_ALLOWED_FILE_EXT       TRUE
+
+/* SetUID security for CGI modes */
+#define SETUID_NEEDS_VALID_CALLER_UID    TRUE
+#define SETUID_NEEDS_ALLOWED_CALLER_UID  TRUE
+#define SETUID_NEEDS_VALID_OWNER_UID     TRUE
+#define SETUID_NEEDS_VALID_OWNER_GID     TRUE
+#define SETUID_NEEDS_BELOW_OWNER_HOME    TRUE
+
+#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".ephtml", ".epl", ".pl", ".cgi", NULL };
+#define LIST_OF_ALLOWED_CALLER_UID       { "nobody", "root", NULL }
+
+/*
+**
+**  The ePerl runtime mode
+**
+*/
+
+#define MODE_UNKNOWN    1
+#define MODE_FILTER     2
+#define MODE_CGI        4
+#define MODE_NPHCGI     8
+
 
 #endif /* EPERL_GLOBAL_H */
 /*EOF*/

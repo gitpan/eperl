@@ -1,29 +1,34 @@
 
   I N S T A L L A T I O N
 
-  1. Make sure you have Perl 5.003 or higher already
-     installed on your system. The perl program should be in your path. If you
-     have different perl binaries in your path the program with the latest
-     version number will be used.
+  1. Make sure you have Perl 5.003 (compiled with -DEMBED) or higher (5.003_XX
+     is ok, too) already installed on your system. The perl program should be
+     in your path. If you have different perl binaries in your path the
+     program with the latest version number will be used.  Additionally you
+     need a real ANSI C compiler like GCC to compile ePerl.
 
-  2. Compile the ePerl interpreter
+  2. Configure the ePerl sources for compilation
   
-     $ ./configure --prefix=/path/to/eperl/root
+     $ ./configure --prefix=/path/to/eperl/root 
+                  [--with-perl=/path/to/preferred/perl]
+
+  3. Compile the ePerl interpreter
+
      $ make
 
-  3. Optionally you can run a test suite now
+  4. Optionally you can run a test suite now
 
      $ make test
 
-  3. Install it into /path/to/eperl/root/{bin,man}
+  5. Finally install it into /path/to/eperl/root/{bin,man}/
    
      $ make install
 
-  4. Aditionally install it into your HTTP Server
+  6. Aditionally install it into your HTTP Server
   
      $ cp eperl /path/to/apache/cgi-bin/nph-eperl
 
-     When you also want UID-switching, you have to enable the setuid bit:
+     When you also want UID/GID-switching, you have to set the setuid bit:
 
      $ chown root /path/to/apache/cgi-bin/nph-eperl
      $ chmod u+s  /path/to/apache/cgi-bin/nph-eperl

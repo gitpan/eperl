@@ -43,7 +43,7 @@ print ($rc == 0 ? "ok\n" : "not ok\n");
 
 #   test if filter mode actually works for embedded Perl 5 blocks
 $tempfile3 = &TEST::tmpfile;
-&TEST::system("../eperl -b '<:' -e ':>' $testfile2 >$tempfile3");
+&TEST::system("../eperl -B '<:' -E ':>' $testfile2 >$tempfile3");
 $rc = &TEST::system("cmp $tempfile3 $testfile3");
 print ($rc == 0 ? "ok\n" : "not ok\n");
 

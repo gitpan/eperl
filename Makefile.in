@@ -11,8 +11,8 @@
 CC      = @CC@
 AR      = @AR@
 RANLIB  = @RANLIB@
-CFLAGS  = -I. @CFLAGS@ 
-LDFLAGS = -L. @LDFLAGS@
+CFLAGS  = @CFLAGS@ -I.
+LDFLAGS = @LDFLAGS@ -L.
 debug   = @debug@
 dmalloc = @dmalloc@
 
@@ -27,8 +27,7 @@ prefix          = @prefix@
 exec_prefix     = @exec_prefix@
 bindir          = @bindir@
 libdir          = @libdir@
-mandir          = ${exec_prefix}/man
-logfile         = @logfile@
+mandir          = @mandir@
 
 #   Perl 5 language
 perlprog      = @perlprog@
@@ -70,7 +69,7 @@ _GETDISTINFO = \
 
 _BUILDDIST = \
     echo "Creating tarball..."; \
-    tar cvf - * |\
+    gtar --no-recursion -cvf - `find * -depth -print | sort` |\
     tardy --user_number=1000  --user_name=rse \
           --group_number=1000 --group_name=en \
           --prefix=$${_distname} - |\
@@ -135,7 +134,6 @@ PROTO_SRCS = \
  eperl_sys.c \
  eperl_http.c \
  eperl_getopt.c \
- eperl_log.c \
  eperl_debug.c \
  eperl_version.c \
  eperl_readme.c \
@@ -149,7 +147,6 @@ SRCS = \
  eperl_sys.c \
  eperl_http.c \
  eperl_getopt.c \
- eperl_log.c \
  eperl_debug.c \
  eperl_version.c \
  eperl_readme.c \
@@ -163,7 +160,6 @@ OBJS = \
  eperl_sys.o \
  eperl_http.o \
  eperl_getopt.o \
- eperl_log.o \
  eperl_debug.o \
  eperl_version.o \
  eperl_readme.o \
@@ -173,8 +169,9 @@ OBJS = \
 eperl: $(OBJS)
 	$(CC) $(CFLAGS) $(perlccdlflags) -o eperl $(OBJS) $(LDFLAGS) $(dmalloc) $(perldla) $(perlldflags)
 	@if [ "x$(debug)" = xoff ]; then \
-		strip eperl; ls -l eperl; size eperl; \
+		strip eperl; \
 	fi
+	@ls -l eperl; size eperl
 
 eperl_main.o: eperl_main.c
 	$(CC) $(CFLAGS) $(perlccflags) -c eperl_main.c
@@ -184,9 +181,6 @@ eperl_getopt.o: eperl_getopt.c
 
 eperl_parse.o: eperl_parse.c
 	$(CC) $(CFLAGS) -c eperl_parse.c
-
-eperl_log.o: eperl_log.c
-	$(CC) $(CFLAGS) -c eperl_log.c
 
 eperl_sys.o: eperl_sys.c
 	$(CC) $(CFLAGS) -c eperl_sys.c
@@ -209,8 +203,15 @@ eperl_readme.c: README
 eperl_readme.o: eperl_readme.c
 	$(CC) $(CFLAGS) -c eperl_readme.c
 
-eperl_license.c: LICENSE
+eperl_license.c: ARTISTIC COPYING
+	(\
+	 echo "--File: COPYING-------------------------------------"; \
+	 cat COPYING; \
+	 echo "--File: ARTISTIC------------------------------------"; \
+	 cat ARTISTIC; \
+	) >LICENSE
 	./etc/asc2c LICENSE eperl_license ePerl_LICENSE
+	rm -f LICENSE
 
 eperl_license.o: eperl_license.c
 	$(CC) $(CFLAGS) -c eperl_license.c
@@ -258,10 +259,6 @@ install: all
 	$(MKDIR) $(mandir)
 	$(INSTALL_PROGRAM) eperl $(bindir)/eperl
 	$(INSTALL_DATA) eperl.1 $(mandir)/eperl.1
-	@if [ "x$(logfile)" != x ]; then \
-		echo "$(MKDIR) `echo $(logfile) | sed -e 's%[^/]*$$%%'`; touch $(logfile)"; \
-		$(MKDIR) `echo $(logfile) | sed -e 's%[^/]*$$%%'`; touch $(logfile); \
-	fi
 
 # ------------------------------------------------
 #   CLEANUP
