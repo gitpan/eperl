@@ -57,8 +57,10 @@ do-install:
 		${PREFIX}/share/examples/eperl/demo.cgipm.phtml
 	${INSTALL_DATA} ${WRKSRC}/eg/demo.env.phtml \
 		${PREFIX}/share/examples/eperl/demo.env.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.error.phtml \
-		${PREFIX}/share/examples/eperl/demo.error.phtml
+	${INSTALL_DATA} ${WRKSRC}/eg/demo.errout.phtml \
+		${PREFIX}/share/examples/eperl/demo.errout.phtml
+	${INSTALL_DATA} ${WRKSRC}/eg/demo.errsyn.phtml \
+		${PREFIX}/share/examples/eperl/demo.errsyn.phtml
 	${INSTALL_DATA} ${WRKSRC}/eg/demo.func.phtml \
 		${PREFIX}/share/examples/eperl/demo.func.phtml
 	${INSTALL_DATA} ${WRKSRC}/eg/demo.html.phtml \

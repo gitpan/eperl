@@ -9,6 +9,13 @@ use Config;
 $perl = $Config{bin} . "/perl";
 $args = join(' ', @ARGV);
 
+$cc = $Config{cc};
+$ccarg = "";
+if ($args =~ m|CC=(\S+)|) {
+	$cc = $1;
+	$ccarg = "CC=$1 ";
+}
+
 unlink("Makefile");
 unlink("Makefile.stand");
 
@@ -18,16 +25,18 @@ print MK <<"EOT";
 all:
 	\@if [ ! -f Makefile.stand ]; then \\
 	    cp Makefile Makefile.perl; \\
-		echo "./configure"; \\
-	    ./configure --with-perl=$perl; \\
+		echo "${ccarg}./configure --with-perl=$perl"; \\
+	    ${ccarg}./configure --with-perl=$perl; \\
 	    mv Makefile Makefile.stand; \\
 	    cp Makefile.perl Makefile; \\
 		rm Makefile.perl; \\
 	fi
 	@\$(MAKE) -f Makefile.stand libeperl.a
 	\@if [ ! -f mod/Makefile ]; then \\
+	    echo "cd mod && $perl Makefile.PL $args"; \\
 	    cd mod && $perl Makefile.PL $args; \\
-		sed -e '/^\trm -f */d' <Makefile >Makefile.n && mv Makefile.n Makefile; \\
+		    sed -e '/^\trm -f */d' <Makefile >Makefile.n && mv Makefile.n Makefile; \\
+		    sed -e 's,^CC = .*,CC = $cc,' <Parse/Makefile >Parse/Makefile.n && mv Parse/Makefile.n Parse/Makefile; \\
 	fi
 	cd mod && \$(MAKE) \$(MFLAGS)
 
@@ -50,8 +59,8 @@ clean:
 distclean:
 	cd mod && \$(MAKE) \$(MFLAGS) distclean
 	\$(MAKE) -f Makefile.stand distclean
-	rm -f Makefile.stand
-	rm -f Makefile
+	-rm -f Makefile.stand
+	-rm -f Makefile
 
 EOT
 close(MK);

@@ -2,6 +2,11 @@
   Known Bugs in ePerl
   ===================
 
+  o  Under BSD/OS 2.1 and 3.0 there is no real support
+     for dynamic loading of objects. Perl does some tricks
+     to achieve it which ePerl has to emulate but still
+     doesn't.
+
   o  When using
 
      - ePerl as a server-side scripting language

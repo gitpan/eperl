@@ -93,7 +93,7 @@
 .nr % 0
 .rr F
 .\}
-.TH EPERL 1 "EN" "18/Jul/97" "Ralf S. Engelschall"
+.TH EPERL 1 "EN" "14/Aug/97" "Ralf S. Engelschall"
 .IX Title "EPERL 1"
 .UC
 .IX Name "ePerl - Embedded Perl 5 Language"
@@ -194,7 +194,7 @@
 ePerl \- Embedded Perl 5 Language
 .SH "VERSION"
 .IX Header "VERSION"
-2.2.0 (18-07-1997)
+2.2.2 (14-08-1997)
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \fBeperl\fR
@@ -422,9 +422,9 @@ escape it in any way.
 .Ip "\fI8. \s-1HTML\s0 entity conversion.\fR" 4
 .IX Item "\fI8. \s-1HTML\s0 entity conversion.\fR"
 Because one of ePerl's usage is as a server-side scripting-language for \s-1HTML\s0
-pages, there is common problem in conjunction with \s-1HTML\s0 editors.  They cannot
-know ePerl blocks, so when you enter those blocks inside the editors they
-usually encode some characters with the corresponding \s-1HTML\s0 entities. The
+pages, there is a common problem in conjunction with \s-1HTML\s0 editors.  They
+cannot know ePerl blocks, so when you enter those blocks inside the editors
+they usually encode some characters with the corresponding \s-1HTML\s0 entities. The
 problem is that this encoding leads to invalid Perl code. ePerl provides the
 option \fB\-C\fR for decoding these entities which is automatically turned on in
 \s-1CGI\s0 modes. See description below under option \fB\-C\fR for more details.
@@ -497,7 +497,7 @@ See \fIParse::ePerl\fR\|(3) for more details.
 This is the runtime mode where ePerl uses the \s-1CGI/1\s0.1 interface of a webserver
 when used as a \fIServer-Side Scripting Language\fR on the Web. ePerl enters this
 mode automatically when the \s-1CGI/1\s0.1 environment variable \f(CWPATH_TRANSLATED\fR is
-set and the scripts filename does \fInot\fR begin with the \s-1NPH\s0 prefix
+set and its or the scripts filename does \fInot\fR begin with the \s-1NPH\s0 prefix
 ``\fInph-\fR'\*(R'.  In this runtime mode it prefixes the resulting data with
 \s-1HTTP/1\s0.0 (default) or \s-1HTTP/1\s0.1 (if identified by the webserver) compliant
 response header lines.
@@ -512,7 +512,7 @@ generated data, i.e. for instance you can generate your own \s-1HTTP\s0 headers 
 \&   <html>
 \&   ...
 .Ve
-But notice that while you can output arbitrary headers, all webservers
+But notice that while you can output arbitrary headers, most webservers
 restrict the headers which are accepted via the \s-1CGI/1\s0.1 interface. Usually you
 can provide only a few specific \s-1HTTP\s0 headers like \f(CWLocation\fR or \f(CWStatus\fR.
 If you need more control you have to use the \s-1NPH\s0\-\s-1CGI/1\s0.1 interface mode.
@@ -550,8 +550,8 @@ the following line to your \fIhttpd.conf\fR file:
 \&  AddHandler cgi-script .cgi
 .Ve
 Now you can use \fIfile.cgi\fR instead of \fIfile.html\fR and make advantage of the
-achieved programming capability by bristling \fIfile.cgi\fR with wanted Perl
-blocks (or the transformation into a \s-1CGI\s0 script was useless).
+achieved programming capability by bristling \fIfile.cgi\fR with your Perl
+blocks (or the transformation into a \s-1CGI\s0 script would be useless).
 .Sp
 Alternatively (or even additionally) a webmaster can enable ePerl support in a
 more seemless way by configuring ePerl as a real implicit server-side
@@ -975,10 +975,14 @@ The ePerl identification string.
 The identification string of the used Perl interpreter library.
 .Sh "Provided Built-In Images"
 .IX Subsection "Provided Built-In Images"
+The following built-in images can be accessed via \s-1URL\s0
+\f(CW/url/to/nph-eperl/\fR\fI\s-1NAME\s0\fR\f(CW.gif\fR:
 .Ip "\f(CWlogo.gif\fR" 4
 .IX Item "\f(CWlogo.gif\fR"
+The standard ePerl logo. Please do not include this one on your website.
 .Ip "\f(CWpowered.gif\fR" 4
 .IX Item "\f(CWpowered.gif\fR"
+The ``\fIpowered by ePerl 2.2\fR'\*(R' logo. Feel free to use this on your website.
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 .PP

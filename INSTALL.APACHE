@@ -102,12 +102,23 @@
 
      PerlModule Apache::ePerl
      <Files ~ "/root/of/webmaster/area/.+\.iphtml$">
-         SetHandler perl-script
-         PerlHandler Apache::ePerl::handler
+         SetHandler  perl-script
+         PerlHandler Apache::ePerl
      </Files>
 
      This forces all files under /root/of/webmaster/area/ with extension
      .iphtml to be processed by the Apache::ePerl::handler function which
      emulates the runtime behavior of the stand-alone "eperl" program (when
      run as a SSSL) up to 90%.
+     
+     If you're not paranoid about security (for instance driving a stand-alone
+     webserver without user accounts) you can also just use
+
+     PerlModule Apache::ePerl
+     <Files ~ ".+\.iphtml$">
+         SetHandler  perl-script
+         PerlHandler Apache::ePerl
+     </Files>
+
+     which enabled .iphtml files everywhere.
 

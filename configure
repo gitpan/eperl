@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # From configure.in Revision: 2.0
-echo "Configuring for ePerl `./etc/newvers -l c -d eperl_version.c`"
+echo "Configuring for ePerl `./etc/newvers -l c -D eperl_version.c`"
 
 ac_aux_dir=
 for ac_dir in etc $srcdir/etc; do
@@ -38,7 +38,7 @@ ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_default_prefix=/usr/local
 ac_help="$ac_help
-  --with-perl             force the usage of a specific installed Perl"
+  --with-perl=PATH        force the usage of a specific installed Perl"
 ac_help="$ac_help
   --enable-debug          to enable the debugging options for compilation"
 ac_help="$ac_help
@@ -570,7 +570,7 @@ touch $TMPFILE
 c=0
 for dir in `echo $PATH | sed -e 's/:/ /g'` /tmp; do
     for perl in perl5 perl miniperl; do
-         if test -f "$dir/$perl"; then
+         if test -x "$dir/$perl"; then
              perl="$dir/$perl"
              version=`$perl -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
              versionnum="`echo $version | sed -e 's/\.//g' -e 's/_//g'`"
@@ -1812,6 +1812,12 @@ rm -f $ac_uvar_editfile
 
 fi
 
+
+eval libdir=$libdir
+case $libdir in
+    *eperl* ) ;;
+          * ) libdir="${exec_prefix}/lib/eperl" ;;
+esac
 
 
 echo "$ac_t""" 1>&6

@@ -72,40 +72,6 @@ void Perl5_ForceUnbufferedStdout(void)
 
 /*
 **
-**  eval a Perl command
-**
-**  We provide an own copy of the new perl_eval_pv() function
-**  which was first introduced in Perl 5.003_97e, so its
-**  missing in older Perl versions, for instance plain old 5.003.
-**  The above code was copied from perl5.004/perl.c
-**
-*/
-
-SV* Perl5_eval_pv(char* p, I32 croak_on_error)
-{
-    dSP;
-    SV* sv = newSVpv(p, 0);
-
-    PUSHMARK(sp);
-    perl_eval_sv(sv, G_SCALAR);
-    SvREFCNT_dec(sv);
-    SPAGAIN;
-    sv = POPs;
-    PUTBACK;
-    if (croak_on_error && SvTRUE(GvSV(errgv)))
-        croak(SvPVx(GvSV(errgv), na));
-    return sv;
-}
-
-void Perl5_EvalCmd(char *cmd)
-{
-    (void)Perl5_eval_pv(cmd, FALSE);
-    return;
-}
-
-
-/*
-**
 **  set a Perl environment variable
 **
 */
@@ -127,10 +93,11 @@ char **Perl5_SetEnvVar(char **env, char *str)
 */
 void Perl5_SetScalar(char *pname, char *vname, char *vvalue)
 {
-    char ca[1024];
-
-    sprintf(ca, "%s::%s", pname, vname);
-    sv_setpv(perl_get_sv(ca, TRUE), vvalue);
+    ENTER;
+    save_hptr(&curstash); 
+    curstash = gv_stashpv(pname, TRUE);
+    sv_setpv(perl_get_sv(vname, TRUE), vvalue);
+    LEAVE;
     return;
 }
 
@@ -196,13 +163,10 @@ void Perl5_RememberINC(char *str)
 
 void Perl5_SetRememberedINC(void) 
 {
-    char ca[1024];
     int i;
 
-    for (i = 0; Perl5_RememberedINC[i] != NULL; i++) {
-        sprintf(ca, "push(@INC, '%s');", Perl5_RememberedINC[i]);
-        Perl5_EvalCmd(ca);
-    }
+    for (i = 0; Perl5_RememberedINC[i] != NULL; i++)
+        av_push(GvAV(incgv), newSVpv(Perl5_RememberedINC[i],0));
 }
 
 

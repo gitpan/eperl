@@ -1,27 +1,48 @@
+##        ____           _ 
+##    ___|  _ \ ___ _ __| |
+##   / _ \ |_) / _ \ '__| |
+##  |  __/  __/  __/ |  | |
+##   \___|_|   \___|_|  |_|
+## 
+##  ePerl -- Embedded Perl 5 Language
 ##
-##  ePerl.pm -- mod_perl handler for fast emulated ePerl facility
-##  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
+##  ePerl interprets an ASCII file bristled with Perl 5 program statements
+##  by evaluating the Perl 5 code while passing through the plain ASCII
+##  data. It can operate both as a standard Unix filter for general file
+##  generation tasks and as a powerful Webserver scripting language for
+##  dynamic HTML page programming. 
+##
+##  ======================================================================
+##
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
+##
+##  This program is free software; it may be redistributed and/or modified
+##  only under the terms of either the Artistic License or the GNU General
+##  Public License, which may be found in the ePerl source distribution.
+##  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
+##  a built-in copy of both license files.
+##
+##  This program is distributed in the hope that it will be useful, but
+##  WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
+##  Artistic License or the GNU General Public License for more details.
+##
+##  ======================================================================
+##
+##  ePerl.pm -- Apache/mod_perl handler for fast emulated ePerl facility
 ##
 
 package Apache::ePerl;
 
+
 #   requirements and runtime behaviour
 require 5.00325;
 use strict;
-use Carp;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
+use vars qw($VERSION);
 use vars qw($nDone $nOk $nFail $Cache);
 
-#   private version number
-$VERSION = "2.2.0";
-
-#   globals
-$nDone = 0;
-$nOk   = 0;
-$nFail = 0;
-$Cache = {};
-
-#   import of used modules
+#   imports
+use Carp;
 use Apache;
 use Apache::Debug;
 use Apache::Constants;
@@ -29,6 +50,19 @@ use FileHandle;
 use File::Basename qw(dirname);
 use Parse::ePerl;
 
+#   private version number
+$VERSION = "2.2.2";
+
+#   globals
+$nDone = 0;
+$nOk   = 0;
+$nFail = 0;
+$Cache = {};
+
+
+#
+#   send HTML error page
+#
 sub send_errorpage {
     my ($r, $e) = @_;
 
@@ -37,14 +71,10 @@ sub send_errorpage {
     $r->print(
         "<html>\n" .
         "<head>\n" .
-        "<title>\n" .
-        "Apache::ePerl ERROR\n" .
-        "</title>\n" .
+        "<title>Apache::ePerl ERROR</title>\n" .
         "</head>\n" .
         "<body>\n" .
-        "<h1>\n" .
-        "Apache::ePerl ERROR\n" .
-        "</h1>\n" .
+        "<h1>Apache::ePerl ERROR</h1>\n" .
         "<pre>$e</pre>\n" .
         "</body>\n" .
         "</html>\n"
@@ -52,11 +82,13 @@ sub send_errorpage {
     $r->log_reason("Apache::ePerl: $e", $r->filename);
 }
 
+#
 #   the mod_perl handler
+#
 sub handler {
     my ($r) = @_;
     my ($filename, $data, $error, $fh);
-    my (%env, $rc, $mtime);
+    my (%env, $rc, $mtime, $header, $key, $value);
 
     $nDone++;
     
@@ -103,10 +135,11 @@ sub handler {
         #   translate the script from bristled 
         #   ePerl format to plain Perl format
         if (not Parse::ePerl::Translate({
-            Script         => $data,
-            BeginDelimiter => '<?',
-            EndDelimiter   => '!>',
-            Result         => \$data,
+            Script          => $data,
+            BeginDelimiter  => '<?',
+            EndDelimiter    => '!>',
+            ConvertEntities => 1,
+            Result          => \$data,
         })) {
             &send_errorpage($r, "Error on translating script from bristled to plain format");
             $nFail++;
@@ -118,6 +151,7 @@ sub handler {
         if (not Parse::ePerl::Precompile({
             Script => $data,
             Name   => $filename, 
+            Cwd    => dirname($filename),
             Result => \$data,
             Error  => \$error,
         })) {
@@ -147,10 +181,26 @@ sub handler {
         return OK;
     }
 
+    #   generate headers
+    if ($data =~ m|^([A-Za-z0-9-]+:\s.+?)\n\n(.+)$|s) {
+        ($header, $data) = ($1, $2);
+
+        $r->content_type("text/html");
+        $r->cgi_header_out("Content-Length", length($data));
+        
+        while ($header =~ m|^([A-Za-z0-9-]+):\s+(.+?)\s*\n(.+)$|) {
+            ($key, $value, $header) = ($1, $2, $3);
+            $r->cgi_header_out($key, $value);
+        }
+    }
+    else {
+        $r->content_type("text/html");
+        $r->cgi_header_out("Content-Length", length($data));
+    }
+
     #   send resulting page
-    $r->content_type("text/html");
     $r->send_http_header;
-    $r->print($data);
+    $r->print($data) if (not $r->header_only);
 
     #   statistic
     $nOk++;
@@ -159,8 +209,10 @@ sub handler {
     return OK;
 }
 
-#   when Apache::Status is loaded, add
-#   information about us
+
+#
+#   optional Apache::Status information
+#
 Apache::Status->menu_item(
     'ePerl' => "ePerl status",
     sub {
@@ -173,7 +225,9 @@ Apache::Status->menu_item(
     }
 ) if Apache->module("Apache::Status");
 
+
 1;
+##EOF##
 __END__
 
 =head1 NAME
@@ -248,7 +302,14 @@ is more compliant to the original ePerl facility.
 
 =head1 SEE ALSO
 
-Parse::ePerl(3), eperl(1), http://www.engelschall.com/sw/eperl/.
+Parse::ePerl(3)
+
+Web-References:
+
+  Perl:     perl(1),     http://www.perl.com/perl/
+  ePerl:    eperl(1),    http://www.engelschall.com/sw/eperl/
+  Apache:   httpd(7),    http://www.apache.org/
+  mod_perl: mod_perl(1), http://perl.apache.org/
 
 =cut
 

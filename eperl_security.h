@@ -40,7 +40,7 @@
  * General security for CGI modes
  */
 #define CGI_NEEDS_ALLOWED_FILE_EXT       TRUE
-#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".ephtml", ".epl", ".pl", ".cgi", NULL }
+#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".eperl", ".ephtml", ".epl", ".pl", ".cgi", NULL }
 
 /* 
  * Perl security 

@@ -272,9 +272,9 @@ escape it in any way.
 =item I<8. HTML entity conversion.>
 
 Because one of ePerl's usage is as a server-side scripting-language for HTML
-pages, there is common problem in conjunction with HTML editors.  They cannot
-know ePerl blocks, so when you enter those blocks inside the editors they
-usually encode some characters with the corresponding HTML entities. The
+pages, there is a common problem in conjunction with HTML editors.  They
+cannot know ePerl blocks, so when you enter those blocks inside the editors
+they usually encode some characters with the corresponding HTML entities. The
 problem is that this encoding leads to invalid Perl code. ePerl provides the
 option B<-C> for decoding these entities which is automatically turned on in
 CGI modes. See description below under option B<-C> for more details.
@@ -350,7 +350,7 @@ See Parse::ePerl(3) for more details.
 This is the runtime mode where ePerl uses the CGI/1.1 interface of a webserver
 when used as a I<Server-Side Scripting Language> on the Web. ePerl enters this
 mode automatically when the CGI/1.1 environment variable C<PATH_TRANSLATED> is
-set and the scripts filename does I<not> begin with the NPH prefix
+set and its or the scripts filename does I<not> begin with the NPH prefix
 ``F<nph->''.  In this runtime mode it prefixes the resulting data with
 HTTP/1.0 (default) or HTTP/1.1 (if identified by the webserver) compliant
 response header lines.
@@ -364,7 +364,7 @@ generated data, i.e. for instance you can generate your own HTTP headers like
    <html>
    ...
 
-But notice that while you can output arbitrary headers, all webservers
+But notice that while you can output arbitrary headers, most webservers
 restrict the headers which are accepted via the CGI/1.1 interface. Usually you
 can provide only a few specific HTTP headers like C<Location> or C<Status>.
 If you need more control you have to use the NPH-CGI/1.1 interface mode.
@@ -398,8 +398,8 @@ the following line to your F<httpd.conf> file:
   AddHandler cgi-script .cgi
 
 Now you can use F<file.cgi> instead of F<file.html> and make advantage of the
-achieved programming capability by bristling F<file.cgi> with wanted Perl
-blocks (or the transformation into a CGI script was useless).
+achieved programming capability by bristling F<file.cgi> with your Perl
+blocks (or the transformation into a CGI script would be useless).
 
 Alternatively (or even additionally) a webmaster can enable ePerl support in a
 more seemless way by configuring ePerl as a real implicit server-side
@@ -870,11 +870,18 @@ The identification string of the used Perl interpreter library.
 
 =head2 Provided Built-In Images
 
+The following built-in images can be accessed via URL
+C</url/to/nph-eperl/>I<NAME>C<.gif>:
+
 =over 4
 
 =item C<logo.gif>
 
+The standard ePerl logo. Please do not include this one on your website.
+
 =item C<powered.gif>
+
+The ``I<powered by ePerl 2.2>'' logo. Feel free to use this on your website.
 
 =back
 

@@ -157,7 +157,7 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
          *   search for any more directives
          */
         cp = NULL;
-		if (cps == cpBuf || ((cps > cpBuf) && (*(cps-1) == '\n'))) {
+        if (cps == cpBuf || ((cps > cpBuf) && (*(cps-1) == '\n'))) {
             if ((strncmp(cps, "#include",  8) == 0) && (cp == NULL)) cp = cps;
             if ((strncmp(cps, "#sinclude", 9) == 0) && (cp == NULL)) cp = cps;
             if ((strncmp(cps, "#if",       3) == 0) && (cp == NULL)) cp = cps;
@@ -165,7 +165,7 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
             if ((strncmp(cps, "#else",     5) == 0) && (cp == NULL)) cp = cps;
             if ((strncmp(cps, "#endif",    6) == 0) && (cp == NULL)) cp = cps;
             if ((strncmp(cps, "#c",        2) == 0) && (cp == NULL)) cp = cps;
-		}
+        }
         if (((cpT = strnstr(cps, "\n#include",  cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
         if (((cpT = strnstr(cps, "\n#sinclude", cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
         if (((cpT = strnstr(cps, "\n#if",       cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
@@ -203,6 +203,11 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
                 /* skip whitespaces */
                 for ( ; cps < cpEND && (*cps == ' ' || *cps == '\t'); cps++)
                     ;
+                /* skip possible quotation mark or opening angle bracket */
+                if (*cps == '"' || *cps == '<')
+                    cps++;
+
+                /* check for EOL */
                 if (*cps == '\n') {
                     ePerl_PP_SetError("Missing filename or URL for #include directive");
                     free(cpOutBuf);
@@ -210,7 +215,10 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
                 }
 
                 /* copy the filename and skip to end of line */
-                for (i = 0; cps < cpEND && (*cps != ' ' && *cps != '\t' && *cps != '\n'); )
+                for (i = 0; cps < cpEND && 
+                            (*cps != ' ' && *cps != '\t' && 
+                             *cps != '>' && *cps != '"'  &&
+                             *cps != '\n'                  );  )
                     caName[i++] = *cps++;
                 caName[i++] = NUL;
                 for ( ; cps < cpEND && *cps != '\n'; cps++)
@@ -231,6 +239,11 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
                 /* skip whitespaces */
                 for ( ; cps < cpEND && (*cps == ' ' || *cps == '\t'); cps++)
                     ;
+                /* skip possible quotation mark or opening angle bracket */
+                if (*cps == '"' || *cps == '<')
+                    cps++;
+
+                /* check for EOL */
                 if (*cps == '\n') {
                     ePerl_PP_SetError("Missing filename or URL for #sinclude directive");
                     free(cpOutBuf);
@@ -238,7 +251,10 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
                 }
 
                 /* copy the filename and skip to end of line */
-                for (i = 0; cps < cpEND && (*cps != ' ' && *cps != '\t' && *cps != '\n'); )
+                for (i = 0; cps < cpEND && 
+                            (*cps != ' ' && *cps != '\t' && 
+                             *cps != '>' && *cps != '"'  &&
+                             *cps != '\n'                  );  )
                     caName[i++] = *cps++;
                 caName[i++] = NUL;
                 for ( ; cps < cpEND && *cps != '\n'; cps++)

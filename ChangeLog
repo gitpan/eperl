@@ -2,8 +2,67 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2.1 and 2.2.2
+  -------------------------------
+  [Bugfix and Porting Enhancement]
+
+  970804 o removed bad demo.errsync.phtml 
+  970806 o fixed a few spaces in Makefile.in
+  970807 o removed wrong $AUTOLOAD from Apache::ePerl 
+         o fixed a few other things in Apache::ePerl and Parse::ePerl
+         o added 2.2.1 to VERSIONS file
+         o moved the place of the release macros in Makefile.in
+           before any targets because some braindead Make variants
+           don't like it in the middle of targets.
+         o added a new test 09-dynaloader.t for testing if
+           dynamic loading works correctly.
+         o added error capturing for Parse::ePerl::Evaluate via __DIE__ hook.
+         o fixed the PODs
+         o moved -lperl at linking after DynaLoader
+  970808 o fixed configure help string for --with-perl=PATH
+         o added missing .eperl extension in eperl_security.h
+           [Thanks to Heiko Schlittermann <heiko@os.inf.tu-dresden.de> for hint]
+         o added more stuff to INSTALL.APACHE
+  970811 o fixed wrong coding in setuid check
+           [Thanks to SONE Takeshi <ts1@tsn.or.jp> for patch]
+
+  Changes between 2.2.0 and 2.2.1
+  -------------------------------
+  [Bugfix and Enhancement]
+
+  970721 o fixed eg/demo.net.phtml
+  970727 o optimized the Perl 5 internal stuff in eperl_eperl5.c 
+           [Thanks to Doug McEachern <dougm@opengroup.org> for patches]
+         o added support for Cwd parameter to Parse::ePerl::Precompile and use
+           this also in Apache::ePerl when precompiling.  
+           [Thanks to Michael Lazar <michael@vertex.worldweb.com> for idea]
+         o added support for quotation marks and angle brackets in #include
+           and #sinclude directives: these are just skipped.
+           [Thanks to Karl Wallner <karl.wallner@x3network.net> for idea]
+         o now DOCUMENT_ROOT is automatically added to @INC in CGI modes.
+           [Thanks to Karl Wallner <karl.wallner@x3network.net> for idea]
+         o now Apache::ePerl always uses option "ConvertEntities=1" when
+           calling Parse::ePerl::Translate.
+           [Thanks to Mike Pheasant <pheasant@gte.net> for hint]
+         o fixed demos for strict variables and added both .phtml
+           and .iphtml files (same contents!) for easier testing
+           with both nph-eperl and Apache::ePerl.
+         o added support for generated custom HTTP headers
+           to Apache::ePerl.
+  970801 o added "/eperl" to $libdir for installation
+         o now "make install" installs the demo pages into $libdir/eg
+         o added PORTING.test script for making porting tests easier
+         o changed test for Perl in configure from "test -f" to "test -x"
+         o fixed the examples again.
+         o fixed a few things in eperl.pod
+  970802 o enhanced the overwriting of the perl and cc programs
+           for the build process. See INSTALL for more details.
+         o enhanced PORTING.test to be able to set perl and cc.
+         o added overview to INSTALL
+
   Changes between 2.2b9 and 2.2.0
   -------------------------------
+  [Bugfix only]
 
   970706 o added missing eperl_getopt.h include
            for eperl_main.c which caused the compilation

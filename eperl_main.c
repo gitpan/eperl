@@ -509,10 +509,15 @@ int main(int argc, char **argv, char **env)
         }
     }
 
-    /* CGI modes imply Preprocessor usage and HTML entity conversions */
+    /* CGI modes imply 
+       - Preprocessor usage 
+       - HTML entity conversions
+       - adding of DOCUMENT_ROOT to include paths */
     if (mode == MODE_CGI || mode == MODE_NPHCGI) {
         fPP = TRUE;
         ePerl_convert_entities = TRUE;
+        if ((cp = getenv("DOCUMENT_ROOT")) != NULL)
+            Perl5_RememberINC(cp);
     }
 
     /* check for valid source file */
@@ -594,7 +599,7 @@ int main(int argc, char **argv, char **env)
                             pw2 = getpwuid(atoi(allowed_caller_uid[i]));
                         else
                             pw2 = getpwnam(allowed_caller_uid[i]);
-                        if (pw->pw_name == pw2->pw_name) {
+                        if (strcmp(pw->pw_name, pw2->pw_name) == 0) {
                             allow = TRUE;
                             break;
                         }

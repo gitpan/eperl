@@ -1,29 +1,60 @@
+##        ____           _ 
+##    ___|  _ \ ___ _ __| |
+##   / _ \ |_) / _ \ '__| |
+##  |  __/  __/  __/ |  | |
+##   \___|_|   \___|_|  |_|
+## 
+##  ePerl -- Embedded Perl 5 Language
+##
+##  ePerl interprets an ASCII file bristled with Perl 5 program statements
+##  by evaluating the Perl 5 code while passing through the plain ASCII
+##  data. It can operate both as a standard Unix filter for general file
+##  generation tasks and as a powerful Webserver scripting language for
+##  dynamic HTML page programming. 
+##
+##  ======================================================================
+##
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
+##
+##  This program is free software; it may be redistributed and/or modified
+##  only under the terms of either the Artistic License or the GNU General
+##  Public License, which may be found in the ePerl source distribution.
+##  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
+##  a built-in copy of both license files.
+##
+##  This program is distributed in the hope that it will be useful, but
+##  WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
+##  Artistic License or the GNU General Public License for more details.
+##
+##  ======================================================================
 ##
 ##  ePerl.pm -- Perl interface to the ePerl parser (Perl part)
-##  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
 ##
 
 package Parse::ePerl;
 
+
 #   requirements and runtime behaviour
 require 5.00325;
+use strict;
+use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
 
+#   imports
 require Exporter;
 require DynaLoader;
 require AutoLoader;
-
-@ISA    = qw(Exporter DynaLoader);
-@EXPORT = qw();
-
-#   import of used modules
-use strict;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
 use Carp;
 use Cwd qw(fastcwd);
 #use Safe;
 
+#   interface
+@ISA    = qw(Exporter DynaLoader);
+@EXPORT = qw();
+
 #   private version number
-$VERSION = "2.2.0";
+$VERSION = "2.2.2";
+
 
 #   autoloading (currently unused)
 sub AUTOLOAD {
@@ -45,6 +76,7 @@ sub AUTOLOAD {
 
 #   dynaloader bootstrapping
 bootstrap Parse::ePerl $VERSION;
+
 
 ##
 ##  Preprocess -- run the ePerl preprocessor over the script
@@ -78,6 +110,7 @@ sub Preprocess ($) {
         return 1;
     }
 }
+
 
 ##
 ##  Translate -- translate a plain Perl script from 
@@ -127,7 +160,7 @@ sub Translate ($) {
 
 sub Precompile ($) {
     my ($p) = @_;
-    my ($error, $func);
+    my ($error, $func, $ocwd);
 
     #   error if no input or no output
     if (   not $p->{Script}
@@ -142,10 +175,19 @@ sub Precompile ($) {
     local $SIG{'__WARN__'} = sub { $error .= $_[0]; };
     local $SIG{'__DIE__'};
 
+    #   switch to directory of file
+    if ($p->{Cwd}) {
+        $ocwd = fastcwd();
+        chdir($p->{Cwd});
+    }
+
     #   precompile the source into P-code
     #my $cp = new Safe("Safe::ePerl");
     #$func = $cp->reval('$func = sub {'.$p->{Script}.'};');
     eval("\$func = sub {" . $p->{Script} . "};");
+
+    #   restore Cwd
+    chdir($ocwd) if ($p->{Cwd});
 
     #   return the result
     if ($error) {
@@ -200,7 +242,7 @@ sub Evaluate ($) {
     #   disable the die of the interpreter
     $error = "";
     local $SIG{'__WARN__'} = sub { $error .= $_[0]; };
-    local $SIG{'__DIE__'};
+    local $SIG{'__DIE__'} = sub { $error .= $_[0]; };
 
     #   now evaluate the script which 
     #   produces content on STDOUT and perhaps
@@ -276,6 +318,7 @@ sub Expand ($) {
     return $rc;
 }
 
+
 ##
 ##  Capture -- methods for capturing a filehandle
 ##             (used by Evaluate) via this class
@@ -296,6 +339,7 @@ sub PRINTF {
     my ($fmt) = shift;
     ${$self} .= sprintf($fmt, @_);
 }
+
 
 1;
 ##EOF##
@@ -432,6 +476,10 @@ Parse::ePerl::Evaluate(3) function.
 Reference to scalar receiving possible error messages from the compilation
 (e.g.  syntax errors).
 
+=item I<Cwd>
+
+Directory to switch to while precompiling the script.
+
 =item I<Name>
 
 Name of the script for informal references inside error messages.
@@ -527,7 +575,12 @@ high-level interface for Parse::ePerl.
 
 =head1 SEE ALSO
 
-eperl(1), http://www.engelschall.com/sw/eperl/.
+eperl(1)
+
+Web-References:
+
+  Perl:  perl(1),  http://www.perl.com/perl/
+  ePerl: eperl(1), http://www.engelschall.com/sw/eperl/
 
 =cut
 

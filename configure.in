@@ -7,7 +7,7 @@ dnl #
 
 AC_PREREQ(2.10)dnl
 AC_REVISION($Revision: 2.0$)
-echo "Configuring for ePerl `./etc/newvers -l c -d eperl_version.c`"
+echo "Configuring for ePerl `./etc/newvers -l c -D eperl_version.c`"
 
 AC_CONFIG_AUX_DIR(etc)
 AC_INIT(README)
@@ -17,7 +17,7 @@ AC_PREFIX_DEFAULT(/usr/local)
 AC_CONFIGURE_PART(CHECK: Configuration of Perl Language)
 AC_MSG_CHECKING([for Perl language])
 AC_ARG_WITH(perl,dnl
-[  --with-perl             force the usage of a specific installed Perl],
+[  --with-perl=PATH        force the usage of a specific installed Perl],
 perlprog=$with_perl
 perlvers=`$perlprog -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
 ,
@@ -27,7 +27,7 @@ touch $TMPFILE
 c=0
 for dir in `echo $PATH | sed -e 's/:/ /g'` /tmp; do
     for perl in perl5 perl miniperl; do
-         if test -f "$dir/$perl"; then
+         if test -x "$dir/$perl"; then
              perl="$dir/$perl"
              version=`$perl -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
              versionnum="`echo $version | sed -e 's/\.//g' -e 's/_//g'`"
@@ -287,6 +287,12 @@ AC_UVAR_SET(infodir,       $prefix/info)
 AC_UVAR_SET(xaddir,        $prefix/xad)
 AC_UVAR_SET(tmpdir,        /tmp)
 AC_UVAR_OUTPUT
+
+eval libdir=$libdir
+case $libdir in
+    *eperl* ) ;;
+          * ) libdir="${exec_prefix}/lib/eperl" ;;
+esac
 
 
 AC_CONFIGURE_PART(RESULT: Sourcefile Substitution)

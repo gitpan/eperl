@@ -1,24 +1,24 @@
 <html>
 <head>
-<title>demo.cgipm</title>
+<title>demo.errsyn</title>
 </head>
 <body>
 <blockquote>
-<h1>demo.cgipm</h1>
+<h1>demo.errsyn</h1>
 <p>
 <!-- 
 ##
-##  ePerl Demo: usage of the CGI.pm package from within ePerl
+##  ePerl Demo: demonstration of the ePerl error page
 ##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
 ##
-##  This just demonstrates how one can use the
-##  popular CGI.pm package from within ePerl.
+##  This just demonstrates how ePerl responds
+##  with its error page to a syntax error
 ##
 -->
 
 <?
 use CGI;
-my $Q = new CGI;
+my $Q := new CGI;
 my $myself = $ENV{SCRIPT_SRC_URL}."?".$Q->query_string;
 !>
 

@@ -1,0 +1,25 @@
+<html>
+<head>
+<title>demo.errout</title>
+</head>
+<body>
+<blockquote>
+<h1>demo.errout</h1>
+<p>
+<!-- 
+##
+##  ePerl Demo: demonstration of the ePerl error page
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
+##
+##  This just demonstrates how ePerl responds
+##  with its error page to data occuring on STDERR.
+##
+-->
+
+First pure text...
+<? print STDERR "This is data on STDERR which leads to an error"; !>
+...and then again pure text.
+
+</blockquote>
+</body>
+</html>

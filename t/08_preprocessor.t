@@ -14,7 +14,7 @@ EOT
 
 $testfile2 = &TEST::tmpfile_with_name("file2", <<"EOT");
 bar1
-#include file3
+#include <file3>
 bar3
 EOT
 

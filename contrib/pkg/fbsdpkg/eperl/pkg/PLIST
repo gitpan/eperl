@@ -6,7 +6,8 @@ man/man1/eperl.1
 @unexec grep -v "application/x-httpd-eperl" %D/etc/apache/srm.conf >%D/etc/apache/srm.conf.bak; mv %D/etc/apache/srm.conf.bak %D/etc/apache/srm.conf
 share/examples/eperl/demo.cgipm.phtml
 share/examples/eperl/demo.env.phtml
-share/examples/eperl/demo.error.phtml
+share/examples/eperl/demo.errout.phtml
+share/examples/eperl/demo.errsyn.phtml
 share/examples/eperl/demo.func.phtml
 share/examples/eperl/demo.html.phtml
 share/examples/eperl/demo.image.phtml

@@ -1,8 +1,10 @@
 ##
 ##  Makefile -- ePerl Makefile
-##  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
 ##
+
 @SET_MAKE@
+
 
 # ------------------------------------------------
 #   DEFINITIONS
@@ -25,7 +27,7 @@ CC       = $(perl_cc)
 CFLAGS   = @CFLAGS@ $(perl_optimize) $(perl_ccflags) -I$(perl_archlib)/CORE -I.
 DLCFLAGS = @CFLAGS@ $(perl_optimize) $(perl_cccdlflags) $(perl_ccflags) -I$(perl_archlib)/CORE -I.
 LDFLAGS  = @LDFLAGS@ $(perl_ccdlflags) $(perl_ldflags) -L$(perl_archlib)/CORE 
-LDLIBS   = -lperl $(perl_dla) $(perl_libs)
+LDLIBS   = $(perl_dla) -lperl $(perl_libs)
 AR       = @AR@
 RANLIB   = @RANLIB@
 SIZE     = @SIZE@
@@ -37,6 +39,7 @@ INSTALL         = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA    = @INSTALL_DATA@
 MKDIR           = ./etc/mkinstalldirs
+CP              = cp
 
 #   installation paths
 prefix          = @prefix@
@@ -45,30 +48,9 @@ bindir          = @bindir@
 libdir          = @libdir@
 mandir          = @mandir@
 
-# ------------------------------------------------
-#   THE DEFAULT TARGETS
-# ------------------------------------------------
-
-all: config eperl eperl.1
-
 
 # ------------------------------------------------
-#   THE CONFIGURATION SUPPORT
-# ------------------------------------------------
-
-config: configure config_ac.h.in
-
-configure: configure.in aclocal.m4 acconfig.h
-	rm -f configure
-	autoconf configure.in >configure
-	chmod 770 configure
-
-config_ac.h.in: configure.in acconfig.h
-	rm -f config_ac.h.in
-	autoheader configure.in >config_ac.h.in
-
-# ------------------------------------------------
-#   THE RELEASE STUFF
+#   THE RELEASE STUFF (MACROS)
 # ------------------------------------------------
 
 _GETDISTINFO = \
@@ -102,13 +84,41 @@ _UPDATEVERS = \
 	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
 	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
 
+
+# ------------------------------------------------
+#   THE DEFAULT TARGET
+# ------------------------------------------------
+
+all: config eperl eperl.1
+
+
+# ------------------------------------------------
+#   THE CONFIGURATION SUPPORT
+# ------------------------------------------------
+
+config: configure config_ac.h.in
+
+configure: configure.in aclocal.m4 acconfig.h
+	rm -f configure
+	autoconf configure.in >configure
+	chmod 770 configure
+
+config_ac.h.in: configure.in acconfig.h
+	rm -f config_ac.h.in
+	autoheader configure.in >config_ac.h.in
+
+
+# ------------------------------------------------
+#   THE RELEASE STUFF (TARGETS)
+# ------------------------------------------------
+
 release: distclean fixperm
 	@$(_GETDISTINFO) \
 	_distname="eperl-$${_version}"; \
 	_tarball="/tmp/$${_distname}.tar.gz"; \
 	echo "Release Distribution: ePerl Version $$_version"; \
 	$(_BUILDDIST); \
-	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz 
+	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz
 
 snap: distclean fixperm
 	@$(_GETDISTINFO) \
@@ -116,7 +126,7 @@ snap: distclean fixperm
 	_tarball="/tmp/$${_distname}.tar.gz"; \
 	echo "Snap of whole source tree: ePerl Version $$_version as of $$_date"; \
 	$(_BUILDDIST); \
-	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz 
+	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz
 
 new-version:
 	OPT=-iv; $(_NEWVERS)
@@ -263,6 +273,7 @@ mkproto:
 fixperm:
 	./etc/fixperm *
 
+
 # ------------------------------------------------
 #   THE DOCUMENTATION
 # ------------------------------------------------
@@ -275,6 +286,7 @@ eperl.1: eperl.pod eperl_version.c
 			--release="EN" \
 			/tmp/eperl.pod >eperl.1 && \
 	rm -f /tmp/eperl.pod
+
 
 # ------------------------------------------------
 #   THE SHARED LIBRARY
@@ -302,6 +314,7 @@ eperl_http.so: eperl_http.c
 eperl_version.so: eperl_version.c
 	$(CC) $(DLCFLAGS) -o eperl_version.so -c eperl_version.c
 
+
 # ------------------------------------------------
 #   TEST SUITE
 # ------------------------------------------------
@@ -317,8 +330,12 @@ test:
 install: all
 	$(MKDIR) $(bindir)
 	$(MKDIR) $(mandir)
+	$(MKDIR) $(libdir)
 	$(INSTALL_PROGRAM) eperl $(bindir)/eperl
 	$(INSTALL_DATA) eperl.1 $(mandir)/eperl.1
+	$(MKDIR) $(libdir)/eg
+	$(CP) -r eg/* $(libdir)/eg/
+
 
 # ------------------------------------------------
 #   CLEANUP
@@ -351,5 +368,6 @@ distclean:
 	-rm -f config.status config.cache config.log
 	-rm -f Makefile
 	-rm -f t/Makefile
+
 
 ##EOF##
