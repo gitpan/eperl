@@ -420,8 +420,47 @@ int main(int argc, char **argv, char **env)
         }
     }
 
-    /* determine source filename and runtime mode */
-    if (optind == argc-1) {
+    /* 
+     *  determine source filename and runtime mode 
+     */
+
+    if ((cp = getenv("GATEWAY_INTERFACE")) != NULL) {
+        if (strncasecmp(cp, "CGI/1", 5) != 0) {
+            fprintf(stderr, "%s: Unknown gateway interface: NOT CGI/1.x\n", progname);
+            CU(EX_IOERR);
+        }
+
+        /*  CGI/1.1 or NPH-CGI/1.1 script, 
+            source in PATH_TRANSLATED. */
+        source = getenv("PATH_TRANSLATED");
+        if (source == NULL)
+            source = "";
+
+        /*  determine whether pure CGI or NPH-CGI mode */ 
+        if ((cp = getenv("SCRIPT_FILENAME")) != NULL) { 
+            strcpy(ca, cp);
+            if ((cp = strrchr(ca, '/')) != NULL) 
+                *cp++ = NUL;
+            else 
+                cp = ca;
+            if (strncasecmp(cp, "nph-", 4) == 0) 
+                mode = (mode == MODE_UNKNOWN ? MODE_NPHCGI : mode);
+            else
+                mode = (mode == MODE_UNKNOWN ? MODE_CGI : mode);
+        }
+        else {
+            mode = (mode == MODE_UNKNOWN ? MODE_CGI : mode);
+        }
+
+        /* set the command line for ps output */
+        sprintf(ca, "%s %s [%sCGI]", argv[0], source, mode == MODE_NPHCGI ? "NPH-" : "");
+        argv[0] = strdup(ca);
+    }
+    else if (optind == argc-1 && 
+             /* make really sure we are not running under a webserver */
+             getenv("GATEWAY_INTERFACE") == NULL &&
+             getenv("PATH_TRANSLATED")   == NULL &&
+             getenv("QUERY_STRING")      == NULL   ) {
 
         /*  stand-alone filter, source as argument:
             either manually on the console or via shebang */
@@ -444,32 +483,6 @@ int main(int argc, char **argv, char **env)
             /* stdin script implies keeping of cwd */
             keepcwd = TRUE;
         }
-    }
-    else if (optind == argc && (cp = getenv("PATH_TRANSLATED")) != NULL) { 
-
-        /*  CGI or NPH-CGI script, source in PATH_TRANSLATED:
-            via Webserver request */
-        source = cp;
-
-        /*  determine whether pure CGI or NPH-CGI mode */ 
-        if ((cp = getenv("SCRIPT_FILENAME")) != NULL) { 
-            strcpy(ca, cp);
-            if ((cp = strrchr(ca, '/')) != NULL) 
-                *cp++ = NUL;
-            else 
-                cp = ca;
-            if (strncasecmp(cp, "nph-", 4) == 0) 
-                mode = (mode == MODE_UNKNOWN ? MODE_NPHCGI : mode);
-            else
-                mode = (mode == MODE_UNKNOWN ? MODE_CGI : mode);
-        }
-        else {
-            mode = (mode == MODE_UNKNOWN ? MODE_CGI : mode);
-        }
-
-        /* set the command line for ps output */
-        sprintf(ca, "%s %s [%sCGI]", argv[0], source, mode == MODE_NPHCGI ? "NPH-" : "");
-        argv[0] = strdup(ca);
     }
     else {
         /* else we are used in a wrong way... */
@@ -521,6 +534,12 @@ int main(int argc, char **argv, char **env)
     }
 
     /* check for valid source file */
+    if (*source == NUL) {
+        PrintError(mode, "", NULL, NULL, "Filename is empty");
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+    }
+
+    /* check for existing source file */
     if ((stat(source, &st)) != 0) {
         PrintError(mode, source, NULL, NULL, "File `%s' not exists", source);
         CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
@@ -791,11 +810,21 @@ int main(int argc, char **argv, char **env)
 
     /* optionally run the ePerl preprocessor */
     if (fPP) {
+        /* switch to directory where script stays */
+        getcwd(cwd, MAXPATHLEN);
+        strcpy(sourcedir, source);
+        for (cp = sourcedir+strlen(sourcedir); cp > sourcedir && *cp != '/'; cp--)
+            ;
+        *cp = NUL;
+        chdir(sourcedir);
+        /* run the preprocessor */
         if ((cpBuf3 = ePerl_PP(cpScript, Perl5_RememberedINC)) == NULL) {
             PrintError(mode, source, NULL, NULL, "Preprocessing failed for `%s': %s", source, ePerl_PP_GetError());
             CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
         cpScript = cpBuf3;
+        /* switch to previous dir */
+        chdir(cwd);
     }
 
     /* convert bristled source to valid Perl code */
@@ -916,7 +945,7 @@ int main(int argc, char **argv, char **env)
         strcpy(sourcedir, source);
         for (cp = sourcedir+strlen(sourcedir); cp > sourcedir && *cp != '/'; cp--)
             ;
-        *cp = '\0';
+        *cp = NUL;
         chdir(sourcedir);
     }
 

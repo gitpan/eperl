@@ -2,6 +2,27 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2.2 and 2.2.3
+  -------------------------------
+  [Security Bugfix and Enhancement]
+
+  970821 o fixed installation section in Apache::ePerl manpage
+         o ***** SECURITY BUGFIX *****
+           ePerl versions <= 2.2.2 have a heavy security hole when running
+           under a webserver's CGI/1.1 interface.   Because ePerl assumed here
+           there are not command line arguments. THIS IS WRONG! According to
+           the CGI/1.1 spec when an ISINDEX document is used (QUERY_STRING!)
+           the query is provided on the command line by the webserver.  So,
+           when only one query existed, there was exactly one command line
+           argument and ePerl switched to stand-alone runtime mode and all
+           CGI-mode restrictions are falling down!!
+           ***** SECURITY BUGFIX *****
+           [Thanks to Andrew Pimlott <pimlott@abel.MATH.HARVARD.EDU> for
+           finding this security bug!]
+         o now a chdir is done before the preprocessor is run so relative
+           paths in #include directives work as expected.  [Thanks to Marc
+           Singer <elf@netcom.com> for patch]
+
   Changes between 2.2.1 and 2.2.2
   -------------------------------
   [Bugfix and Porting Enhancement]

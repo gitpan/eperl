@@ -53,7 +53,7 @@ use Cwd qw(fastcwd);
 @EXPORT = qw();
 
 #   private version number
-$VERSION = "2.2.2";
+$VERSION = "2.2.3";
 
 
 #   autoloading (currently unused)

@@ -51,7 +51,7 @@ use File::Basename qw(dirname);
 use Parse::ePerl;
 
 #   private version number
-$VERSION = "2.2.2";
+$VERSION = "2.2.3";
 
 #   globals
 $nDone = 0;
@@ -238,11 +238,10 @@ Apache::ePerl - mod_perl handler for fast emulated ePerl facility
 
    #   httpd.conf
    PerlModule Apache::ePerl
-
    <Files ~ "/root/of/webmaster/area/.+\.iphtml$">
-   Options     +ExecCGI
-   SetHandler  perl-script
-   PerlHandler Apache::ePerl::handler
+       Options     +ExecCGI
+       SetHandler  perl-script
+       PerlHandler Apache::ePerl
    </Files>
 
 =head1 DESCRIPTION
