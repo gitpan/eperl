@@ -89,8 +89,8 @@ _NEWVERS = \
 	V=`./etc/newvers -lc -D eperl_version.c`;\
 	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
 	V=`./etc/newvers -lc -d eperl_version.c`;\
-	sed -e "s/\\$$VERSION = \".*\";/$$VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
-	sed -e "s/\\$$VERSION = \".*\";/$$VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
+	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
+	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
 
 _UPDATEVERS = \
 	V=`./etc/newvers -lc -d eperl_version.c`;\
@@ -98,8 +98,8 @@ _UPDATEVERS = \
 	V=`./etc/newvers -lc -D eperl_version.c`;\
 	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
 	V=`./etc/newvers -lc -d eperl_version.c`;\
-	sed -e "s/\\$$VERSION = \".*\";/$$VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
-	sed -e "s/\\$$VERSION = \".*\";/$$VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
+	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
+	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
 
 release: distclean fixperm
 	@$(_GETDISTINFO) \

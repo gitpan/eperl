@@ -8,8 +8,8 @@
 ##           used as a version display tool in "./configire" steps...
 ##
 
-VERSION="2.2.1"
-   DATE="30-05-1997"
+VERSION="2.2.2"
+   DATE="02-06-1997"
 
 #   print version information line
 print_version () {
@@ -60,9 +60,8 @@ INCREASE=P
 getopt=getopt
 eval "$getopt" >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-    if [ ! -x /tmp/getopt ]; then
-        rm -f /tmp/getopt.c >/dev/null 2>&1
-        cat >/tmp/getopt.c <<EOT
+    rm -f /tmp/getopt.c >/dev/null 2>&1
+    cat >/tmp/getopt.c <<EOT
 #include <stdio.h>
 main(argc, argv)
 int argc;
@@ -93,7 +92,6 @@ char *argv[];
 }
 EOT
         cc -o /tmp/getopt /tmp/getopt.c
-    fi
     getopt=/tmp/getopt
 fi
 set -- `$getopt l:p:r:i:dDVh $*`
@@ -101,6 +99,7 @@ if [ $? != 0 ]; then
     print_usage
     exit 2
 fi
+rm -f /tmp/getopt >/dev/null 2>&1
 for opt in $*; do
     case $opt in
         -l)  LANGUAGE=$2;      shift; shift  ;;

@@ -52,6 +52,7 @@ char **mysetenv(char **env, char *var, char *str, ...)
     char **envN;
     extern char **environ;
     static int stillcalled = FALSE;
+    int replaced = FALSE;
 
     /*  create the key=val string  */
     va_start(ap, str);
@@ -63,12 +64,20 @@ char **mysetenv(char **env, char *var, char *str, ...)
     for (i = 0; env[i] != NULL; i++)
         ;
     envN = (char **)malloc(sizeof(char *) * (i+2));
-    for (i = 0; env[i] != NULL; i++)
-        envN[i] = env[i];
+    for (i = 0; env[i] != NULL; i++) {
+        if (strncmp(env[i], var, strlen(var)) == 0) {
+            envN[i] = cp;
+            replaced = TRUE;
+        }
+        else
+            envN[i] = env[i];
+    }
 
-    /*  and add the new entry  */
-    envN[i++] = cp;
-    envN[i++] = NULL;
+    /*  add the new entry if not replaced */
+    if (!replaced) {
+        envN[i++] = cp;
+        envN[i++] = NULL;
+    }
 
     /*  set the libc/exec variable which Perl uses */
     if (stillcalled) 
@@ -372,8 +381,8 @@ char *filename(char *path)
     else {
         for (cp = path+strlen(path); cp > path && *(cp-1) != '/'; cp--)
             ;
-		if (cp == path+1)
-			cp--;
+        if (cp == path+1)
+            cp--;
         strcpy(file, cp);
         return file;
     }
@@ -404,18 +413,18 @@ char *abspath(char *path)
     if (path[0] == '/')
         return path;
     else {
-		/* remember current working dir */
-		getcwd(cwd, MAXPATHLEN);
-		/* determine dir of path */
-		cp = dirname(path);
-		chdir(cp);
-		getcwd(apath, MAXPATHLEN);
-		/* restore cwd */
-		chdir(cwd);
-		/* add file part again */
-		if (apath[strlen(apath)-1] != '/')
-		    strcpy(apath+strlen(apath), "/");
-		strcpy(apath+strlen(apath), path);
+        /* remember current working dir */
+        getcwd(cwd, MAXPATHLEN);
+        /* determine dir of path */
+        cp = dirname(path);
+        chdir(cp);
+        getcwd(apath, MAXPATHLEN);
+        /* restore cwd */
+        chdir(cwd);
+        /* add file part again */
+        if (apath[strlen(apath)-1] != '/')
+            strcpy(apath+strlen(apath), "/");
+        strcpy(apath+strlen(apath), path);
         return apath;
     }
 }

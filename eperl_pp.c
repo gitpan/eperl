@@ -69,12 +69,17 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
     char *cps;
     char *cp;
     char *cp2;
+    char *cp3;
+    char *cp4;
+    char *cpT;
     char *cpInBuf = NULL;
     char *cpBuf;
     char caName[1024];
     char caArg[1024];
     char caStr[1024];
     int n;
+    int l1;
+    int l2;
     int nBuf;
     int nOut;
     int nOutBuf;
@@ -151,14 +156,13 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
         /*
          *   search for any more directives
          */
-        if ((cp = strnstr(cps, "#include", cpEND-cps)) != NULL)
-            ;
-        else if ((cp = strnstr(cps, "#if", cpEND-cps)) != NULL)
-            ;
-        else if ((cp = strnstr(cps, "#else", cpEND-cps)) != NULL)
-            ;
-        else if ((cp = strnstr(cps, "#endif", cpEND-cps)) != NULL)
-            ;
+        cp = NULL;
+        if (((cpT = strnstr(cps, "#include",  cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
+        if (((cpT = strnstr(cps, "#sinclude", cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
+        if (((cpT = strnstr(cps, "#if",       cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
+        if (((cpT = strnstr(cps, "#else",     cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
+        if (((cpT = strnstr(cps, "#endif",    cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
+        if (((cpT = strnstr(cps, "#c",        cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
 
         if (cp != NULL && (cp == cpBuf || (cp > cpBuf && *(cp-1) == '\n'))) {
             /* 
@@ -190,7 +194,7 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
                 for ( ; cps < cpEND && (*cps == ' ' || *cps == '\t'); cps++)
                     ;
                 if (*cps == '\n') {
-                    ePerl_PP_SetError("Missing filename for #include directive");
+                    ePerl_PP_SetError("Missing filename or URL for #include directive");
                     free(cpOutBuf);
                     return NULL;
                 }
@@ -207,6 +211,51 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
                 /* recursive usage */
                 if ((cp = ePerl_PP_Process(caName, cppINC, 0 /*mode=file*/)) == NULL)
                     return NULL;
+            }
+            else if (strncmp(cp, "#sinclude", 9) == 0) {
+                /* 
+                 *  found a #sinclude directive
+                 */
+                cps = cp+9;
+            
+                /* skip whitespaces */
+                for ( ; cps < cpEND && (*cps == ' ' || *cps == '\t'); cps++)
+                    ;
+                if (*cps == '\n') {
+                    ePerl_PP_SetError("Missing filename or URL for #sinclude directive");
+                    free(cpOutBuf);
+                    return NULL;
+                }
+
+                /* copy the filename and skip to end of line */
+                for (i = 0; cps < cpEND && (*cps != ' ' && *cps != '\t' && *cps != '\n'); )
+                    caName[i++] = *cps++;
+                caName[i++] = NUL;
+                for ( ; cps < cpEND && *cps != '\n'; cps++)
+                    ;
+                if (*cps == '\n')
+                    cps++;
+    
+                /* recursive usage */
+                if ((cp = ePerl_PP_Process(caName, cppINC, 0 /*mode=file*/)) == NULL)
+                    return NULL;
+
+                /* make it secure by removing all begin/end delimiters!! */
+                if ((cp2 = (char *)malloc(strlen(cp))) == NULL)
+                    return NULL;
+                l1 = strlen(ePerl_begin_delimiter);
+                l2 = strlen(ePerl_end_delimiter);
+                for (cp3 = cp, cp4 = cp2; *cp3 != NUL; ) {
+                    if (strncasecmp(cp3, ePerl_begin_delimiter, l1) == 0)
+                        cp3 += l1;
+                    else if (strncasecmp(cp3, ePerl_end_delimiter, l2) == 0)
+                        cp3 += l2;
+                    else
+                        *cp4++ = *cp3++;
+                }
+                *cp4 = NUL;
+                free(cp);
+                cp = cp2;
             }
             else if (strncmp(cp, "#if", 3) == 0) {
                 /* 
@@ -265,6 +314,23 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
                 /* create replacement string */
                 sprintf(caStr, "%s } _%s//\n", 
                         ePerl_begin_delimiter, ePerl_end_delimiter);
+                cp = caStr;
+            }
+            else if (strncmp(cp, "#c", 2) == 0) {
+                /* 
+                 *  found a #c directive
+                 */
+                cps = cp+2;
+
+                /* skip to end of line */
+                for (i = 0; cps < cpEND && *cps != '\n'; cps++)
+                    ;
+                if (*cps == '\n')
+                    cps++;
+
+                /* create replacement string: just a newline 
+                 * to preserve line numbers */
+                sprintf(caStr, "\n");
                 cp = caStr;
             }
 

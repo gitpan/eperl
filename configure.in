@@ -51,12 +51,23 @@ AC_SUBST(PATH_PERL)
 AC_SUBST(perlprog)
 AC_SUBST(perlvers)
 perl_prog=$perlprog
+perl_vers=$perlvers
 AC_SUBST(perl_prog)
+AC_SUBST(perl_vers)
 if test -f $PATH_PERL; then
 	:
 else
     AC_ERROR([required program ``perl'' not found])
 fi
+
+AC_MSG_CHECKING([for Perl knowledge of system])
+perl_osname="`$perl_prog -e 'use Config; print $Config{osname}'`";
+perl_osvers="`$perl_prog -e 'use Config; print $Config{osvers}'`";
+perl_os="$perl_osname-$perl_osvers"
+AC_SUBST(perl_osname)
+AC_SUBST(perl_osvers)
+AC_SUBST(perl_os)
+AC_MSG_RESULT([$perl_os])
 
 AC_MSG_CHECKING([for Perl standard compiler])
 perl_cc="`$perl_prog -e 'use Config; print $Config{cc}'`";
@@ -72,8 +83,7 @@ AC_SUBST(perl_optimize)
 
 AC_MSG_CHECKING([for Perl standard compilation flags])
 perl_ccflags="`$perl_prog -e 'use Config; print $Config{ccflags}'`";
-perl_osname="`$perl_prog -e 'use Config; print $Config{osname}'`";
-case $perl_osname in
+case $perl_os in
     *hpux* ) perl_ccflags="$perl_ccflags -Wp,-H32768" ;;
 esac
 AC_MSG_RESULT([$perl_ccflags])
@@ -81,8 +91,8 @@ AC_SUBST(perl_ccflags)
 
 AC_MSG_CHECKING([for Perl standard link flags])
 perl_ldflags="`$perl_prog -e 'use Config; print $Config{ldflags}'`";
-case $perl_osname in
-    *irix* ) perl_ldflags="$perl_ldflags '-Wl,-woff 85'" ;;
+case $perl_os in
+    *irix-6.* ) perl_ldflags="$perl_ldflags '-Wl,-woff 85'" ;;
 esac
 AC_MSG_RESULT([$perl_ldflags])
 AC_SUBST(perl_ldflags)
@@ -136,7 +146,7 @@ AC_PROG_CC
 AC_PROG_RANLIB
 AC_PROGRAM_CHECK(AR, ar, ar,)
 AC_PROGRAM_CHECK(SIZE, size, size,)
-case $perl_osname in
+case $perl_os in
     *irix* ) SIZE="$SIZE -B" ;;
 esac
 
@@ -183,7 +193,6 @@ AC_SET_MAKE
 AC_PROG_INSTALL
 INSTALL_DATA='${INSTALL} -m 644'
 INSTALL_PROGRAM="${INSTALL_PROGRAM} -m 755"
-AC_PATH_PROGS(PATH_BOURNESHELL, bash sh, /bin/sh) 
 
 
 AC_CONFIGURE_PART(CHECK: Characteristic of System Headers and Libraries)

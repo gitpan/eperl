@@ -41,7 +41,7 @@
                      [--with-perl=/path/of/preferred/perl]
 
      b) Configure the ePerl source for building the Perl 5 interface modules:
-        $ perl Makefile.PL [PREFIX=/path/to/private/area/]
+        $ perl Makefile.PL [PREFIX=/path/to/private/perl/area/]
 
   3. Run the build process
 
@@ -57,8 +57,9 @@
   5. Installation
      
      Finally install it into /path/to/eperl/root/{bin,man}/ (in case of the
-     stand-alone program) or /path/to/private/area/lib/{Parse,Apache}/ (in
-     case of the Perl 5 interface modules):
+     stand-alone program) or
+     /path/to/private/perl/area/lib/site_perl/{Parse,Apache}/ (in case of the
+     Perl 5 interface modules):
      $ make install
 
   6. Cleanup

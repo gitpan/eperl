@@ -308,7 +308,7 @@ int main(int argc, char **argv, char **env)
     }
 
     /*  parse the option arguments */
-	opterr = 0;
+    opterr = 0;
     while ((c = getopt(argc, argv, ":m:B:E:id:D:a:o:kxI:PCLTwcvVrlh")) != -1) {
         if (optarg == NULL) 
             optarg = "(null)";
@@ -451,11 +451,15 @@ int main(int argc, char **argv, char **env)
         else {
             mode = (mode == MODE_UNKNOWN ? MODE_CGI : mode);
         }
+
+        /* set the command line for ps output */
+        sprintf(ca, "%s %s [%sCGI]", argv[0], source, mode == MODE_NPHCGI ? "NPH-" : "");
+        argv[0] = strdup(ca);
     }
     else {
         /* else we are used in a wrong way... */
-		fprintf(stderr, "%s: Missing required file to process\n", progname);
-		fprintf(stderr, "%s: Use either a filename, ``-'' for stdin or PATH_TRANSLATED.\n\n", progname);
+        fprintf(stderr, "%s: Missing required file to process\n", progname);
+        fprintf(stderr, "%s: Use either a filename, ``-'' for stdin or PATH_TRANSLATED.\n\n", progname);
         give_usage(progname);
         myexit(EX_USAGE);
     }

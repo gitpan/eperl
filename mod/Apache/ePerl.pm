@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use vars qw($nDone $nOk $nFail $Cache);
 
 #   private version number
-$VERSION = "2.2b4";
+$VERSION = "2.2b7";
 
 #   globals
 $nDone = 0;
@@ -114,7 +114,7 @@ sub handler {
         }
 
         #   precompile the source into P-code
-        $error$VERSION$VERSION = "2.2b4";
+        $error = "";
         if (not Parse::ePerl::Precompile({
             Script => $data,
             Name   => $filename, 

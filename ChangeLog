@@ -2,6 +2,59 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2b6 and 2.2b7
+  -------------------------------
+
+  970602 o now etc/newvers always removes
+           /tmp/genopt 
+           [Thanks to Phil Ritzenthaler <phil@cgrg.ohio-state.edu>
+            for hint]
+         o now configure determines the full 
+           operating system id from Perl's Config.pm
+  970604 o set -Wl,-woff 85 only for IRIX 6.x because
+           IRIX 5.x hates this option..
+           [Thanks to Ewan McPhail <ewan@epages.iafrica.com> and
+            Phil Ritzenthaler <phil@cgrg.ohio-state.edu> for hint]
+         o fixed the preprocessor: the inital searching
+           of the directives was broken, only worked
+           when a specific order was used. So some
+           directives were skipped :-(
+         o added a #sinclude (secure include) directive
+           which is the same as #include but removes
+           all begin and end delimiters, so this one
+           is a secure way of including stuff from 
+           foreign servers.
+         o rewritten the preprocessor part of eperl.pod
+
+  Changes between 2.2b5 and 2.2b6
+  -------------------------------
+
+  970601 o added a #c preprocessor directive
+           to be able to comment out stuff
+           (even to use "#c #include..." to
+           disable an include directive)
+           [Thanks to J. Douglas Dunlop for hint]
+         o now the preprocessor checks the
+           HTTP response code when http://..
+           is uses as the file:
+           - when 301 and 302 are returned
+             it searches for the new URL in the Location-header 
+             and restarts with this one
+           - when a response code other
+             than 200 (OK) is returned it fails the same way 
+             as it fails when a local file it not found: 
+             with an error.
+           [Thanks to J. Douglas Dunlop for hint]
+         o removed the Bash check in configure
+           because this it not used 
+
+  Changes between 2.2b4 and 2.2b5
+  -------------------------------
+
+  970530 o fixed perlvers -> perl_vers stuff
+         o fixed again problem with VERSION stuff:
+           ePerl.pm's were broken (ARGL!)
+
   Changes between 2.2b3 and 2.2b4
   -------------------------------
 

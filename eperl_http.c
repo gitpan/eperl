@@ -206,11 +206,14 @@ FILE *HTTP_openURLasFP(char *url)
     struct protoent *pe;
     char cmd[1024];
     char buf[1024];
+    char newurl[8192];
     char *host;
     char *port;
     char *file;
-    int s;  
     FILE *fp;
+    char *cp;
+    char *cp2;
+    int s;  
 
     /* parse URL */
     host = HTTP_HostOfURL(url);
@@ -250,7 +253,46 @@ FILE *HTTP_openURLasFP(char *url)
     /* convert the file descriptor to a FILE pointer */
     fp = fdopen(s, "r");
 
-    /* now read until a blank line, i.e. skip HTTP/1.0 headers */ 
+    /* read the HTTP response line and check for 200 OK response */
+    if (fgets(buf, sizeof(buf), fp) == NULL)
+        return NULL;
+    if (strncmp(buf, "HTTP/1.", 7) != 0)
+        return NULL;
+    if (buf[7] != '0' && buf[7] != '1')
+        return NULL;
+    for (cp = buf+8; *cp == ' ' || *cp == '\t'; cp++)
+        ;
+    if (strncmp(cp, "200", 3 /* OK */) != 0) {
+        if (strncmp(cp, "301", 3 /* MOVED PERMANENTLY */) != 0 ||
+            strncmp(cp, "302", 3 /* MOVED TEMPORARILY */) != 0   ) {
+            /* we try to determine the new URL from
+               the HTTP header 'Location' and restart from
+               the beginning if an URL is found */
+            newurl[0] = NUL;
+            while (fgets(buf, sizeof(buf), fp) != NULL) {
+                if ((*buf == '\n' && *(buf+1) == NUL) ||
+                    (*buf == '\n' && *(buf+1) == '\r' && *(buf+2) == NUL) ||
+                    (*buf == '\r' && *(buf+1) == '\n' && *(buf+2) == NUL))
+                    break;
+                if (strncasecmp(buf, "Location:", 9) == 0) {
+                    for (cp = buf+9; *cp == ' ' || *cp == '\t'; cp++)
+                        ;
+                    for (cp2 = cp; *cp2 != ' ' && *cp2 != '\t' && *cp2 != '\n' && *cp2 != NUL; cp2++)
+                        ;
+                    *cp2 = NUL;
+                    strcpy(newurl, cp);
+                    break;
+                }
+            }
+            if (newurl[0] != NUL)
+                return HTTP_openURLasFP(newurl);
+            else
+                return NULL;
+        }
+        return NULL;
+    }
+
+    /* now read until a blank line, i.e. skip HTTP headers */ 
     while (fgets(buf, sizeof(buf), fp) != NULL) {
         if ((*buf == '\n' && *(buf+1) == NUL) ||
             (*buf == '\n' && *(buf+1) == '\r' && *(buf+2) == NUL) ||

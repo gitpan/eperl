@@ -73,7 +73,7 @@
 .nr % 0
 .rr F
 .\}
-.TH EPERL 1 "EN" "30/May/97" "Ralf S. Engelschall"
+.TH EPERL 1 "EN" "4/Jun/97" "Ralf S. Engelschall"
 .IX Title "EPERL 1"
 .UC
 .IX Name "ePerl - Embedded Perl 5 Language"
@@ -174,7 +174,7 @@
 ePerl \- Embedded Perl 5 Language
 .SH "VERSION"
 .IX Header "VERSION"
-2.2b4 (30-05-1997)
+2.2b7 (04-06-1997)
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \fBeperl\fR
@@ -660,6 +660,71 @@ some steps at compile time. See \fIeperl_security.h\fR.
 independent of the runtime mode and independent if ePerl has switched to the
 \s-1UID/GID\s0 of the owner. For security reasons, the effective \s-1UID/GID\s0 is always
 destroyed before the script is executed.\fR
+.Sh "ePerl Preprocessor"
+.IX Subsection "ePerl Preprocessor"
+ePerl provides an own preprocessor similar to \fI\s-1CPP\s0\fR in style which is either
+enabled manually via option \fB\-P\fR or automatically when ePerl runs in
+(\s-1NPH\s0\-)\s-1CGI\s0 mode.  The following directives are supported:
+.Ip "\f(CW#include path\fR " 4
+.IX Item "\f(CW#include path\fR "
+This directive is an include directive which can be used to include really any
+stuff, but was actually designed to be used to include other ePerl source
+files. The \fIpath\fR can be either a relative or absolute path for the local
+filesystem or a fully qualified \s-1HTTP\s0 \s-1URL\s0.
+.Sp
+In case of the absolute path the file is directly accessed on the filesystem,
+while the relative path is first searched in the current working directory and
+then in all directories specified via option \fB\-I\fR. In the third case
+(\s-1HTTP\s0 \s-1URL\s0) the file is retrieves via a \s-1HTTP/1\s0.0 request on the network. 
+Here \s-1HTTP\s0 redirects (response codes 301 and 302) are supported, too.
+.Sp
+Notice: While ePerl strictly preserved line number when translating the
+bristled ePerl format to plain Perl format, the ePerl preprocessor can't do
+this (because its a \fBpre\fRprocessor which expands) for this directive.  So,
+whenever you use \f(CW#include\fR, remember that line numbers in error messages are
+wrong.
+.Sp
+Also notice one important security aspect: Because you can include any stuff
+as it is provided with this directive, use it only for stuff which is under
+your direct control. Don't use this directive to include foreign data, at
+least not from external webservers. For instance say you have a ePerl page
+with \f(CW#include http://www.foreigner.com/nice-page.html\fR and at the next
+request of this page your filesystem is lost! Why? Because the foreigner
+recognizes that you include his page and are using ePerl and just put a simple
+``\f(CW<?  \fIsystem\fR\|("rm -rf /"); !>\fR'\*(R' in his page. Think about it.
+\fI\s-1NEVER\s0 \s-1USE\s0 #\s-1INCLUDE\s0 \s-1FOR\s0 \s-1ANY\s0 \s-1DATA\s0 \s-1WHICH\s0 \s-1IS\s0 \s-1NOT\s0 \s-1UNDER\s0 \s-1YOUR\s0 \s-1OWN\s0 \s-1CONTROL\s0\fR.
+Instead always use \f(CW#sinclude\fR for such situations.
+.Ip "\f(CW#sinclude path\fR " 4
+.IX Item "\f(CW#sinclude path\fR "
+This is the secure variant of \f(CW#include\fR where after reading the data from
+\fIpath\fR all ePerl begin and end delimiters are removed. So risky ePerl blocks
+lost their meaning and are converted to plain text. Always use this directive
+when you want to include data which is not under your own control.
+.Ip "\f(CW#if expr\fR, \f(CW#else\fR, \f(CW#endif\fR" 4
+.IX Item "\f(CW#if expr\fR, \f(CW#else\fR, \f(CW#endif\fR"
+These implement a \s-1CPP\s0\-style \f(CW#if-[#else-]#endif\fR construct, but with a Perl
+semantic. While the other directives are real preprocessor commands which are
+evaluated at the preprocessing step, this construct is actually just
+transformed into a low-level ePerl construct, so it is \fBnot\fR actually
+evaluated at the preprocessing step. It is just a handy shortcut for the
+following (where \s-1BD\s0 is the currently used begin delimiter and \s-1ED\s0 the end
+delimiter):
+.Sp
+.Vb 3
+\&  ``#if expr''  ->  ``BD if (expr) { _ ED//''
+\&  ``#else''     ->  ``BD } else { _ ED//''
+\&  ``#endif''    ->  ``BD } _ ED//''
+.Ve
+The advantage of this unusual aproach is that the if-condition really can be
+any valid Perl expression which provides maximum flexibility. The disadvantage
+is that you cannot use the if-construct to make real preprocessing decisions.
+As you can see, the design goal was just to provide a shorthand for the more
+complicated Perl constructs.
+.Ip "\f(CW#c\fR" 4
+.IX Item "\f(CW#c\fR"
+This is the comment directive which just discards all data up to and including
+the newline character. Use this one to comment out any stuff, even other
+preprocessor directives.
 .Sh "Provided Functionality"
 .IX Subsection "Provided Functionality"
 Up to know you've understand that ePerl provides a nice facility to embed Perl
@@ -774,47 +839,13 @@ the console (\fI/dev/tty\fR) before executing it. Only for debugging problems wi
 the inputfile conversion.
 .Ip "\fB\-I\fR \fIdirectory\fR" 4
 .IX Item "\fB\-I\fR \fIdirectory\fR"
-Specify a directory which is both used for \f(CW#include\fR directives of the ePerl
-preprocessor and added to \f(CW@INC\fR under runtime.  This option can occur more
-than once.
+Specify a directory which is both used for \f(CW#include\fR and \f(CW#sinclude\fR
+directives of the ePerl preprocessor and added to \f(CW@INC\fR under runtime.  This
+option can occur more than once.
 .Ip "\fB\-P\fR" 4
 .IX Item "\fB\-P\fR"
-This enables the special ePerl Preprocessor which provides the following
-\s-1CPP\s0\-style constructs:
-.Sp
-.Vb 7
-\& #include /absolute/path
-\& #include relative/path
-\& #include http://host[:port]/path 
-\&   
-\& #if expr
-\& #else
-\& #endif
-.Ve
-The first directive is an include directive which can be used for any stuff,
-but actually designed to be used to include other ePerl source files. The
-\f(CW/absolute/path\fR is directly accessed on the filesystem, while
-\f(CWrelative/path\fR is first searched in the current working directory and then
-in all directories specified via ePerl option \fB\-I\fR. In the third case the
-file is given as an \s-1URL\s0, so a \s-1HTTP/1\s0.0 request used to retrieve the file.
-.Sp
-The other directives implement \s-1CPP\s0\-style \f(CW#if-[#else-]#endif\fR constructs, but
-with a Perl semantic. While \f(CW#include\fR really is a preprocessor command which
-is evaluated at the preprocessing step, this if-construct is actually just
-transformed into a low-level ePerl construct, so are \fBnot\fR actually evaluated
-at the preprocessing step. 
-.Sp
-.Vb 3
-\&  ``#if expr''  ->  ``BD if (expr) { _ ED//''
-\&  ``#else''     ->  ``BD } else { _ ED//''
-\&  ``#endif''    ->  ``BD } _ ED//''
-.Ve
-(where \s-1BD\s0 is the currently used begin delimiter and \s-1ED\s0 the end delimiter).
-The advantage of this unusual aproach is that the if-condition really can be
-any valid Perl expression which provides maximum flexibility. The disadvantage
-is that you cannot use the if-construct to make real preprocessing decisions.
-As you can see, the design goal was just to provide a shorthand for the more
-complicated Perl constructs.
+Manually enables the special ePerl Preprocessor (see above). This option is
+enabled for all \s-1CGI\s0 modes automatically.
 .Ip "\fB\-C\fR" 4
 .IX Item "\fB\-C\fR"
 This enables the \s-1HTML\s0 entity conversion for ePerl blocks. This option is

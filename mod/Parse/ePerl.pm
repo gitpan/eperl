@@ -7,22 +7,23 @@ package Parse::ePerl;
 
 #   requirements and runtime behaviour
 require 5.00390;
-use strict;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
-use Carp;
-#use Safe;
 
 require Exporter;
 require DynaLoader;
 require AutoLoader;
 
-$VERSION = "2.2b4";
-
-@ISA       = qw(Exporter DynaLoader);
-@EXPORT    = qw();
+@ISA    = qw(Exporter DynaLoader);
+@EXPORT = qw();
 
 #   import of used modules
+use strict;
+use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
+use Carp;
 use Cwd qw(fastcwd);
+#use Safe;
+
+#   private version number
+$VERSION = "2.2b7";
 
 #   autoloading (currently unused)
 sub AUTOLOAD {
@@ -137,7 +138,7 @@ sub Precompile ($) {
     #   capture the warning messages which
     #   usually are send to STDERR and
     #   disable the die of the interpreter
-    $error$VERSION$VERSION = "2.2b4";
+    $error = "";
     local $SIG{'__WARN__'} = sub { $error .= $_[0]; };
     local $SIG{'__DIE__'};
 
@@ -155,7 +156,7 @@ sub Precompile ($) {
     }
     else {
         ${$p->{Result}} = $func;
-        $@$VERSION$VERSION = "2.2b4";
+        $@ = "";
         return 1;
     }
 }
@@ -197,7 +198,7 @@ sub Evaluate ($) {
     #   usually are send to STDERR (and which
     #   cannot be captured by our tie!) plus
     #   disable the die of the interpreter
-    $error$VERSION$VERSION = "2.2b4";
+    $error = "";
     local $SIG{'__WARN__'} = sub { $error .= $_[0]; };
     local $SIG{'__DIE__'};
 
@@ -244,7 +245,7 @@ sub Evaluate ($) {
         return 0;
     }
     else {
-        $@$VERSION$VERSION = "2.2b4";
+        $@ = "";
         return 1;
     }
 }
