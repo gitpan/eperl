@@ -1,0 +1,33 @@
+
+  ChangeLog of ePerl
+  ==================
+
+  v1.0  960310 *GENESIS* 
+
+        960323 - works fine with Apache 1.1b0+ak
+
+  --------------------------------------------------------------------
+  
+  v1.1  960415 - fixed a bug in the escape code: more chars 
+                 have to be escaped!
+
+  --------------------------------------------------------------------
+  
+  v1.2  960510 - created GNU autoconf files, Makefiles, etc.
+
+  --------------------------------------------------------------------
+  
+  v1.3  960622 - created WWW pages
+               - changed all old EPL references to ePerl
+               - added a lot of comments to the source
+               - made the begin and end delimiters variable
+               - changed the end delimiter from ">" to "!>"
+                 because ">" makes problems if it occurs inside the 
+                 ePerl block
+
+  --------------------------------------------------------------------
+
+  v1.4  960906 - changed source from PATH_INFO to PATH_TRANSLATED
+               - cleanup the sources and released it
+                 the first time officially on the Web
+

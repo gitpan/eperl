@@ -1,0 +1,22 @@
+        ____           _ 
+    ___|  _ \ ___ _ __| |
+   / _ \ |_) / _ \ '__| |
+  |  __/  __/  __/ |  | |
+   \___|_|   \___|_|  |_|
+                         
+  ePerl -- Embedded Perl 5 for HTML
+
+  Version 1.4 (960906)
+
+  ePerl interprets a HTML markup file bristled with Perl5 program statements
+  by expanding the Perl5 code. It is a CGI/1.0 compliant program which
+  produces pure HTML markup as its result on stdout.
+
+  The documentation and latest release can be found on
+  http://www.engelschall.com/sw/eperl/
+
+  Copyright (c) 1996 Ralf S. Engelschall, All rights reserved.
+
+  Look at the file LICENSE for detailed license information 
+  about this product.
+

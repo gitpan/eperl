@@ -1,0 +1,21 @@
+
+INSTALLATION
+============
+
+1. Make sure you have Perl 5.002 or higher already
+   installed on your system. The perl program should be in your path. If you
+   have different perl binaries in your path the program with the latest
+   version number will be used.
+
+2. Compile the ePerl interpreter
+
+   $ ./configure
+   $ make
+
+3. Install it into your HTTP Server. For Apache 1.1.1 the following will
+   work:
+
+   ScriptAlias  /internal/cgi              /sw/lib/apache/cgi-bin
+   AddType      application/x-httpd-eperl  phtml eperl epl
+   Action       application/x-httpd-eperl  /internal/cgi/user/eperl
+

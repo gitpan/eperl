@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>demo-02: Perl subprocedures</title>
+</head>
+<body>
+<h1>demo-02: Perl subprocedures</h1>
+
+<?
+@dow = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
+@moy = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' );
+sub ctime {
+    local($time) = @_[0];
+
+    local($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = 
+        localtime($time);
+    local($str) = sprintf("%s %s %2d %02d:%02d:%02d 19%s%s",
+         $dow[$wday], $moy[$mon], $mday, $hour, $min, $sec, $year, 
+         $isdst ?  " DST" : "");
+    return $str;
+}
+!>
+
+Welcome, our local time is <? print &ctime(time()); !>.
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+##
+##  Makefile.in -- ePerl Makefile
+##
+@SET_MAKE@
+
+# ------------------------------------------------
+
+PERL=@PATH_PERL@
+CC=@CC@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+
+# ------------------------------------------------
+
+all: config eperl
+
+# ------------------------------------------------
+
+config: configure ac.h.in
+
+configure: configure.in aclocal.m4 acconfig.h
+	rm -f configure
+	autoconf configure.in >configure
+	./fixconfigure configure
+	chmod 770 configure
+
+ac.h.in: configure.in acconfig.h
+	rm -f ac.h.in
+	autoheader configure.in >ac.h.in
+
+# ------------------------------------------------
+
+eperl: eperl.o
+	-@LIBDIR="`$(PERL) -e 'use Config; print $$Config{archlib}'`/CORE";\
+	INCDIR=$$LIBDIR; \
+	LIBFILES="-lperl `$(PERL) -e 'use Config; print $$Config{libs}'`"; \
+	echo "$(CC) $(CFLAGS) -o eperl eperl.o $(LDFLAGS) -L$$INCDIR $$LIBFILES"; \
+	$(CC) $(CFLAGS) -o eperl eperl.o $(LDFLAGS) -L$$INCDIR $$LIBFILES; \
+	strip eperl; \
+	ls -l eperl; size eperl
+
+eperl.o: eperl.c
+	-@LIBDIR="`$(PERL) -e 'use Config; print $$Config{archlib}'`/CORE";\
+	INCDIR=$$LIBDIR; \
+	echo "$(CC) $(CFLAGS) -I$$INCDIR -o eperl.o -c eperl.c"; \
+	$(CC) $(CFLAGS) -I$$INCDIR -o eperl.o -c eperl.c
+
+# ------------------------------------------------
+
+install:
+	@echo "Just copy 'eperl' to your cgi-bin directory"
+
+# ------------------------------------------------
+
+clean:
+	-rm -f eperl.o eperl
+
+distclean:
+	-@make clean
+	-rm -f ac.h
+	-rm -f config.status config.cache config.log
+	-rm -f Makefile
+
+##EOF##
