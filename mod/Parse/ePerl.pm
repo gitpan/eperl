@@ -53,7 +53,7 @@ use Cwd qw(fastcwd);
 @EXPORT = qw();
 
 #   private version number
-$VERSION = "2.2.4";
+$VERSION = "2.2.5";
 
 
 #   autoloading (currently unused)
@@ -171,7 +171,7 @@ sub Precompile ($) {
     #   capture the warning messages which
     #   usually are send to STDERR and
     #   disable the die of the interpreter
-    $error = "";
+    $error = '';
     local $SIG{'__WARN__'} = sub { $error .= $_[0]; };
     local $SIG{'__DIE__'};
 
@@ -185,6 +185,7 @@ sub Precompile ($) {
     #my $cp = new Safe("Safe::ePerl");
     #$func = $cp->reval('$func = sub {'.$p->{Script}.'};');
     eval("\$func = sub {" . $p->{Script} . "};");
+    $error = "$@" if ($@);
 
     #   restore Cwd
     chdir($ocwd) if ($p->{Cwd});

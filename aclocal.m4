@@ -410,3 +410,54 @@ define(AC_INIT_BINSH,
 [#! /bin/sh
 #  AAA
 ])
+dnl
+dnl ##########################################################
+dnl ##
+dnl ##  Built Environment
+dnl ##
+dnl ##########################################################
+dnl
+define(AC_BUILD_USER,[dnl
+AC_MSG_CHECKING(for build user)
+username="$LOGNAME"
+if test ".$username" = .; then
+    username="$USER"
+    if test ".$username" = .; then
+        username="`whoami 2>/dev/null | sed -e 's/\n$//'`"
+        if test ".$username" = .; then
+            username="`who am i 2>/dev/null | cut '-d ' -f1`"
+            if test ".$username" = .; then
+                username="unknown"
+            fi
+        fi
+    fi
+fi
+hostname="`uname -n | sed -e 's/\n$//'`"
+if test ".$hostname" = .; then
+    hostname="`hostname | sed -e 's/\n$//'`"
+    if test ".$hostname" = .; then
+        hostname="unknown"
+    fi
+fi
+hostname="`echo $hostname | sed -e 's/\..*//'`"
+if test -f /etc/resolv.conf; then
+    domainname="`grep domain /etc/resolv.conf | sed -e 's/.*domain//' -e 's/^ *//' -e 's/^	*//' -e 's/^\.//' -e 's/^/./'`"
+    if test ".$domainname" = .; then
+        domainname="`grep search /etc/resolv.conf | sed -e 's/.*search//' -e 's/^ *//' -e 's/^	*//' -e 's/ .*//'`"
+    fi
+else
+    domainname="";
+fi
+build_user="$username@$hostname$domainname"
+AC_SUBST(build_user)
+AC_MSG_RESULT($build_user)
+])dnl
+define(AC_BUILD_TIME,[dnl
+AC_MSG_CHECKING(for build time)
+build_time_ctime="`date | sed -e 's/\n$//'`"
+build_time_iso="`date '+%d-%b-%Y' | sed -e 's/\n$//'`"
+AC_MSG_RESULT($build_time_iso)
+AC_SUBST(build_time_ctime)
+AC_SUBST(build_time_iso)
+])dnl
+dnl

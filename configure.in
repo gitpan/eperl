@@ -155,7 +155,9 @@ esac
 AC_MSG_RESULT([$x])
 AC_SUBST(perl_ccdlflags)
 
-AC_CONFIGURE_PART(CHECK: System Build Tools)
+AC_CONFIGURE_PART(CHECK: System Build Environment)
+AC_BUILD_USER
+AC_BUILD_TIME
 AC_PROG_CC
 AC_PROG_RANLIB
 AC_PROGRAM_CHECK(AR, ar, ar,)

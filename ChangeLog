@@ -2,13 +2,25 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2.4 and 2.2.5
+  -------------------------------
+  [Bugfix and Minor Enhancement]
+
+  970902 o fixed error catching for Parse::ePerl::Precompile.
+           [Thanks to Joseph W. Norton <norton@alum.mit.edu> for hint]
+  970903 o added better support for PerlIO/StdIO. The combination
+           PerlIO/SfIO is currently untested and may be broken because
+           the I/O redirection for SfIO is very different from StdIO.
+         o added Perl I/O layer info to eperl -V
+         o added built time/user info to configure and eperl -V
+
   Changes between 2.2.3 and 2.2.4
   -------------------------------
-  [Bugfix and Enhancement]
+  [Bugfix and Major Enhancement]
 
   970901 o added more hints to PORTING file
          o fixed a bug in Parse::ePerl for case where $error was undefined
-           [Thanks to Joe Norton <norton@alum.mit.edu> for patch]
+           [Thanks to Joseph W. Norton <norton@alum.mit.edu> for patch]
          o fixed -I option: now it works as expected even for
            cases where you want to add stuff to @INC which is
            needed at _parse_ time.
@@ -19,7 +31,7 @@
 
   Changes between 2.2.2 and 2.2.3
   -------------------------------
-  [Security Bugfix and Enhancement]
+  [Security Bugfix and Minor Enhancement]
 
   970821 o fixed installation section in Apache::ePerl manpage
          o ***** SECURITY BUGFIX *****

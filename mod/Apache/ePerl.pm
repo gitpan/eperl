@@ -51,7 +51,7 @@ use File::Basename qw(dirname);
 use Parse::ePerl;
 
 #   private version number
-$VERSION = "2.2.4";
+$VERSION = "2.2.5";
 
 #   globals
 $nDone  = 0;

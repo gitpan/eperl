@@ -34,11 +34,8 @@
 */
 
 #include "eperl_global.h"
+#include "eperl_perl5.h"
 #include "eperl_proto.h"
-
-#include <EXTERN.h>
-#include <perl.h>                 
-
 
 #ifdef HAVE_PERL_DYNALOADER
 

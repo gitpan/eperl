@@ -35,16 +35,9 @@
 
 #include "eperl_global.h"
 #include "eperl_security.h"
-#include "eperl_proto.h"
 #include "eperl_getopt.h"
-
-#include <EXTERN.h>
-#include <perl.h>                 
-
-/* Perl/SFIO kludge */
-#ifdef USE_SFIO
-#define fwrite PerlIO_write
-#endif
+#include "eperl_perl5.h"
+#include "eperl_proto.h"
 
 int mode = MODE_UNKNOWN;
 
@@ -155,10 +148,13 @@ void give_version_extended(void)
     fprintf(stdout, "%s\n", ePerl_Hello);
     fprintf(stdout, "\n");
     fprintf(stdout, "Characteristics of this binary:\n");
-    fprintf(stdout, "  Perl 5 Version    : %s (%s)\n", AC_perl_vers, AC_perl_prog);
-    fprintf(stdout, "  Perl 5 Library    : %s/CORE/libperl.a\n", AC_perl_archlib);
-    fprintf(stdout, "  Perl 5 DynaLoader : %s\n", AC_perl_dla);
-    fprintf(stdout, "  Additional Libs   : %s\n", AC_perl_libs);
+    fprintf(stdout, "  Perl Version    : %s (%s)\n", AC_perl_vers, AC_perl_prog);
+    fprintf(stdout, "  Perl I/O Layer  : %s\n", PERL_IO_LAYER_ID);
+    fprintf(stdout, "  Perl Library    : %s/CORE/libperl.a\n", AC_perl_archlib);
+    fprintf(stdout, "  Perl DynaLoader : %s\n", AC_perl_dla);
+    fprintf(stdout, "  System Libs     : %s\n", AC_perl_libs);
+    fprintf(stdout, "  Built User      : %s\n", AC_build_user);
+    fprintf(stdout, "  Built Time      : %s\n", AC_build_time_iso);
     fprintf(stdout, "\n");
 }
 
