@@ -23,7 +23,7 @@ use Cwd qw(fastcwd);
 #use Safe;
 
 #   private version number
-$VERSION = "2.2b7";
+$VERSION = "2.2b9";
 
 #   autoloading (currently unused)
 sub AUTOLOAD {

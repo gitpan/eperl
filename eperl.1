@@ -45,16 +45,36 @@
 .if (\n(.H=4u)&(1m=20u) .ds -- \(*W\h'-12u'\(*W\h'-8u'-\" diablo 12 pitch
 .ds L" ""
 .ds R" ""
+'''   \*(M", \*(S", \*(N" and \*(T" are the equivalent of
+'''   \*(L" and \*(R", except that they are used on ".xx" lines,
+'''   such as .IP and .SH, which do another additional levels of
+'''   double-quote interpretation
+.ds M" """
+.ds S" """
+.ds N" """""
+.ds T" """""
 .ds L' '
 .ds R' '
+.ds M' '
+.ds S' '
+.ds N' '
+.ds T' '
 'br\}
 .el\{\
 .ds -- \(em\|
 .tr \*(Tr
 .ds L" ``
 .ds R" ''
+.ds M" ``
+.ds S" ''
+.ds N" ``
+.ds T" ''
 .ds L' `
 .ds R' '
+.ds M' `
+.ds S' '
+.ds N' `
+.ds T' '
 .ds PI \(*p
 'br\}
 .\"	If the F register is turned on, we'll generate
@@ -73,7 +93,7 @@
 .nr % 0
 .rr F
 .\}
-.TH EPERL 1 "EN" "4/Jun/97" "Ralf S. Engelschall"
+.TH EPERL 1 "EN" "28/Jun/97" "Ralf S. Engelschall"
 .IX Title "EPERL 1"
 .UC
 .IX Name "ePerl - Embedded Perl 5 Language"
@@ -174,7 +194,7 @@
 ePerl \- Embedded Perl 5 Language
 .SH "VERSION"
 .IX Header "VERSION"
-2.2b7 (04-06-1997)
+2.2b9 (28-06-1997)
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \fBeperl\fR
@@ -700,8 +720,8 @@ This is the secure variant of \f(CW#include\fR where after reading the data from
 \fIpath\fR all ePerl begin and end delimiters are removed. So risky ePerl blocks
 lost their meaning and are converted to plain text. Always use this directive
 when you want to include data which is not under your own control.
-.Ip "\f(CW#if expr\fR, \f(CW#else\fR, \f(CW#endif\fR" 4
-.IX Item "\f(CW#if expr\fR, \f(CW#else\fR, \f(CW#endif\fR"
+.Ip "\f(CW#if expr\fR, \f(CW#elsif expr\fR, \f(CW#else\fR, \f(CW#endif\fR" 4
+.IX Item "\f(CW#if expr\fR, \f(CW#elsif expr\fR, \f(CW#else\fR, \f(CW#endif\fR"
 These implement a \s-1CPP\s0\-style \f(CW#if-[#else-]#endif\fR construct, but with a Perl
 semantic. While the other directives are real preprocessor commands which are
 evaluated at the preprocessing step, this construct is actually just
@@ -710,10 +730,11 @@ evaluated at the preprocessing step. It is just a handy shortcut for the
 following (where \s-1BD\s0 is the currently used begin delimiter and \s-1ED\s0 the end
 delimiter):
 .Sp
-.Vb 3
-\&  ``#if expr''  ->  ``BD if (expr) { _ ED//''
-\&  ``#else''     ->  ``BD } else { _ ED//''
-\&  ``#endif''    ->  ``BD } _ ED//''
+.Vb 4
+\&  ``#if expr''    ->  ``BD if (expr) { _ ED//''
+\&  ``#elsif expr'' ->  ``BD } elsif (expr) { _ ED//''
+\&  ``#else''       ->  ``BD } else { _ ED//''
+\&  ``#endif''      ->  ``BD } _ ED//''
 .Ve
 The advantage of this unusual aproach is that the if-condition really can be
 any valid Perl expression which provides maximum flexibility. The disadvantage
@@ -952,6 +973,12 @@ The ePerl identification string.
 .Ip "\f(CWVERSION_LANGUAGE\fR" 4
 .IX Item "\f(CWVERSION_LANGUAGE\fR"
 The identification string of the used Perl interpreter library.
+.Sh "Provided Built-In Images"
+.IX Subsection "Provided Built-In Images"
+.Ip "\f(CWlogo.gif\fR" 4
+.IX Item "\f(CWlogo.gif\fR"
+.Ip "\f(CWpowered.gif\fR" 4
+.IX Item "\f(CWpowered.gif\fR"
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 .PP
@@ -967,8 +994,8 @@ The identification string of the used Perl interpreter library.
 Web-References:
 .PP
 .Vb 3
-\&  ePerl:  http://www.engelschall.com/sw/eperl/
 \&  Perl:   perl(1),  http://www.perl.com/perl/
+\&  ePerl:  eperl(1), http://www.engelschall.com/sw/eperl/
 \&  Apache: httpd(8), http://www.apache.org/
 .Ve
 

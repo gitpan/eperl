@@ -9,7 +9,7 @@ char *ePerl_README = \
 "                         \n"\
 "  ePerl -- Embedded Perl 5 Language\n"\
 "\n"\
-"  Version 2.2b7 (04-06-1997)\n"\
+"  Version 2.2b9 (28-06-1997)\n"\
 "\n"\
 "  ePerl interprets an ASCII file bristled with Perl 5 program statements by\n"\
 "  evaluating the Perl 5 code while passing through the plain ASCII data. It\n"\
@@ -30,8 +30,8 @@ char *ePerl_README = \
 "\n"\
 "  This program is distributed in the hope that it will be useful, but WITHOUT\n"\
 "  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or\n"\
-"  FITNESS FOR A PARTICULAR PURPOSE.  See either the GNU General Public License\n"\
-"  or the Artistic License for more details.\n"\
+"  FITNESS FOR A PARTICULAR PURPOSE.  See either the Artistic License or the\n"\
+"  GNU General Public License for more details.\n"\
 "\n"\
 "                              Ralf S. Engelschall\n"\
 "                              rse@engelschall.com\n"\

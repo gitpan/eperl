@@ -26,7 +26,7 @@
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of
 **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
-**  GNU General Public License or the Artistic License for more details.
+**  Artistic License or the GNU General Public License for more details.
 **
 **  ======================================================================
 **
@@ -74,6 +74,7 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
         cp = getenv("SCRIPT_NAME");
         if (cp == NULL)
             cp = "UNKNOWN_IMG_DIR";
+        printf("<a href=\"http://www.engelschall.com/sw/eperl/\"><img src=\"%s/powered.gif\" alt=\"Powered By ePerl\" align=right border=0></a>\n", cp);
         printf("<table cellspacing=0 cellpadding=0 border=0>\n");
         printf("<tr>\n");
         printf("<td><img src=\"%s/logo.gif\" alt=\"Embedded Perl 5 Language\"></td>\n", cp);
@@ -83,12 +84,12 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
         printf("</tr>\n");
         printf("</table>\n");
         printf("<p>\n");
-        printf("<table bgcolor=\"#f0d0d0\" cellspacing=0 cellpadding=10 border=0>\n");
-        printf("<tr><td bgcolor=\"#d0c0c0\">\n");
+        printf("<table bgcolor=\"#d0d0f0\" cellspacing=0 cellpadding=10 border=0>\n");
+        printf("<tr><td bgcolor=\"#b0b0d0\">\n");
         printf("<font face=\"Arial, Helvetica\"><b>ERROR:</b></font>\n");
         printf("</td></tr>\n");
         printf("<tr><td>\n");
-        printf("<h1><font color=\"#cc3333\">%s</font></h1>\n", ca);
+        printf("<h1><font color=\"#3333cc\">%s</font></h1>\n", ca);
         printf("</td></tr>\n");
         printf("</table>\n");
         if (logfile != NULL) {
@@ -139,7 +140,7 @@ void give_version(void)
     fprintf(stdout, "This program is distributed in the hope that it will be useful,\n");
     fprintf(stdout, "but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
     fprintf(stdout, "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either\n");
-    fprintf(stdout, "the GNU General Public License or the Artistic License for more details.\n");
+    fprintf(stdout, "the Artistic License or the GNU General Public License for more details.\n");
     fprintf(stdout, "\n");
 }
 
@@ -171,6 +172,14 @@ void give_img_logo(void)
         HTTP_PrintResponseHeaders();
     printf("Content-Type: image/gif\n\n");
     fwrite(ePerl_LOGO_data, ePerl_LOGO_size, 1, stdout);
+}
+
+void give_img_powered(void)
+{
+    if (mode == MODE_NPHCGI)
+        HTTP_PrintResponseHeaders();
+    printf("Content-Type: image/gif\n\n");
+    fwrite(ePerl_POWERED_data, ePerl_POWERED_size, 1, stdout);
 }
 
 void give_usage(char *name)
@@ -486,6 +495,10 @@ int main(int argc, char **argv, char **env)
     if ((mode == MODE_CGI || mode == MODE_NPHCGI) && (cp = getenv("PATH_INFO")) != NULL) { 
         if (strcmp(cp, "/logo.gif") == 0) {
             give_img_logo();
+            myexit(0);
+        }
+        else if (strcmp(cp, "/powered.gif") == 0) {
+            give_img_powered();
             myexit(0);
         }
     }

@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use vars qw($nDone $nOk $nFail $Cache);
 
 #   private version number
-$VERSION = "2.2b7";
+$VERSION = "2.2b9";
 
 #   globals
 $nDone = 0;
@@ -186,6 +186,7 @@ Apache::ePerl - mod_perl handler for fast emulated ePerl facility
    PerlModule Apache::ePerl
 
    <Files ~ "/root/of/webmaster/area/.+\.iphtml$">
+   Options     +ExecCGI
    SetHandler  perl-script
    PerlHandler Apache::ePerl::handler
    </Files>
@@ -230,18 +231,20 @@ not use forking.
 
 Apache::ePerl was first implemented by Mark Imbriaco E<lt>mark@itribe.netE<gt>
 in December 1996 as a plain Perl module after he has seen the original ePerl
-from Ralf S. Engelschall. It implimented the ePerl idea, but not compatible to
-the original ePerl. In May 1997 Hanno Mueller E<lt>hmueller@kabel.deE<gt> has
-taken over the maintainance from Mark I. and enhanced Apache::ePerl by adding
-caching for P-Code, adding the missing chdir-stuff, etc. Nearly at the same
-time Ralf S. Engelschall was unhappy of the old Apache::ePerl from Mark I.
-and already started to write this version (the one you are current reading its
-POD). He has rewritten the complete module from scratch, but incorporated the
-P-Code caching idea and the Apache::Status implementation from Hanno M.'s
-version. The big difference between this one and Mark I.'s or Hanno M.'s
-versions are that that version makes use of the new Parse::ePerl module which
-itself incorporates the original ePerl parser. So this version is more
-compliant to the original ePerl facility.
+from Ralf S. Engelschall. It implemented the ePerl idea, but was not
+compatible to the original ePerl. In May 1997 Hanno Mueller
+E<lt>hmueller@kabel.deE<gt> has taken over the maintainance from Mark I. and
+enhanced Apache::ePerl by adding caching for P-Code, adding the missing chdir
+stuff, etc. 
+
+Nearly at the same time Ralf S. Engelschall was unhappy of the old
+Apache::ePerl from Mark I. and already started to write this version (the one
+you are current reading its POD). He has rewritten the complete module from
+scratch, but incorporated the P-Code caching idea and the Apache::Status usage
+from Hanno M.'s version. The big difference between this one and Mark I.'s or
+Hanno M.'s versions are that this version makes use of the new Parse::ePerl
+module which itself incorporates the original ePerl parser.  So this version
+is more compliant to the original ePerl facility.
 
 =head1 SEE ALSO
 

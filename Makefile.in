@@ -1,5 +1,6 @@
 ##
 ##  Makefile -- ePerl Makefile
+##  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
 ##
 @SET_MAKE@
 
@@ -103,19 +104,19 @@ _UPDATEVERS = \
 
 release: distclean fixperm
 	@$(_GETDISTINFO) \
-    _distname="eperl-$${_version}"; \
-    _tarball="/tmp/$${_distname}.tar.gz"; \
-    echo "Release Distribution: ePerl Version $$_version"; \
-    $(_BUILDDIST); \
-    mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz 
+	_distname="eperl-$${_version}"; \
+	_tarball="/tmp/$${_distname}.tar.gz"; \
+	echo "Release Distribution: ePerl Version $$_version"; \
+	$(_BUILDDIST); \
+	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz 
 
 snap: distclean fixperm
 	@$(_GETDISTINFO) \
-    _distname="eperl-$${_version}-SNAP-$$_date"; \
-    _tarball="/tmp/$${_distname}.tar.gz"; \
-    echo "Snap of whole source tree: ePerl Version $$_version as of $$_date"; \
-    $(_BUILDDIST); \
-    mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz 
+	_distname="eperl-$${_version}-SNAP-$$_date"; \
+	_tarball="/tmp/$${_distname}.tar.gz"; \
+	echo "Snap of whole source tree: ePerl Version $$_version as of $$_date"; \
+	$(_BUILDDIST); \
+	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz 
 
 new-version:
 	OPT=-iv; $(_NEWVERS)
@@ -153,12 +154,12 @@ PROTO_SRCS = \
  eperl_pp.c \
  eperl_sys.c \
  eperl_http.c \
- eperl_getopt.c \
  eperl_debug.c \
  eperl_version.c \
  eperl_readme.c \
  eperl_license.c \
- eperl_logo.c
+ eperl_logo.c \
+ eperl_powered.c
 
 SRCS = \
  eperl_main.c \
@@ -172,7 +173,8 @@ SRCS = \
  eperl_version.c \
  eperl_readme.c \
  eperl_license.c \
- eperl_logo.c
+ eperl_logo.c \
+ eperl_powered.c
 
 OBJS = \
  eperl_main.o \
@@ -186,7 +188,8 @@ OBJS = \
  eperl_version.o \
  eperl_readme.o \
  eperl_license.o \
- eperl_logo.o
+ eperl_logo.o \
+ eperl_powered.o
 
 eperl: $(OBJS)
 	$(CC) $(LDFLAGS) -o eperl $(OBJS) $(LDLIBS) $(dmalloc)
@@ -246,6 +249,13 @@ eperl_logo.c: eperl_logo.gif
 
 eperl_logo.o: eperl_logo.c
 	$(CC) $(CFLAGS) -c eperl_logo.c
+
+eperl_powered.c: eperl_powered.gif
+	./etc/bin2c eperl_powered.gif eperl_powered ePerl_POWERED
+
+eperl_powered.o: eperl_powered.c
+	$(CC) $(CFLAGS) -c eperl_powered.c
+
 
 mkproto:
 	./etc/mkproto eperl_proto.h $(PROTO_SRCS)

@@ -1,9 +1,20 @@
 <html>
 <head>
-<title>demo-02: Perl subprocedures</title>
+<title>demo.func</title>
 </head>
 <body>
-<h1>demo-02: Perl subprocedures</h1>
+<blockquote>
+<h1>demo.func</h1>
+<p>
+<!-- 
+##
+##  ePerl Demo: definition and usage of a Perl function
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
+##
+##  This defines a Perl function in a first ePerl block and
+##  later uses the function in another ePerl block.
+##
+-->
 
 <?
 @dow = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
@@ -23,5 +34,6 @@ sub ctime {
 
 Welcome, our local time is <? print &ctime(time()); !>.
 
+</blockquote>
 </body>
 </html>

@@ -5,58 +5,32 @@
 **  |  __/  __/  __/ |  | |
 **   \___|_|   \___|_|  |_|
 ** 
-**  ePerl -- Embedded Perl 5 for HTML
+**  ePerl -- Embedded Perl 5 Language
 **
-**  ePerl interprets a HTML markup file bristled with Perl 5 program
-**  statements by expanding the Perl 5 code. It can operate both as a 
-**  stand-alone CGI/1.1 compliant program or as a integrated API module
-**  for the Apache webserver. The resulting data is pure HTML markup code.
-** 
-**  =====================================================================
+**  ePerl interprets an ASCII file bristled with Perl 5 program statements
+**  by evaluating the Perl 5 code while passing through the plain ASCII
+**  data. It can operate both as a standard Unix filter for general file
+**  generation tasks and as a powerful Webserver scripting language for
+**  dynamic HTML page programming. 
+**
+**  ======================================================================
 **
 **  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
-**  
-**  Redistribution and use in source and binary forms, with or without
-**  modification, are permitted provided that the following conditions
-**  are met:
-**  
-**  1. Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer. 
-**  
-**  2. Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**  
-**  3. All advertising materials mentioning features or use of this
-**     software must display the following acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  4. Redistributions of any form whatsoever must retain the following
-**     acknowledgment:
-**         "This product includes software developed by 
-**          Ralf S. Engelschall <rse@engelschall.com>."
-**  
-**  5. The names "ePerl" and "Embedded Perl 5 for HTML" must not be used to
-**     endorse or promote products derived from this software without
-**     prior written permission.
-**  
-**  THIS SOFTWARE IS PROVIDED BY RALF S. ENGELSCHALL ``AS IS'' AND ANY
-**  EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-**  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-**  ARE DISCLAIMED.  IN NO EVENT SHALL RALF S. ENGELSCHALL OR HIS CONTRIBUTORS
-**  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-**  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-**  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-**  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-**  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-**  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-**  POSSIBILITY OF SUCH DAMAGE.
 **
-**  =====================================================================
+**  This program is free software; it may be redistributed and/or modified
+**  only under the terms of either the Artistic License or the GNU General
+**  Public License, which may be found in the ePerl source distribution.
+**  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
+**  a built-in copy of both license files.
 **
-**  eperl_proto.h -- ePerl prototypes
+**  This program is distributed in the hope that it will be useful, but
+**  WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
+**  Artistic License or the GNU General Public License for more details.
+**
+**  ======================================================================
+**
+**  eperl_proto.h -- ePerl ANSI C prototypes
 */
 #ifndef EPERL_PROTO_H
 #define EPERL_PROTO_H 1
@@ -79,6 +53,7 @@ extern void give_version_extended P_((void));
 extern void give_readme P_((void));
 extern void give_license P_((void));
 extern void give_img_logo P_((void));
+extern void give_img_powered P_((void));
 extern void give_usage P_((char *name));
 extern void mysighandler P_((int rc));
 extern void myinit P_((void));
@@ -150,19 +125,6 @@ extern int HTTP_HeadersExists P_((char *cpBuf));
 extern char *WebTime P_((void));
 extern FILE *HTTP_openURLasFP P_((char *url));
 
-/* eperl_getopt.c */
-extern int egetopt_opterr;
-extern int egetopt_optind;
-extern int egetopt_optopt;
-extern int egetopt_optbad;
-extern int egetopt_optchar;
-extern int egetopt_optneed;
-extern int egetopt_optmaybe;
-extern int egetopt_opterrfd;
-extern char *egetopt_optarg;
-extern char *egetopt_optstart;
-extern int egetopt P_((int nargc, char **nargv, char *ostr));
-
 /* eperl_debug.c */
 extern int fDebug;
 extern char *cpDebugFile;
@@ -186,6 +148,10 @@ extern char *ePerl_LICENSE;
 /* eperl_logo.c */
 extern int ePerl_LOGO_size;
 extern char ePerl_LOGO_data[];
+
+/* eperl_powered.c */
+extern int ePerl_POWERED_size;
+extern char ePerl_POWERED_data[];
 
 #undef P_
 /*_END_PROTO_*/

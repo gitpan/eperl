@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>demo.table</title>
+</head>
+<body>
+<h1>demo.table</h1>
+
+<table border=2>
+<?
+##
+##  ePerl Demo: generated of a 1x1 chart as a HTML table
+##  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
+##
+##  This generates a complex HTML table 
+##  showing a 1x1 chart.
+##
+
+$end = 12;
+
+# top bar
+print "<tr><th></th>";
+for ($i=1; $i <= $end; $i++) {
+    print "<th>$i</th>";
+}
+print "</tr>";
+
+# side bar and content
+print"</tr>\n";
+for ($i=1; $i <= $end; $i++) {
+    print "<tr><th>$i</th>";
+    for ($j=1; $j<= $end; $j++) {
+        print "<td>", $i*$j, "</td>";
+    }
+    print"</tr>\n"; 
+}
+!>
+</table>
+
+</body>
+</html>

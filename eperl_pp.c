@@ -26,7 +26,7 @@
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of
 **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
-**  GNU General Public License or the Artistic License for more details.
+**  Artistic License or the GNU General Public License for more details.
 **
 **  ======================================================================
 **
@@ -71,7 +71,7 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
     char *cp2;
     char *cp3;
     char *cp4;
-    char *cpT;
+    char *cpT = NULL;
     char *cpInBuf = NULL;
     char *cpBuf;
     char caName[1024];
@@ -157,12 +157,22 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
          *   search for any more directives
          */
         cp = NULL;
-        if (((cpT = strnstr(cps, "#include",  cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
-        if (((cpT = strnstr(cps, "#sinclude", cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
-        if (((cpT = strnstr(cps, "#if",       cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
-        if (((cpT = strnstr(cps, "#else",     cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
-        if (((cpT = strnstr(cps, "#endif",    cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
-        if (((cpT = strnstr(cps, "#c",        cpEND-cps)) != NULL && cpT < cp) || (cp == NULL)) cp = cpT;
+		if (cps == cpBuf || ((cps > cpBuf) && (*(cps-1) == '\n'))) {
+            if ((strncmp(cps, "#include",  8) == 0) && (cp == NULL)) cp = cps;
+            if ((strncmp(cps, "#sinclude", 9) == 0) && (cp == NULL)) cp = cps;
+            if ((strncmp(cps, "#if",       3) == 0) && (cp == NULL)) cp = cps;
+            if ((strncmp(cps, "#elsif",    6) == 0) && (cp == NULL)) cp = cps;
+            if ((strncmp(cps, "#else",     5) == 0) && (cp == NULL)) cp = cps;
+            if ((strncmp(cps, "#endif",    6) == 0) && (cp == NULL)) cp = cps;
+            if ((strncmp(cps, "#c",        2) == 0) && (cp == NULL)) cp = cps;
+		}
+        if (((cpT = strnstr(cps, "\n#include",  cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
+        if (((cpT = strnstr(cps, "\n#sinclude", cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
+        if (((cpT = strnstr(cps, "\n#if",       cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
+        if (((cpT = strnstr(cps, "\n#elsif",    cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
+        if (((cpT = strnstr(cps, "\n#else",     cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
+        if (((cpT = strnstr(cps, "\n#endif",    cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
+        if (((cpT = strnstr(cps, "\n#c",        cpEND-cps)) != NULL) && ((cpT < cp) || (cp == NULL))) cp = cpT+1;
 
         if (cp != NULL && (cp == cpBuf || (cp > cpBuf && *(cp-1) == '\n'))) {
             /* 
@@ -279,6 +289,31 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
                 if (*cps == '\n')
                     cps++;
                 sprintf(caStr, "%s if (%s) { _%s//\n", 
+                        ePerl_begin_delimiter, caArg, ePerl_end_delimiter);
+                cp = caStr;
+            }
+            else if (strncmp(cp, "#elsif", 6) == 0) {
+                /* 
+                 *  found a #elsif directive
+                 */
+                cps = cp+6;
+
+                /* skip whitespaces */
+                for ( ; cps < cpEND && (*cps == ' ' || *cps == '\t'); cps++)
+                    ;
+                if (*cps == '\n') {
+                    ePerl_PP_SetError("Missing expression for #elsif directive");
+                    free(cpOutBuf);
+                    return NULL;
+                }
+
+                /* copy the argument and create replacement string */
+                for (i = 0; cps < cpEND && *cps != '\n'; )
+                    caArg[i++] = *cps++;
+                caArg[i++] = NUL;
+                if (*cps == '\n')
+                    cps++;
+                sprintf(caStr, "%s } elsif (%s) { _%s//\n", 
                         ePerl_begin_delimiter, caArg, ePerl_end_delimiter);
                 cp = caStr;
             }

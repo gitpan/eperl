@@ -26,7 +26,7 @@
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of
 **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either the
-**  GNU General Public License or the Artistic License for more details.
+**  Artistic License or the GNU General Public License for more details.
 **
 **  ======================================================================
 **

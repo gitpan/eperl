@@ -1,4 +1,14 @@
-<? use GD;
+<?
+##
+##  ePerl Demo: on-the-fly GIF image showing the Web216 color palette
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
+##
+##  This ePerl source file entirely consists of one single
+##  ePerl block which generates a complete GIF image plus
+##  the corresponding HTTP headers to introduce it as such.
+##
+
+use GD;
 
 $im = new GD::Image(190,130);
 $im->interlaced('true');
@@ -10,7 +20,7 @@ for ($b = 0; $b <= 255; $b += 51) {
             $y = (($b / 51) < 3 ? 0 : 1)*60 + (60-($g / 51) * 10);
 
             $col = $im->colorAllocate($r,$g,$b);
-            $im->rectangle($x, $y, $x+9, $y+9,$col);
+            $im->rectangle($x, $y, $x+9, $y+9, $col);
             $im->fill($x+2, $y+2, $col);
         }
     }
@@ -18,7 +28,7 @@ for ($b = 0; $b <= 255; $b += 51) {
 $C = $im->gif;
 
 print "Content-Type: image/gif\n";
-print "Content-Length: " . length($C) . "\n"; # strips the newline avove
+print "Content-Length: " . length($C) . "\n"; # strips the newline above
 print "\n";
 print $C;
 

@@ -6,7 +6,7 @@
                          
   ePerl -- Embedded Perl 5 Language
 
-  Version 2.2b7 (04-06-1997)
+  Version 2.2b9 (28-06-1997)
 
   ePerl interprets an ASCII file bristled with Perl 5 program statements by
   evaluating the Perl 5 code while passing through the plain ASCII data. It
@@ -27,8 +27,8 @@
 
   This program is distributed in the hope that it will be useful, but WITHOUT
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  FITNESS FOR A PARTICULAR PURPOSE.  See either the GNU General Public License
-  or the Artistic License for more details.
+  FITNESS FOR A PARTICULAR PURPOSE.  See either the Artistic License or the
+  GNU General Public License for more details.
 
                               Ralf S. Engelschall
                               rse@engelschall.com

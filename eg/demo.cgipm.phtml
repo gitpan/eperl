@@ -1,0 +1,30 @@
+<html>
+<head>
+<title>demo.cgi</title>
+</head>
+<body>
+<blockquote>
+<h1>demo.cgi</h1>
+<p>
+<!-- 
+##
+##  ePerl Demo: usage of the CGI.pm package from within ePerl
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
+##
+##  This just demonstrates how one can use the
+##  popular CGI.pm package from within ePerl.
+##
+-->
+
+<?
+use CGI;
+$Q = new CGI;
+$myself = $ENV{SCRIPT_SRC_URL}."?".$Q->query_string;
+!>
+
+Just an absolute <a href="<?=$myself!>#section-2">hyperlink</a> to myself
+which is determined and also preserves the state (query string).
+
+</blockquote>
+</body>
+</html>
