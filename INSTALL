@@ -1,43 +1,68 @@
 
   I N S T A L L A T I O N
+  =======================
 
-  1. Make sure you have Perl 5.003 (compiled with -DEMBED) or higher (5.003_XX
-     is ok, too) already installed on your system. The perl program should be
-     in your path. If you have different perl binaries in your path the
-     program with the latest version number will be used.  Additionally you
-     need a real ANSI C compiler like GCC to compile ePerl.
+  1. Requirements
+     
+     Make sure you have a up-to-date release of Perl already installed on your
+     system. Perl 5.004 is highly recommended to make use of the complete
+     ePerl functionality.  Previous releases are only supported partially: for
+     the stand-alone program you need at least Perl 5.003 compiled with
+     -DEMBED while for the Perl 5 interface modules you need at least Perl
+     5.003_90.
 
-  2. Configure the ePerl sources for compilation
-  
-     $ ./configure --prefix=/path/to/eperl/root 
-                  [--with-perl=/path/to/preferred/perl]
+     As a summary the following table shows the details of support grade:
 
-  3. Compile the ePerl interpreter
+         Perl               stand-alone        Perl 5
+         version            ePerl program      interface modules
+         ------------------ ------------------ -----------------
+         5.003              no                 no
+         5.003+-DEMBED      yes (minimum)      no
+         5.003_01-5.003_90  yes (minimum)      no
+         5.003_90-5.003_99  yes                yes
+         5.004-...          yes                yes
+     
+     Make sure that the ``perl'' program is in your path, so ``configure'' can
+     find it. If you have different Perl binaries in your path the one with
+     the latest version number will be used. If you want to force ePerl to be
+     build with a specific Perl on your system (if you have more then one
+     installed), you can also use option ``--with-perl'' with ``configure''.
+     Additionally you need a real ANSI C compiler like GCC to compile ePerl,
+     but most of the vendor compilers also work.
 
+  2. Configuring the source
+
+     The ePerl distribution is a hybrid source tree. It can be used to either
+     install the stand-alone program "eperl" or the Perl 5 interface module
+     "Parse::ePerl". Decide which one you want:
+
+     a) Configure the ePerl source for building the stand-alone program:
+        $ ./configure --prefix=/path/to/eperl/root 
+                     [--with-perl=/path/of/preferred/perl]
+
+     b) Configure the ePerl source for building the Perl 5 interface modules:
+        $ perl Makefile.PL [PREFIX=/path/to/private/area/]
+
+  3. Run the build process
+
+     Now you are ready to run the build process. Start it with a simple
      $ make
 
-  4. Optionally you can run a test suite now
+  4. Run the Test suite
 
+     Optionally you can now run a test suite which will check if
+     the programs work correctly before they get finally installed.
      $ make test
 
-  5. Finally install it into /path/to/eperl/root/{bin,man}/
-   
+  5. Installation
+     
+     Finally install it into /path/to/eperl/root/{bin,man}/ (in case of the
+     stand-alone program) or /path/to/private/area/lib/{Parse,Apache}/ (in
+     case of the Perl 5 interface modules):
      $ make install
 
-  6. Aditionally install it into your HTTP Server
-  
-     $ cp eperl /path/to/apache/cgi-bin/nph-eperl
+  6. Cleanup
 
-     When you also want UID/GID-switching, you have to set the setuid bit:
-
-     $ chown root /path/to/apache/cgi-bin/nph-eperl
-     $ chmod u+s  /path/to/apache/cgi-bin/nph-eperl
-     
-     Finally configure your webserver to process all pages with extension
-     '.phtml' via the ePerl NPH-CGI/1.1 program. For an Apache webserver add
-     the following to your httpd.conf file:
-
-     AddType      application/x-httpd-eperl  .phtml .eperl .epl
-     Action       application/x-httpd-eperl  /internal/cgi/nph-eperl
-     ScriptAlias  /internal/cgi              /path/to/apache/cgi-bin
+     Now cleanup the source tree to make it vanilla again.
+     $ make distclean
 

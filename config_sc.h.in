@@ -7,12 +7,12 @@
 **
 */
 
-#define AC_perlprog "@perlprog@"
-#define AC_perlvers "@perlvers@"
-#define AC_perlarch "@perlarch@"
-#define AC_perllibs "@perllibs@"
-#define AC_perldla  "@perldla@"
+#define AC_perl_prog    "@perl_prog@"
+#define AC_perl_vers    "@perl_vers@"
+#define AC_perl_archlib "@perl_archlib@"
+#define AC_perl_libs    "@perl_libs@"
+#define AC_perl_dla     "@perl_dla@"
 
-#define AC_prefix   "@prefix@"
+#define AC_prefix       "@prefix@"
 
 #endif /* SC_H */

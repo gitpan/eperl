@@ -7,14 +7,29 @@
 #   DEFINITIONS
 # ------------------------------------------------
 
+#   imported Perl 5 parameters
+perl_prog       = @perl_prog@
+perl_cc         = @perl_cc@
+perl_optimize   = @perl_optimize@
+perl_ccflags    = @perl_ccflags@
+perl_ldflags    = @perl_ldflags@
+perl_libs       = @perl_libs@
+perl_dla        = @perl_dla@
+perl_ccdlflags  = @perl_ccdlflags@
+perl_cccdlflags = @perl_cccdlflags@
+perl_archlib    = @perl_archlib@
+
 #   compiler tools
-CC      = @CC@
-AR      = @AR@
-RANLIB  = @RANLIB@
-CFLAGS  = @CFLAGS@ -I.
-LDFLAGS = @LDFLAGS@ -L.
-debug   = @debug@
-dmalloc = @dmalloc@
+CC       = $(perl_cc)
+CFLAGS   = @CFLAGS@ $(perl_optimize) $(perl_ccflags) -I$(perl_archlib)/CORE -I.
+DLCFLAGS = @CFLAGS@ $(perl_optimize) $(perl_cccdlflags) $(perl_ccflags) -I$(perl_archlib)/CORE -I.
+LDFLAGS  = @LDFLAGS@ $(perl_ccdlflags) $(perl_ldflags) -L$(perl_archlib)/CORE 
+LDLIBS   = -lperl $(perl_dla) $(perl_libs)
+AR       = @AR@
+RANLIB   = @RANLIB@
+SIZE     = @SIZE@
+debug    = @debug@
+dmalloc  = @dmalloc@
 
 #   installation tools
 INSTALL         = @INSTALL@
@@ -28,14 +43,6 @@ exec_prefix     = @exec_prefix@
 bindir          = @bindir@
 libdir          = @libdir@
 mandir          = @mandir@
-
-#   Perl 5 language
-perlprog      = @perlprog@
-perlccflags   = -I@perlarch@/CORE
-perlldflags   = -L@perlarch@/CORE -lperl @perllibs@
-perldla       = @perldla@
-perlccdlflags = @perlccdlflags@
-
 
 # ------------------------------------------------
 #   THE DEFAULT TARGETS
@@ -80,13 +87,19 @@ _BUILDDIST = \
 _NEWVERS = \
 	./etc/newvers -lc -p ePerl $$OPT eperl_version.c; \
 	V=`./etc/newvers -lc -D eperl_version.c`;\
-	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
+	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
+	V=`./etc/newvers -lc -d eperl_version.c`;\
+	sed -e "s/\\$$VERSION = \".*\";/$$VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
+	sed -e "s/\\$$VERSION = \".*\";/$$VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
 
 _UPDATEVERS = \
 	V=`./etc/newvers -lc -d eperl_version.c`;\
 	./etc/newvers -lc -p ePerl -r $$V eperl_version.c; \
 	V=`./etc/newvers -lc -D eperl_version.c`;\
-	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
+	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
+	V=`./etc/newvers -lc -d eperl_version.c`;\
+	sed -e "s/\\$$VERSION = \".*\";/$$VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
+	sed -e "s/\\$$VERSION = \".*\";/$$VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
 
 release: distclean fixperm
 	@$(_GETDISTINFO) \
@@ -110,11 +123,17 @@ new-version:
 new-revision:
 	OPT=-ir; $(_NEWVERS)
 
+new-patchlevel:
+	OPT=-iP; $(_NEWVERS)
+
 new-betalevel:
 	OPT=-ib; $(_NEWVERS)
 
-new-patchlevel:
-	OPT=-iP; $(_NEWVERS)
+new-alphalevel:
+	OPT=-ia; $(_NEWVERS)
+
+new-snaplevel:
+	OPT=-is; $(_NEWVERS)
 
 new-release:
 	OPT=-r$(R); $(_NEWVERS)
@@ -131,6 +150,7 @@ PROTO_SRCS = \
  eperl_main.c \
  eperl_perl5.c \
  eperl_parse.c \
+ eperl_pp.c \
  eperl_sys.c \
  eperl_http.c \
  eperl_getopt.c \
@@ -144,6 +164,7 @@ SRCS = \
  eperl_main.c \
  eperl_perl5.c \
  eperl_parse.c \
+ eperl_pp.o \
  eperl_sys.c \
  eperl_http.c \
  eperl_getopt.c \
@@ -157,6 +178,7 @@ OBJS = \
  eperl_main.o \
  eperl_perl5.o \
  eperl_parse.o \
+ eperl_pp.o \
  eperl_sys.o \
  eperl_http.o \
  eperl_getopt.o \
@@ -167,14 +189,17 @@ OBJS = \
  eperl_logo.o
 
 eperl: $(OBJS)
-	$(CC) $(CFLAGS) $(perlccdlflags) -o eperl $(OBJS) $(LDFLAGS) $(dmalloc) $(perldla) $(perlldflags)
+	$(CC) $(LDFLAGS) -o eperl $(OBJS) $(LDLIBS) $(dmalloc)
 	@if [ "x$(debug)" = xoff ]; then \
 		strip eperl; \
 	fi
-	@ls -l eperl; size eperl
+	@ls -l eperl; @SIZE@ eperl
 
 eperl_main.o: eperl_main.c
-	$(CC) $(CFLAGS) $(perlccflags) -c eperl_main.c
+	$(CC) $(CFLAGS) -c eperl_main.c
+
+eperl_perl5.o: eperl_perl5.c
+	$(CC) $(CFLAGS) -c eperl_perl5.c
 
 eperl_getopt.o: eperl_getopt.c
 	$(CC) $(CFLAGS) -c eperl_getopt.c
@@ -182,14 +207,14 @@ eperl_getopt.o: eperl_getopt.c
 eperl_parse.o: eperl_parse.c
 	$(CC) $(CFLAGS) -c eperl_parse.c
 
+eperl_pp.o: eperl_pp.c
+	$(CC) $(CFLAGS) -c eperl_pp.c
+
 eperl_sys.o: eperl_sys.c
 	$(CC) $(CFLAGS) -c eperl_sys.c
 
 eperl_debug.o: eperl_debug.c
 	$(CC) $(CFLAGS) -c eperl_debug.c
-
-eperl_perl5.o: eperl_perl5.c
-	$(CC) $(CFLAGS) $(perlccflags) -c eperl_perl5.c
 
 eperl_http.o: eperl_http.c
 	$(CC) $(CFLAGS) -c eperl_http.c
@@ -241,6 +266,31 @@ eperl.1: eperl.pod eperl_version.c
 			/tmp/eperl.pod >eperl.1 && \
 	rm -f /tmp/eperl.pod
 
+# ------------------------------------------------
+#   THE SHARED LIBRARY
+# ------------------------------------------------
+
+SOBJS = \
+ eperl_parse.so \
+ eperl_pp.so \
+ eperl_http.so \
+ eperl_version.so 
+
+libeperl.a: $(SOBJS)
+	$(AR) r libeperl.a $(SOBJS)
+	$(RANLIB) libeperl.a
+
+eperl_parse.so: eperl_parse.c
+	$(CC) $(DLCFLAGS) -o eperl_parse.so -c eperl_parse.c
+
+eperl_pp.so: eperl_pp.c
+	$(CC) $(DLCFLAGS) -o eperl_pp.so -c eperl_pp.c
+
+eperl_http.so: eperl_http.c
+	$(CC) $(DLCFLAGS) -o eperl_http.so -c eperl_http.c
+
+eperl_version.so: eperl_version.c
+	$(CC) $(DLCFLAGS) -o eperl_version.so -c eperl_version.c
 
 # ------------------------------------------------
 #   TEST SUITE
@@ -267,16 +317,26 @@ install: all
 clean:
 	-rm -f $(OBJS)
 	-rm -f eperl
+	-rm -f $(SOBJS)
+	-rm -f libeperl.a
 	-rm -f core *.core
 
 realclean:
-	-@make clean
+	-rm -f $(OBJS)
+	-rm -f eperl
+	-rm -f $(SOBJS)
+	-rm -f libeperl.a
+	-rm -f core *.core
 	-rm -f eperl.1
 	-rm -f eperl_readme.[ch]
 	-rm -f eperl_license.[ch]
 
 distclean:
-	-@make clean
+	-rm -f $(OBJS)
+	-rm -f eperl
+	-rm -f $(SOBJS)
+	-rm -f libeperl.a
+	-rm -f core *.core
 	-rm -f config_ac.h config_sc.h
 	-rm -f config.status config.cache config.log
 	-rm -f Makefile
