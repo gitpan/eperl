@@ -86,6 +86,7 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
     vsprintf(ca, str, ap);
 
     IO_restore_stdout();
+    IO_restore_stderr();
 
     if (mode == MODE_CGI || mode == MODE_NPHCGI) {
         if (mode == MODE_NPHCGI)
@@ -137,18 +138,19 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
         printf("</html>\n");
     }
     else {
-        printf("ERROR message: %s\n", ca);
+        fprintf(stderr, "ERROR message: %s\n", ca);
         if (logfile != NULL) {
             if ((cpBuf = ePerl_ReadErrorFile(logfile, scriptfile, scripturl)) != NULL) {
-                printf("\n");
-                printf("---- Contents of STDERR channel: ---------\n");
-                printf("%s", cpBuf);
+                fprintf(stderr, "\n");
+                fprintf(stderr, "---- Contents of STDERR channel: ---------\n");
+                fprintf(stderr, "%s", cpBuf);
                 if (cpBuf[strlen(cpBuf)-1] != '\n')
-                    printf("\n");
-                printf("------------------------------------------\n");
+                    fprintf(stderr, "\n");
+                fprintf(stderr, "------------------------------------------\n");
             }
         }
     }
+    fflush(stderr);
     fflush(stdout);
     
     va_end(ap);
@@ -469,7 +471,7 @@ int main(int argc, char **argv, char **env)
     /* check for valid source file */
     if ((stat(source, &st)) != 0) {
         PrintError(mode, source, NULL, NULL, "File `%s' not exists", source);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
 
     /*
@@ -481,18 +483,18 @@ int main(int argc, char **argv, char **env)
         uid = getuid();
         if ((pw = getpwuid(uid)) == NULL) {
             PrintError(mode, source, NULL, NULL, "Invalid UID %d", uid);
-            CU(EX_OK);
+            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
 
         /* security check: UID and GID */
         if ((pw = getpwuid(st.st_uid)) == NULL) {
             PrintError(mode, source, NULL, NULL, "Invalid UID %d of file owner", st.st_uid);
-            CU(EX_OK);
+            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
         uid = pw->pw_uid;
         if ((gr = getgrgid(st.st_gid)) == NULL) {
             PrintError(mode, source, NULL, NULL, "Invalid GID %d of file group", st.st_gid);
-            CU(EX_OK);
+            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
         gid = gr->gr_gid;
 
@@ -506,7 +508,7 @@ int main(int argc, char **argv, char **env)
         }
         if (!allow) {
             PrintError(mode, source, NULL, NULL, "File `%s' is not allowed to be interpreted by ePerl (wrong extension!)", source);
-            CU(EX_OK);
+            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
 
         /* switch to uid/gid if run as a setuid program */
@@ -514,11 +516,11 @@ int main(int argc, char **argv, char **env)
             /* XXX */
             if (((setgid(gid)) != 0) || (initgroups(pw->pw_name,gid) != 0)) {
                 PrintError(mode, source, NULL, NULL, "Failed to set GID %d", gid);
-                CU(EX_OK);
+                CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
             }
             if ((setuid(uid)) != 0) {
                 PrintError(mode, source, NULL, NULL, "Failed to set UID %d", uid);
-                CU(EX_OK);
+                CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
             }
     
             /* eliminate effective uid/gid */
@@ -530,7 +532,7 @@ int main(int argc, char **argv, char **env)
     /* read source file into internal buffer */
     if ((cpBuf = ePerl_ReadSourceFile(source, &cpBuf, &nBuf)) == NULL) {
         PrintError(mode, source, NULL, NULL, "Cannot open source file `%s' for reading\n%s", source, ePerl_GetError);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
 
     /* strip shebang prefix */
@@ -561,7 +563,7 @@ int main(int argc, char **argv, char **env)
     /* convert bristled source to valid Perl code */
     if ((cpBuf2 = ePerl_Bristled2Perl(cpScript)) == NULL) {
         PrintError(mode, source, NULL, NULL, "Cannot convert bristled code file `%s' to pure HTML", source);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
     cpScript = cpBuf2;
 
@@ -572,7 +574,7 @@ int main(int argc, char **argv, char **env)
 #endif
     if ((fp = fopen(perlscript, "w")) == NULL) {
         PrintError(mode, source, NULL, NULL, "Cannot open Perl script file `%s' for writing", perlscript);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
     fwrite(cpScript, strlen(cpScript), 1, fp);
     fclose(fp);
@@ -585,7 +587,7 @@ int main(int argc, char **argv, char **env)
 #endif
     if ((out = fopen(perlstdout, "w")) == NULL) {
         PrintError(mode, source, NULL, NULL, "Cannot open STDOUT file `%s' for writing", perlstdout);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
     IO_redirect_stdout(out);
 
@@ -597,7 +599,7 @@ int main(int argc, char **argv, char **env)
 #endif
     if ((er = fopen(perlstderr, "w")) == NULL) {
         PrintError(mode, source, NULL, NULL, "Cannot open STDERR file `%s' for writing", perlstderr);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
     IO_redirect_stderr(er);
 
@@ -621,7 +623,7 @@ int main(int argc, char **argv, char **env)
     if (rc != 0) { 
         fclose(er);
         PrintError(mode, source, perlscript, perlstderr, "Perl parsing error (interpreter rc=%d)", rc);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
 
     /* change to directory of script:
@@ -661,14 +663,14 @@ int main(int argc, char **argv, char **env)
         size = 0;
     if (rc != 0 || size > 0) {
         PrintError(mode, source, perlscript, perlstderr, "Perl runtime error (interpreter rc=%d)", rc);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
 
     /*  else all processing was fine, so
         we read in the stdout contents */
     if ((cpOut = ePerl_ReadSourceFile(perlstdout, &cpOut, &nOut)) == NULL) {
         PrintError(mode, source, NULL, NULL, "Cannot open STDOUT file `%s' for reading", perlstdout);
-        CU(EX_OK);
+        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
     }
     stat(perlstdout, &st);
 
@@ -712,7 +714,7 @@ int main(int argc, char **argv, char **env)
         /* open outputfile and write out the data */
         if ((fp = fopen(outputfile, "w")) == NULL) {
             PrintError(mode, source, NULL, NULL, "Cannot open output file `%s' for writing", outputfile);
-            CU(EX_OK);
+            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
         fwrite(cpOut, nOut, 1, fp);
         fclose(fp);

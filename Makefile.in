@@ -283,5 +283,6 @@ distclean:
 	-rm -f config_ac.h config_sc.h
 	-rm -f config.status config.cache config.log
 	-rm -f Makefile
+	-rm -f t/Makefile
 
 ##EOF##

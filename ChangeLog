@@ -2,6 +2,18 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.1b4 and 2.1b5
+  -------------------------------
+
+  970404 o now when used as a Unix filter the exit code 
+           is != 0 on error while for CGI scripts it is
+           still 0 (needed to make the webserver happy 
+           and to force him to accept your HTML error page).
+         o now prints the error message on stderr instead
+           of stdout in Unix filter mode
+         o fixed "make distclean", now t/Makefile is 
+           also removed.
+
   Changes between 2.1b3 and 2.1b4
   -------------------------------
 
