@@ -179,6 +179,9 @@ AC_SUBST(perl_cccdlflags)
 
 AC_MSG_CHECKING([for Perl dynamic loading link flags])
 perl_ccdlflags="`$perlprog -e 'use Config; print $Config{ccdlflags}'`";
+case $perl_os in
+    *aix* ) perl_ccdlflags="`echo $perl_ccdlflags | sed -e 's;-bE:perl.exp;-bE:${perl_archlib}/CORE/perl.exp;'`" ;;
+esac
 case $perl_ccdlflags in
     " " ) x="none" ;;
     * )   x="$perl_ccdlflags" ;;

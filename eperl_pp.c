@@ -109,9 +109,9 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
             fp = fopen(cpInput, "r");
         }
         else {
-            if ((fp = fopen(cpInput, "r")) == NULL) {
+            fp = fopen(cpInput, "r");
+            if (fp == NULL) {
                 /* we have to try in all include directories! */
-                fp = NULL;
                 for (i = 0; cppINC[i] != NULL; i++) {
                     sprintf(caName, "%s/%s", cppINC[i], cpInput);
                     if ((fp = fopen(caName, "r")) != NULL)

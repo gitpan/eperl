@@ -112,7 +112,7 @@ config_ac.h.in: configure.in acconfig.h
 # ------------------------------------------------
 
 release: distclean fixperm
-	@$(_GETDISTINFO) \
+	@$(_GETDISTINFO); \
 	_distname="eperl-$${_version}"; \
 	_tarball="/tmp/$${_distname}.tar.gz"; \
 	echo "Release Distribution: ePerl Version $$_version"; \
@@ -120,10 +120,10 @@ release: distclean fixperm
 	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz
 
 snap: distclean fixperm
-	@$(_GETDISTINFO) \
-	_distname="eperl-$${_version}-SNAP-$$_date"; \
+	@$(_GETDISTINFO); \
+	_distname="eperl-$${_version}-SNAP-$${_date}"; \
 	_tarball="/tmp/$${_distname}.tar.gz"; \
-	echo "Snap of whole source tree: ePerl Version $$_version as of $$_date"; \
+	echo "Snap of whole source tree: ePerl Version $$_version as of $${_date}"; \
 	$(_BUILDDIST); \
 	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz
 

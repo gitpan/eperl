@@ -54,6 +54,7 @@ extern void RememberINC(char *str);
 extern void mysighandler(int rc);
 extern void myinit(void);
 extern void myexit(int rc);
+extern struct option options[];
 extern int main(int argc, char **argv, char **env);
 
 /* eperl_perl5.c */
@@ -110,10 +111,11 @@ extern char *dirname(char *path);
 extern char *abspath(char *path);
 
 /* eperl_http.c */
-extern void HTTP_PrintResponseHeaders(void);
+extern void HTTP_PrintResponseHeaders(char *cpBuf);
 extern void HTTP_StripResponseHeaders(char **cpBuf, int *nBuf);
 extern int HTTP_IsHeaderLine(char *cp1, char *cp2);
 extern int HTTP_HeadersExists(char *cpBuf);
+extern int HTTP_HeaderLineExists(char *cpBuf, char *name);
 extern char *WebTime(void);
 extern FILE *HTTP_openURLasFP(char *url);
 
@@ -121,6 +123,8 @@ extern FILE *HTTP_openURLasFP(char *url);
 extern int fDebug;
 extern char *cpDebugFile;
 extern void Debug(char *str, ...);
+
+/* eperl_config.c */
 
 /* eperl_version.c */
 extern char ePerl_Version[];

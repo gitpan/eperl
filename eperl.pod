@@ -545,7 +545,7 @@ then in all directories specified via option B<-I>. In the third case
 (HTTP URL) the file is retrieves via a HTTP/1.0 request on the network. 
 Here HTTP redirects (response codes 301 and 302) are supported, too.
 
-Notice: While ePerl strictly preserved line number when translating the
+Notice: While ePerl strictly preserves the line numbers when translating the
 bristled ePerl format to plain Perl format, the ePerl preprocessor can't do
 this (because its a B<pre>processor which expands) for this directive.  So,
 whenever you use C<#include>, remember that line numbers in error messages are
@@ -897,7 +897,7 @@ Parse::ePerl(3), Apache::ePerl(3).
 
 Web-References:
 
-  Perl:   perl(1),  http://www.perl.com/perl/
+  Perl:   perl(1),  http://www.perl.com/
   ePerl:  eperl(1), http://www.engelschall.com/sw/eperl/
   Apache: httpd(8), http://www.apache.org/
 

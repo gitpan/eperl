@@ -1,30 +1,37 @@
+<!-- 
+##
+##  demo.lwp -- ePerl demonstration webpage
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
+##
+-->
 <html>
 <head>
 <title>demo.lwp</title>
 </head>
 <body>
 <blockquote>
+<blockquote>
 <h1>demo.lwp</h1>
-<p>
-<!-- 
-##
-##  ePerl Demo: usage of the LWP package from within ePerl
-##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
-##
-##  This just demonstrates how one can use the
-##  popular LWP (libwww-perl) package from within ePerl.
-##
--->
+<h2>High-level Network programming with LWP::Simple</h2>
 
-Here comes the ePerl README file, retrieved via HTTP:
+<p>
+This demonstrates how one can use the LWP::Simple package (from
+<tt>libwww-perl</tt>) from within ePerl to retrieve a file via HTTP. As an
+example the ePerl distribution README file is fetched from
+<tt>http://www.engelschall.com/sw/eperl/distrib/eperl-SNAP/</tt>.
+
+<p>
+And here comes the file:
 
 <pre>
 <?
 use LWP::Simple;
-print get("http://www.engelschall.com/sw/eperl/distrib/eperl-SNAP/README");
+my $data = get("http://www.engelschall.com/sw/eperl/distrib/eperl-SNAP/README");
+print $data;
 !>
 </pre>
 
+</blockquote>
 </blockquote>
 </body>
 </html>

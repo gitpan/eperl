@@ -2,6 +2,58 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2.7 and 2.2.8
+  -------------------------------
+  [Bugfix and Minor Enhancement]
+
+  971107 o ported to AIX 4.1.x by adding a fix for Perl's ccdlflags
+  971108 o again made Apache::ePerl even more complete: added the
+           following env variables similar to nph-eperl:
+           SCRIPT_SRC_URL, SCRIPT_SRC_URL_DIR,
+           SCRIPT_SRC_URL_FILE, SCRIPT_SRC_PATH,
+           SCRIPT_SRC_PATH_DIR, SCRIPT_SRC_PATH_FILE,
+           SCRIPT_SRC_MODIFIED, SCRIPT_SRC_MODIFIED_CTIME,
+           SCRIPT_SRC_MODIFIED_ISOTIME, SCRIPT_SRC_SIZE,
+           SCRIPT_SRC_OWNER
+         o enhanced the Apache::ePerl status page: now displays
+           also the cache size
+  971116 o fixed shebang mode for webserver environment.  [Thanks
+           to J. Douglas Dunlop <dunlop@ionline.net> for hint]
+         o added hint to INSTALL file that PerlIO+SfIO is currently
+           not supported.
+         o fixed HTTP header parsing: now setting of cookies
+           (e.g.  via Perl's CGI module) work correctly.
+         o fixed HTTP header parsing in Apache::ePerl. Now even
+           the special-case "Content-type: ..." works as expected. 
+  971117 o fixed typos in eperl.pod
+         o fixed preprocessing for Apache::ePerl
+         o overhauled the demo webpages under eg/. Now the
+           CGI::Cookie is used an example for CGI.pm.
+         o adjusted VERSIONS file
+
+  Changes between 2.2.6 and 2.2.7
+  -------------------------------
+  [Bugfix and Minor Enhancement]
+
+  971102 o reduced memory consumption of Apache::ePerl by
+           specificing detailed import flags
+         o fixed prototype bug in Parse::ePerl's XS part
+           [Thanks to Doug MacEachern <dougm@opengroup.org> for patch]
+         o removed the not needed AUTOLOAD facility from
+           Parse::ePerl because this causes problems.
+           [Thanks to Doug MacEachern <dougm@opengroup.org> for hint]
+  971104 o added VERSION_LANGUAGE and VERSION_INTERPRETER
+           environment variables to Apache::ePerl the same way it is provides
+           by the stand-alone program.
+  971105 o adjusted the URL to the Perl homepage in the PODs.
+         o fixed Content-length header generation in Apache::ePerl
+         o minor cleanup to Parse::ePerl
+  971106 o added workarounds to Parse::ePerl for tainted environments 
+           like the "PerlTaintCheck On" under Apache/mod_perl where
+           Parse::ePerl is called from Apache::ePerl.
+         o made the Apache::ePerl error page similar to the one nph-eperl
+           displays.
+
   Changes between 2.2.5 and 2.2.6
   -------------------------------
   [Bugfix and Minor Enhancement]

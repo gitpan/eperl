@@ -53,28 +53,21 @@ use Cwd qw(fastcwd);
 @EXPORT = qw();
 
 #   private version number
-$VERSION = do { my @v=("2.2.6"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
-
-#   autoloading (currently unused)
-sub AUTOLOAD {
-    my $constname;
-    ($constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($! != 0) {
-        if ($! =~ /Invalid/) {
-            $AutoLoader::AUTOLOAD = $AUTOLOAD;
-            goto &AutoLoader::AUTOLOAD;
-        }
-        else {
-            croak "Your vendor has not defined Parse::ePerl macro $constname";
-        }
-    }
-    eval "sub $AUTOLOAD { $val }";
-    goto &$AUTOLOAD;
-}
+$VERSION = do { my @v=("2.2.8"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
 
 #   dynaloader bootstrapping
 bootstrap Parse::ePerl $VERSION;
+
+
+#   untainting a variable: for restricted environments like 
+#   Apache/mod_perl under which our caller Apache::ePerl could run
+sub Untaint {
+   my ($var) = @_;
+
+   #   see perlsec(1)
+   ${$var} =~ m|^(.*)$|s;
+   ${$var} = $1;
+}
 
 
 ##
@@ -84,7 +77,7 @@ bootstrap Parse::ePerl $VERSION;
 
 sub Preprocess ($) {
     my ($p) = @_;
-    my ($result);
+    my ($result, $ocwd);
 
     #   error if no input or no output
     if (   not $p->{Script}
@@ -95,11 +88,21 @@ sub Preprocess ($) {
     #   set defaults
     $p->{INC} ||= [ '.' ];
 
-    #   use XS part: PP
+    #   switch to directory of file
+    if ($p->{Cwd}) {
+        Untaint(\$p->{Cwd});
+        $ocwd = fastcwd();
+        chdir($p->{Cwd});
+    }
+
+    #   use XS part: PP (preprocessor)
     $result = PP(
         $p->{Script}, 
         $p->{INC}
     );
+
+    #   restore Cwd
+    chdir($ocwd) if ($p->{Cwd});
 
     if ($result eq '') {
         return 0;
@@ -127,10 +130,10 @@ sub Translate ($) {
     }
 
     #   set defaults
-    $p->{BeginDelimiter} ||= "<:";
-    $p->{EndDelimiter}   ||= ":>";
-    $p->{CaseDelimiters}  = 0 if (not defined($p->{CaseDelimiters}));
-    $p->{ConvertEntities} = 0 if (not defined($p->{ConvertEntities}));
+    $p->{BeginDelimiter}  ||= '<:';
+    $p->{EndDelimiter}    ||= ':>';
+    $p->{CaseDelimiters}  ||= 0;
+    $p->{ConvertEntities} ||= 0;
 
     #   use XS part: Bristled2Plain
     $result = Bristled2Plain(
@@ -176,6 +179,7 @@ sub Precompile ($) {
 
     #   switch to directory of file
     if ($p->{Cwd}) {
+        Untaint(\$p->{Cwd});
         $ocwd = fastcwd();
         chdir($p->{Cwd});
     }
@@ -183,6 +187,7 @@ sub Precompile ($) {
     #   precompile the source into P-code
     #my $cp = new Safe("Safe::ePerl");
     #$func = $cp->reval('$func = sub {'.$p->{Script}.'};');
+    Untaint(\$p->{Script});
     eval("\$func = sub {" . $p->{Script} . "};");
     $error = "$@" if ($@);
 
@@ -242,7 +247,7 @@ sub Evaluate ($) {
     #   disable the die of the interpreter
     $error = '';
     local $SIG{'__WARN__'} = sub { $error .= $_[0]; };
-    local $SIG{'__DIE__'} = sub { $error .= $_[0]; };
+    local $SIG{'__DIE__'}  = sub { $error .= $_[0]; };
 
     #   now evaluate the script which 
     #   produces content on STDOUT and perhaps
@@ -583,7 +588,7 @@ eperl(1)
 
 Web-References:
 
-  Perl:  perl(1),  http://www.perl.com/perl/
+  Perl:  perl(1),  http://www.perl.com/
   ePerl: eperl(1), http://www.engelschall.com/sw/eperl/
 
 =cut

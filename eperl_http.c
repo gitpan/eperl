@@ -43,7 +43,7 @@
 **  print a standard HTTP reponse of header lines
 **
 */
-void HTTP_PrintResponseHeaders(void)
+void HTTP_PrintResponseHeaders(char *cpBuf)
 {
     char *cp;
 
@@ -51,12 +51,18 @@ void HTTP_PrintResponseHeaders(void)
         cp = "HTTP/1.0";
     printf("%s 200 OK\n", cp);
 
-    if ((cp = getenv("SERVER_SOFTWARE")) == NULL)
-        cp = "unknown-server/0.0";
-    printf("Server: %s %s Perl/%s\n", cp, ePerl_WebID, AC_perl_vers);
+    if (!HTTP_HeaderLineExists(cpBuf, "Server")) {
+        if ((cp = getenv("SERVER_SOFTWARE")) == NULL)
+            cp = "unknown-server/0.0";
+        printf("Server: %s %s Perl/%s\n", cp, ePerl_WebID, AC_perl_vers);
+    }
 
-    printf("Date: %s\n", WebTime());
-    printf("Connection: close\n");
+    if (!HTTP_HeaderLineExists(cpBuf, "Date"))
+        printf("Date: %s\n", WebTime());
+
+    if (!HTTP_HeaderLineExists(cpBuf, "Connection"))
+        printf("Connection: close\n");
+
     return;
 }
 
@@ -81,7 +87,12 @@ int HTTP_IsHeaderLine(char *cp1, char *cp2)
     char *cp4;
     char ca[1024];
 
+    while (cp1 < cp2 && (*cp1 == '\n' || *cp1 == '\r')) 
+        cp1++;
+    while (cp2 > cp1 && (*(cp2-1) == '\n' || *(cp2-1) == '\r')) 
+        cp2--;
     strncpy(ca, cp1, cp2-cp1);
+    ca[cp2-cp1] = NUL;
     if ((cp3 = strchr(ca, ':')) == NULL)
         return 0;
     for (cp4 = ca; cp4 < cp3; cp4++) {
@@ -106,13 +117,39 @@ int HTTP_HeadersExists(char *cpBuf)
     char *cp3;
 
     if ((cp2 = strstr(cpBuf, "\n\n")) != NULL) {
-        for (cp1 = cpBuf; cp1 < cp2; ) {
+        for (cp1 = cpBuf; cp1 < cp2-1; ) {
             cp3 = strchr(cp1, '\n');
             if (!HTTP_IsHeaderLine(cp1, cp3))
                 return 0;
             cp1 = cp3+1;
         }
         return 1;
+    }
+    return 0;
+}
+
+/*
+**  
+**  check if there a particular HTTP headerline exists
+**
+*/
+int HTTP_HeaderLineExists(char *cpBuf, char *name)
+{
+    char *cp1;
+    char *cp2;
+    char *cp3;
+    int n;
+
+    n = strlen(name);
+    if ((cp2 = strstr(cpBuf, "\n\n")) != NULL) {
+        for (cp1 = cpBuf; cp1 < cp2-1; ) {
+            cp3 = strchr(cp1, '\n');
+            if (HTTP_IsHeaderLine(cp1, cp3) && cp3-cp1 > n+1)
+                if (strncasecmp(cp1, name, n) == 0)
+                    return 1;
+            cp1 = cp3+1;
+        }
+        return 0;
     }
     return 0;
 }

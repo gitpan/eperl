@@ -43,7 +43,9 @@
      ePerl functionality.  Previous releases are only supported partially: for
      the stand-alone program you need at least Perl 5.003 compiled with
      -DEMBED while for the Perl 5 interface modules you need at least Perl
-     5.003_90.
+     5.003_90. Also make sure (``perl -V | grep sfio'')that your
+     Perl-Interpreter doesn't use PerlIO in combination with SfIO, because
+     this currently is not supported by ePerl.
 
      As a summary the following table shows the details of support grade:
 

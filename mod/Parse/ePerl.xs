@@ -149,7 +149,7 @@ Bristled2Plain(cpIn, cpBegin = "<:", cpEnd = ":>", fCase = TRUE, fConvertEntitie
     char *cpEnd;
     int  fCase;
     int  fConvertEntities;
-PROTOTYPE: $;$$$
+PROTOTYPE: $;$$$$
 PPCODE:
 {
     char *cpOut;

@@ -1,20 +1,22 @@
+<!-- 
+##
+##  demo.html -- ePerl demonstration webpage
+##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
+##
+-->
 <html>
 <head>
 <title>demo.html</title>
 </head>
 <body>
 <blockquote>
+<blockquote>
 <h1>demo.html</h1>
+<h2>High-level HTML programming with HTML::Stream</h2>
 <p>
-<!-- 
-##
-##  ePerl Demo: usage of the HTML-Stream package from within ePerl
-##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
-##
-##  This just demonstrates how one can use the
-##  HTML-Stream package from within ePerl.
-##
--->
+
+This demonstrates how one can use the HTML-Stream package from
+within ePerl to do high-level HTML programming.
 
 <?
 use HTML::Stream;
@@ -30,8 +32,10 @@ First, a programmed hyperlink to
 <p>
 Second, just 
 <? $HTML->t("plain text with umlaut characters: äöüÄÖÜß\n" ); !>.<br>
-These are automatically converted to HTML entities.
+These were automatically converted from ISO-Latin-1 encoding to
+HTML entities.
 
+</blockquote>
 </blockquote>
 </body>
 </html>

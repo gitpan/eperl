@@ -63,7 +63,7 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
 
     if (mode == MODE_CGI || mode == MODE_NPHCGI) {
         if (mode == MODE_NPHCGI)
-            HTTP_PrintResponseHeaders();
+            HTTP_PrintResponseHeaders("");
         printf("Content-Type: text/html\n\n");
         printf("<html>\n");
         printf("<head>\n");
@@ -171,7 +171,7 @@ void give_license(void)
 void give_img_logo(void)
 {
     if (mode == MODE_NPHCGI)
-        HTTP_PrintResponseHeaders();
+        HTTP_PrintResponseHeaders("");
     printf("Content-Type: image/gif\n\n");
     fwrite(ePerl_LOGO_data, ePerl_LOGO_size, 1, stdout);
 }
@@ -179,7 +179,7 @@ void give_img_logo(void)
 void give_img_powered(void)
 {
     if (mode == MODE_NPHCGI)
-        HTTP_PrintResponseHeaders();
+        HTTP_PrintResponseHeaders("");
     printf("Content-Type: image/gif\n\n");
     fwrite(ePerl_POWERED_data, ePerl_POWERED_size, 1, stdout);
 }
@@ -468,7 +468,17 @@ int main(int argc, char **argv, char **env)
      *  determine source filename and runtime mode 
      */
 
-    if ((cp = getenv("GATEWAY_INTERFACE")) != NULL) {
+    if (optind == argc &&
+        getenv("GATEWAY_INTERFACE") != NULL &&
+        getenv("PATH_TRANSLATED")   != NULL   ) {
+        /*
+        **
+        **  Server-Side-Scripting-Language
+        **  (i.e. /url/to/nph-eperl/path/to/script.phtml)
+        **
+        */
+        
+        cp = getenv("GATEWAY_INTERFACE");
         if (strncasecmp(cp, "CGI/1", 5) != 0) {
             fprintf(stderr, "ePerl:Error: Unknown gateway interface: NOT CGI/1.x\n");
             CU(EX_IOERR);
@@ -477,8 +487,6 @@ int main(int argc, char **argv, char **env)
         /*  CGI/1.1 or NPH-CGI/1.1 script, 
             source in PATH_TRANSLATED. */
         source = getenv("PATH_TRANSLATED");
-        if (source == NULL)
-            source = "";
 
         /*  determine whether pure CGI or NPH-CGI mode */ 
         if ((cp = getenv("SCRIPT_FILENAME")) != NULL) { 
@@ -496,15 +504,58 @@ int main(int argc, char **argv, char **env)
             mode = (mode == MODE_UNKNOWN ? MODE_CGI : mode);
         }
 
-        /* set the command line for ps output */
+        /* set the command line for ``ps'' output */
+        sprintf(ca, "%s %s [%sCGI]", argv[0], source, mode == MODE_NPHCGI ? "NPH-" : "");
+        argv[0] = strdup(ca);
+    }
+    else if (optind == argc-1 &&
+             getenv("GATEWAY_INTERFACE") != NULL) {
+        /*
+        **
+        **  Stand-Alone inside Webserver environment
+        **  (i.e. CGI-script with shebang #!/path/to/eperl)
+        **
+        */
+
+        cp = getenv("GATEWAY_INTERFACE");
+        if (strncasecmp(cp, "CGI/1", 5) != 0) {
+            fprintf(stderr, "ePerl:Error: Unknown gateway interface: NOT CGI/1.x\n");
+            CU(EX_IOERR);
+        }
+
+        /*  CGI/1.1 or NPH-CGI/1.1 script, 
+            source in ARGV */
+        source = argv[optind];
+
+        /*  determine whether pure CGI or NPH-CGI mode */ 
+        if ((cp = getenv("SCRIPT_FILENAME")) != NULL) { 
+            strcpy(ca, cp);
+            if ((cp = strrchr(ca, '/')) != NULL) 
+                *cp++ = NUL;
+            else 
+                cp = ca;
+            if (strncasecmp(cp, "nph-", 4) == 0) 
+                mode = (mode == MODE_UNKNOWN ? MODE_NPHCGI : mode);
+            else
+                mode = (mode == MODE_UNKNOWN ? MODE_CGI : mode);
+        }
+        else {
+            mode = (mode == MODE_UNKNOWN ? MODE_CGI : mode);
+        }
+
+        /* set the command line for ``ps'' output */
         sprintf(ca, "%s %s [%sCGI]", argv[0], source, mode == MODE_NPHCGI ? "NPH-" : "");
         argv[0] = strdup(ca);
     }
     else if (optind == argc-1 && 
-             /* make really sure we are not running under a webserver */
              getenv("GATEWAY_INTERFACE") == NULL &&
              getenv("PATH_TRANSLATED")   == NULL &&
              getenv("QUERY_STRING")      == NULL   ) {
+        /*
+        **
+        **  Stand-Alone outside Webserver environment
+        **
+        */
 
         /*  stand-alone filter, source as argument:
             either manually on the console or via shebang */
@@ -933,7 +984,7 @@ int main(int argc, char **argv, char **env)
     /*  now allocate the Perl interpreter  */
     my_perl = perl_alloc();   
     perl_construct(my_perl); 
-    /* perl_destruct_level = 0; */
+    /* perl_destruct_level = 1; */
     /* perl_init_i18nl10n(1); */
 
     /*  create command line...  */
@@ -1035,10 +1086,15 @@ int main(int argc, char **argv, char **env)
     }
     stat(perlstdout, &st);
 
+    /* ok, now recover the stdout and stderr and
+       print out the real contents on stdout or outputfile */
+    IO_restore_stdout();
+    IO_restore_stderr();
+
     /*  if we are running as a NPH-CGI/1.1 script
         we had to provide the HTTP reponse headers ourself */
     if (mode == MODE_NPHCGI) {
-        HTTP_PrintResponseHeaders();
+        HTTP_PrintResponseHeaders(cpOut);
 
         /* if there are no HTTP header lines, we print a basic
            Content-Type header which should be ok */
@@ -1062,11 +1118,6 @@ int main(int argc, char **argv, char **env)
     else if (mode == MODE_FILTER) {
         HTTP_StripResponseHeaders(&cpOut, &nOut);
     }
-
-    /* ok, now recover the stdout and stderr and
-       print out the real contents on stdout or outputfile */
-    IO_restore_stdout();
-    IO_restore_stderr();
 
     /* now when the request was not a HEAD request we create the output */
     cp = getenv("REQUEST_METHOD");

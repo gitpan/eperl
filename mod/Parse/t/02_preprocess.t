@@ -24,7 +24,7 @@ EOT
 $rc = Parse::ePerl::Preprocess({
     Script  => $in, 
 	Result  => \$out,
-	INC     => [ ".", "TEST", "DREI" ]
+	INC     => [ 'One', '.', 'Three' ]
 });
 
 if ($rc == 1 and $out eq $test) {
