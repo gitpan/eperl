@@ -26,9 +26,9 @@
      find it. If you have different Perl binaries in your path the one with
      the latest version number will be used. If you want to force ePerl to be
      build with a specific Perl on your system (if you have more then one
-     installed), you can also use option ``--with-perl'' with ``configure''.
-     Additionally you need a real ANSI C compiler like GCC to compile ePerl,
-     but most of the vendor compilers also work.
+     installed), you can also use option ``--with-perl=/path/to/bin/perl''
+     with ``configure''.  Additionally you need a real ANSI C compiler like
+     GCC to compile ePerl, but most of the vendor compilers also work.
 
   2. Configuring the source
 
@@ -38,10 +38,18 @@
 
      a) Configure the ePerl source for building the stand-alone program:
         $ ./configure --prefix=/path/to/eperl/root 
-                     [--with-perl=/path/of/preferred/perl]
+                     [--with-perl=/path/to/bin/perl]
 
      b) Configure the ePerl source for building the Perl 5 interface modules:
-        $ perl Makefile.PL [PREFIX=/path/to/private/perl/area/]
+        $ [/path/to/bin/]perl Makefile.PL [PREFIX=/path/to/private/perl/area/]
+
+     ATTENTION! When compiling ePerl you should use the same
+                environment as you had when compiling the Perl system itself.
+                Because ePerl uses the same compiler, libraries, etc. it is
+                essential for a correct and successful compile that there is
+                no difference here. Typical error: You compile ePerl on
+                another machine of a cluster which does not have the same
+                libraries as the one used last time for compiling Perl.
 
   3. Run the build process
 

@@ -56,13 +56,13 @@
      ePerl blocks back to plain characters, so the Perl interpreter again
      receives valid Perl code blocks.
 
-  o  Taint and Warning modes now available
+  o  Perl Taint and Warning modes now available
 
      Now ePerl has two new options similar to the plain ``perl'' program:
      Option -T for enabling the Tainting mode and option -w for enabling
      Warning messages of the Perl interpreter. 
 
-  o  Preprocessor
+  o  New ePerl Preprocessor
 
      ePerl now provides an own preprocessor similar to F<CPP> (from the C
      language) in style which is either enabled manually via the new option -P
@@ -78,7 +78,7 @@
      #sinclude directives of the new ePerl preprocessor and added to @INC
      under runtime. 
 
-  o  New Perl 5 interface module for ePerl parser
+  o  New Perl 5 interface module for ePerl parser: Parse::ePerl
 
      A new Perl 5 interface module named Parse::ePerl was created which makes
      the ePerl parser available from within Perl scripts itself via "use
@@ -101,10 +101,25 @@
      So this version is more compliant to the original ePerl facility and
      emulates it more strictly.
 
-  o  New option -h ;-)
+  o  New option -h for consistency ;-)
 
      Just to be consequent with options a -h option was added to show the
      usage list.
+
+  o  First attempt to write a converter from (X)SSI to ePerl
+
+     A Perl script was added to the distribution which converts most of the
+     (X)SSI directives into the corresponding or emulating ePerl directives.
+     It is called shtml2phtml and can be found under contrib/ in the
+     distribution.
+
+  o  Built-in GIF images
+
+     Again the GIF images are built right into the executable to make ePerl
+     run out-of-the-box without any need for configurations. Additionally to
+     the ePerl Logo (which can be access via URL /url/to/nph-eperl/logo.gif)
+     there is a second image available: The POWERED-BY-EPERL image. It can be
+     accessed via URL /url/to/nph-eperl/powered.gif.
 
   o  Enhanced portability
 
@@ -117,16 +132,12 @@
      package which is more reliable and even works on all major Unix derivates
      (egetopt had problems under IRIX).
 
-  o  Compiles out-of-the-box on major Unix derivates.
+  o  Compiles and runs out-of-the-box on major Unix derivates.
   
-     ePerl now compiles out-of-the box with Perl 5.003 (EMBED) and 5.004 under
-     FreeBSD, Linux, SunOS, Solaris, HP-UX and IRIX.
-
-  o  Tested with new Perl 5.004
-
-     ePerl runs fine with the new Perl 5.004. This is now the preferred and
-     only officially supported version of Perl for compiling and running
-     ePerl.
+     ePerl was already tested to compile out-of-the-box and pass the test
+     suite successfully with Perl 5.003 (+EMBED) or 5.004 under FreeBSD 2.1.5,
+     FreeBSD 2.2.1, BSD/OS 2.1, SunOS 4.1.3, Solaris 2.5.1, HP-UX 10.20, IRIX
+     6.2 and Linux 2.0.18.
 
 
 

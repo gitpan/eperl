@@ -12,7 +12,7 @@ while (<IN>) {
 	        last if (m|^/\*_END_PROTO_\*/|);
 		}
 		print OUT "/*_BEGIN_PROTO_*/\n";
-        open(CP, "cproto -DMKPROTO -e -f3 -m -v $sources 2>/dev/null|");
+        open(CP, "cproto -DMKPROTO -e -f3 -v $sources 2>/dev/null|");
 		while (<CP>) {
 			if (m|^/\* .+\.c \*/|) {
 				print OUT "\n";

@@ -2,6 +2,38 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2b9 and 2.2.0
+  -------------------------------
+
+  970706 o added missing eperl_getopt.h include
+           for eperl_main.c which caused the compilation
+           at least under SunOS 4.x to fail.
+         o added more descriptive error message
+           to configure when Perl version is to old
+         o added hint to INSTALL that the same
+           environment have to be used for compiling
+           ePerl as for Perl.
+  970709 o added klduge to support Perl+SFIO where
+           fwrite has to be replaced by PerlIO_write
+         o enabled ``CC=/path/to/cc ./configure'' again
+           for cases where one wants to overwrite the
+           used C compiler.
+  970714 o removed some unused defines in eperl_global.h
+           which lead to problems under AIX 4.1.4
+         o removed the P_ macros in eperl_proto.h because
+           AIX 4.1.4 is not happy about it because of
+           PrintError defines which has "...". Should
+           be ok without P_ because we need an ANSI
+           compiler since the first days.
+  970715 o changed Perl requirement from 5.00390 to 5.00325
+  970718 o added ANNOUNCE.ADDR file
+         o updated NEWS file and updated ANNOUNCE file
+         o updated VERSIONS file
+         o slightly adjusted NEWS file
+         o created contrib/utils/00README file
+         o added the package files to contrib/pkg/
+         o updated the demo files
+
   Changes between 2.2b8 and 2.2b9
   -------------------------------
 

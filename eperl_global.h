@@ -159,7 +159,6 @@ char *vsprintf (char *, char *, va_list);
 #endif
 #endif
 
-
 /*
 **
 **  OS Return Values
@@ -184,7 +183,7 @@ char *vsprintf (char *, char *, va_list);
 #define EX_CONFIG       78      /* configuration error */
 #define EX__MAX         78      /* maximum listed value */
 
-/* OK and FAIL exits should ALLWAYS exists */
+/* OK and FAIL exits should ALWAYS exists */
 #ifndef EX_OK
 #define EX_OK   0
 #endif
@@ -279,20 +278,6 @@ char *vsprintf (char *, char *, va_list);
 #define FALSE (!(TRUE))
 /* typedef enum { false = FALSE, true = TRUE } bool; */
 
-/*   some other names for true and false */
-
-#define YES   TRUE
-#define NO    FALSE
-
-#define GOOD  TRUE
-#define WRONG FALSE
-
-#undef  OK
-#define OK    TRUE
-#define BAD   FALSE
-
-#define SOME  TRUE
-#define NONE  FALSE
 
 
 /*

@@ -3,7 +3,7 @@
 ##  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
 ##
 
-require 5.00390;
+require 5.00325;
 use Config; 
 
 $perl = $Config{bin} . "/perl";

@@ -6,7 +6,7 @@
 package Parse::ePerl;
 
 #   requirements and runtime behaviour
-require 5.00390;
+require 5.00325;
 
 require Exporter;
 require DynaLoader;
@@ -23,7 +23,7 @@ use Cwd qw(fastcwd);
 #use Safe;
 
 #   private version number
-$VERSION = "2.2b9";
+$VERSION = "2.2.0";
 
 #   autoloading (currently unused)
 sub AUTOLOAD {

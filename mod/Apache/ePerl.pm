@@ -6,14 +6,14 @@
 package Apache::ePerl;
 
 #   requirements and runtime behaviour
-require 5.00390;
+require 5.00325;
 use strict;
 use Carp;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use vars qw($nDone $nOk $nFail $Cache);
 
 #   private version number
-$VERSION = "2.2b9";
+$VERSION = "2.2.0";
 
 #   globals
 $nDone = 0;

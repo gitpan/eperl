@@ -25,9 +25,9 @@ use Net::FTP;
 $tmpfile = "/tmp/demo.net.tmp.$$";
 
 $ftp = Net::FTP->new("ftp.engelschall.com");
-$ftp->login("anonymous", "demo.net.phtml\@foreigner.com");
+$ftp->login("anonymous", "demo.net.phtml\@`hostname`");
 $ftp->cwd("/sw");
-$ftp->get("eperl-2.1.2.readme", $tmpfile);
+$ftp->get("eperl-2.2.0.readme", $tmpfile);
 $ftp->quit;
 
 open(FP, "<$tmpfile");

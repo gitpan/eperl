@@ -44,8 +44,17 @@ rm -f $TMPFILE
 PATH_PERL=$perlprog
 AC_MSG_RESULT([$perlprog v$perlvers])
 case $perlvers in
-    5.003* | 5.004* | 5.005* | 5.006* ) ;;
-	* ) AC_ERROR([latest Perl found is $perlvers, but at least Perl 5.003 is required.])
+    5.003* | 5.004* | 5.005* | 5.006* )
+        ;;
+    * ) echo ""
+        echo "Latest Perl found on your system is $perlvers,"
+        echo "but at least Perl version 5.003 is required."
+        echo "In case the newer one is not in PATH, just use"
+        echo "the option --with-perl=/path/to/bin/perl to"
+        echo "provide the correct executable."
+        echo ""
+        AC_ERROR([Perl version too old]) 
+        ;;
 esac
 AC_SUBST(PATH_PERL)
 AC_SUBST(perlprog)
@@ -55,7 +64,7 @@ perl_vers=$perlvers
 AC_SUBST(perl_prog)
 AC_SUBST(perl_vers)
 if test -f $PATH_PERL; then
-	:
+    :
 else
     AC_ERROR([required program ``perl'' not found])
 fi
@@ -71,10 +80,15 @@ AC_MSG_RESULT([$perl_os])
 
 AC_MSG_CHECKING([for Perl standard compiler])
 perl_cc="`$perl_prog -e 'use Config; print $Config{cc}'`";
-AC_MSG_RESULT([$perl_cc])
+if test ".$CC" = .; then
+    CC=$perl_cc
+    export CC
+    AC_MSG_RESULT([$perl_cc])
+else
+    perl_cc=$CC
+    AC_MSG_RESULT([$perl_cc (OVERWRITTEN)])
+fi
 AC_SUBST(perl_cc)
-CC=$perl_cc
-export CC
 
 AC_MSG_CHECKING([for Perl standard optimization flags])
 perl_optimize="`$perl_prog -e 'use Config; print $Config{optimize}'`";
@@ -111,14 +125,14 @@ AC_MSG_CHECKING([for Perl dynamic loading support])
 usedl="`$perlprog -e 'use Config; print $Config{usedl}'`";
 case $usedl in
     define )
-	    rc=yes
+        rc=yes
         AC_DEFINE(HAVE_PERL_DYNALOADER)
-		perl_dla=$perl_archlib/auto/DynaLoader/DynaLoader.a
-		;;
-	* )
-	    rc=no
-		perl_dla=
-		;;
+        perl_dla=$perl_archlib/auto/DynaLoader/DynaLoader.a
+        ;;
+    * )
+        rc=no
+        perl_dla=
+        ;;
 esac
 AC_SUBST(perl_dla)
 AC_MSG_RESULT([$rc])
@@ -174,18 +188,18 @@ AC_MSG_RESULT([$x])
 
 if test "$debug" = "on"; then
     AC_MSG_CHECKING(for dmalloc library)
-	dmalloc=""
+    dmalloc=""
     x=no
     if test -f /sw/include/dmalloc.h; then
         if test -f /sw/shlib/libdmalloc.a; then
-		    AC_DEFINE(HAVE_DMALLOC)
-		    CFLAGS="$CFLAGS -I/sw/include"
-		    LDFLAGS="$LDFLAGS -L/sw/shlib"
-			dmalloc="-ldmalloc"
-		    x=yes
+            AC_DEFINE(HAVE_DMALLOC)
+            CFLAGS="$CFLAGS -I/sw/include"
+            LDFLAGS="$LDFLAGS -L/sw/shlib"
+            dmalloc="-ldmalloc"
+            x=yes
         fi
     fi
-	AC_SUBST(dmalloc)
+    AC_SUBST(dmalloc)
     AC_MSG_RESULT([$x])
 fi
 
@@ -200,7 +214,7 @@ AC_CONST
 AC_STDC_HEADERS
 AC_HAVE_HEADERS(stdio.h stdarg.h stdlib.h string.h ctype.h dnl
                 unistd.h time.h signal.h pwd.h grp.h dnl
-				sys/types.h sys/stat.h sys/param.h dnl
+                sys/types.h sys/stat.h sys/param.h dnl
                 sys/socket.h netinet/in.h netdb.h)
 AC_CHECK_TYPE(bool, char)
 AC_CHECK_FUNCS(memmove)

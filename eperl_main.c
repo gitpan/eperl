@@ -36,9 +36,15 @@
 #include "eperl_global.h"
 #include "eperl_security.h"
 #include "eperl_proto.h"
+#include "eperl_getopt.h"
 
 #include <EXTERN.h>
 #include <perl.h>                 
+
+/* Perl/SFIO kludge */
+#ifdef USE_SFIO
+#define fwrite PerlIO_write
+#endif
 
 int mode = MODE_UNKNOWN;
 

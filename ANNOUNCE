@@ -1,3 +1,5 @@
+
+  After a long beta cycle I'm proud to release now...
         ____           _ 
     ___|  _ \ ___ _ __| |
    / _ \ |_) / _ \ '__| |
@@ -8,7 +10,7 @@
 
   <URL:http://www.engelschall.com/sw/eperl/>
 
-  Version 2.2.0 (xx-06-1997)
+  Version 2.2.0 (18-07-1997)
 
   ePerl interprets an ASCII file bristled with Perl 5 program statements by
   evaluating the Perl 5 code while passing through the plain ASCII data. It
@@ -17,21 +19,38 @@
   scripting language for dynamic HTML page programming.
 
   Copyright (c) 1996-1997 Ralf S. Engelschall, All rights reserved.
-  ______________________________________________________________________
 
-  Implementation:   - ANSI C
+  Summary of Program
+  ==================
 
-  Min Requirements: - underlaying Unix derivate
-                    - ANSI C compiler
-                    - installed Perl 5.004 or at least 5.003+EMBED
+  o  Implementation:   - ANSI C
+  o  Min Requirements: - underlaying Unix derivate
+                       - ANSI C compiler
+                       - already installed Perl 5.004 (full functionality)
+                         or at least 5.003+EMBED (minimum functionality)
+  o  Distribution:     - freely available
+                       - no charge
+                       - GNU General Public License or Artistic License
+  o  Status:           - Genesis: March 1996
+                       - First major release: March 1996 (1.0)
+                       - Last  major release: April 1997 (2.1)
+                       - stable
 
-  Distribution:     - freely available
-                    - no charge
-                    - GNU General Public License or Artistic License
+  Major Changes from Version 2.1 to 2.2
+  =====================================
 
-  Status:           - Genesis: Februar 1996
-                    - First major release: March 1996 (1.0)
-                    - Last  major release: April 1997 (2.1)
-                    - stable
-  ______________________________________________________________________
+  o  Changed Quotation/Delimiter Parsing
+  o  Smarter and Optimized Parser
+  o  Support for '=' block prefix
+  o  HTML entity conversion inside ePerl blocks
+  o  Perl Taint and Warning modes now available
+  o  New ePerl Preprocessor
+  o  New option -I for include path
+  o  New Perl 5 interface module for ePerl parser: Parse::ePerl
+  o  New ePerl emulation handler for Apache+mod_perl: Apache::ePerl
+  o  New option -h for consistency ;-)
+  o  First attempt to write a converter from (X)SSI to ePerl
+  o  Built-in GIF images
+  o  Enhanced portability
+  o  Compiles and runs out-of-the-box on major Unix derivates.
 
