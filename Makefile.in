@@ -2,9 +2,7 @@
 ##  Makefile -- ePerl Makefile
 ##  Copyright (c) 1996,1997 Ralf S. Engelschall, All Rights Reserved. 
 ##
-
 @SET_MAKE@
-
 
 # ------------------------------------------------
 #   DEFINITIONS
@@ -43,10 +41,11 @@ CP              = cp
 
 #   installation paths
 prefix          = @prefix@
-exec_prefix     = @exec_prefix@
-bindir          = @bindir@
-libdir          = @libdir@
-mandir          = @mandir@
+exec_prefix     = $(prefix)
+bindir          = $(prefix)/bin
+libsubdir       = @libsubdir@
+libdir          = $(prefix)/lib$(libsubdir)
+mandir          = $(prefix)/man/man1
 
 
 # ------------------------------------------------
@@ -72,8 +71,8 @@ _NEWVERS = \
 	V=`./etc/newvers -lc -D eperl_version.c`;\
 	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
 	V=`./etc/newvers -lc -d eperl_version.c`;\
-	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
-	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
+	sed -e "s/@v=(\"[0-9.]*\"/@v=(\"$$V\"/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
+	sed -e "s/@v=(\"[0-9.]*\"/@v=(\"$$V\"/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
 
 _UPDATEVERS = \
 	V=`./etc/newvers -lc -d eperl_version.c`;\
@@ -81,8 +80,8 @@ _UPDATEVERS = \
 	V=`./etc/newvers -lc -D eperl_version.c`;\
 	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
 	V=`./etc/newvers -lc -d eperl_version.c`;\
-	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
-	sed -e "s/VERSION = \".*\";/VERSION = \"$$V\";/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
+	sed -e "s/@v=(\"[0-9.]*\"/@v=(\"$$V\"/g" <mod/Parse/ePerl.pm >mod/Parse/ePerl.pm.n && mv mod/Parse/ePerl.pm.n mod/Parse/ePerl.pm; \
+	sed -e "s/@v=(\"[0-9.]*\"/@v=(\"$$V\"/g" <mod/Apache/ePerl.pm >mod/Apache/ePerl.pm.n && mv mod/Apache/ePerl.pm.n mod/Apache/ePerl.pm
 
 
 # ------------------------------------------------
@@ -165,6 +164,7 @@ PROTO_SRCS = \
  eperl_sys.c \
  eperl_http.c \
  eperl_debug.c \
+ eperl_config.c \
  eperl_version.c \
  eperl_readme.c \
  eperl_license.c \
@@ -180,6 +180,7 @@ SRCS = \
  eperl_http.c \
  eperl_getopt.c \
  eperl_debug.c \
+ eperl_config.c \
  eperl_version.c \
  eperl_readme.c \
  eperl_license.c \
@@ -195,6 +196,7 @@ OBJS = \
  eperl_http.o \
  eperl_getopt.o \
  eperl_debug.o \
+ eperl_config.o \
  eperl_version.o \
  eperl_readme.o \
  eperl_license.o \
@@ -211,8 +213,11 @@ eperl: $(OBJS)
 eperl_main.o: eperl_main.c
 	$(CC) $(CFLAGS) -c eperl_main.c
 
-eperl_perl5.o: eperl_perl5.c
+eperl_perl5.o: eperl_perl5.c eperl_perl5_sm.h
 	$(CC) $(CFLAGS) -c eperl_perl5.c
+
+eperl_perl5_sm.h: eperl_perl5_sm.pl
+	$(perl_prog) eperl_perl5_sm.pl >eperl_perl5_sm.h
 
 eperl_getopt.o: eperl_getopt.c
 	$(CC) $(CFLAGS) -c eperl_getopt.c
@@ -228,6 +233,9 @@ eperl_sys.o: eperl_sys.c
 
 eperl_debug.o: eperl_debug.c
 	$(CC) $(CFLAGS) -c eperl_debug.c
+
+eperl_config.o: eperl_config.c
+	$(CC) $(CFLAGS) -c eperl_config.c
 
 eperl_http.o: eperl_http.c
 	$(CC) $(CFLAGS) -c eperl_http.c
@@ -333,8 +341,8 @@ install: all
 	$(MKDIR) $(libdir)
 	$(INSTALL_PROGRAM) eperl $(bindir)/eperl
 	$(INSTALL_DATA) eperl.1 $(mandir)/eperl.1
-	$(MKDIR) $(libdir)/eg
-	$(CP) -r eg/* $(libdir)/eg/
+	$(MKDIR) $(libdir)
+	$(CP) -r eg/* $(libdir)/
 
 
 # ------------------------------------------------
@@ -354,6 +362,7 @@ realclean:
 	-rm -f $(SOBJS)
 	-rm -f libeperl.a
 	-rm -f core *.core
+	-rm -f eperl_perl5_sm.h
 	-rm -f eperl.1
 	-rm -f eperl_readme.[ch]
 	-rm -f eperl_license.[ch]
@@ -364,6 +373,7 @@ distclean:
 	-rm -f $(SOBJS)
 	-rm -f libeperl.a
 	-rm -f core *.core
+	-rm -f eperl_perl5_sm.h
 	-rm -f config_ac.h config_sc.h
 	-rm -f config.status config.cache config.log
 	-rm -f Makefile

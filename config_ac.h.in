@@ -35,6 +35,9 @@
 /* Define if you have the seteuid function.  */
 #undef HAVE_SETEUID
 
+/* Define if you have the strdup function.  */
+#undef HAVE_STRDUP
+
 /* Define if you have the <ctype.h> header file.  */
 #undef HAVE_CTYPE_H
 

@@ -33,6 +33,8 @@
 **  eperl_parse.c -- ePerl parser stuff
 */
 
+
+#include "eperl_config.h"
 #include "eperl_global.h"
 #include "eperl_proto.h"
 

@@ -33,6 +33,7 @@
 **  eperl_sys.c -- ePerl system functions
 */
 
+#include "eperl_config.h"
 #include "eperl_global.h"
 #include "eperl_proto.h"
 

@@ -1,8 +1,13 @@
+dnl ##
+dnl ##  configure.in -- GNU autoconf configuration spec
+dnl ##  Copyright (c) Ralf S. Engelschall, <rse@engelschall.com>
+dnl ##
+dnl ##  Process this file with ``autoconf'' to produce a configure script.
+dnl ##
+
+
 dnl #
-dnl #  configure.in -- GNU autoconf configuration spec
-dnl #  Copyright (c) Ralf S. Engelschall, <rse@engelschall.com>
-dnl #
-dnl #  Process this file with ``autoconf'' to produce a configure script.
+dnl #   standard autoconf prolog
 dnl #
 
 AC_PREREQ(2.10)dnl
@@ -14,12 +19,30 @@ AC_INIT(README)
 AC_CONFIG_HEADER(config_ac.h)dnl
 AC_PREFIX_DEFAULT(/usr/local)
 
+
+dnl #
+dnl #   libdir adjustment
+dnl #
+
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+eval "dir=$prefix"
+case $dir in
+    *eperl* ) libsubdir= ;;
+          * ) libsubdir="/eperl" ;;
+esac
+AC_SUBST(libsubdir)
+
+
+dnl #
+dnl #   latest find Perl interpreter
+dnl #
+
 AC_CONFIGURE_PART(CHECK: Configuration of Perl Language)
 AC_MSG_CHECKING([for Perl language])
 AC_ARG_WITH(perl,dnl
 [  --with-perl=PATH        force the usage of a specific installed Perl],
 perlprog=$with_perl
-perlvers=`$perlprog -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
+perlvers=`$perlprog -v | grep version | sed -e 's/.* version //' -e 's/ built.*//' -e 's/ with.*//'`
 ,
 TMPFILE=/tmp/x.$$
 rm -f $TMPFILE
@@ -27,12 +50,14 @@ touch $TMPFILE
 c=0
 for dir in `echo $PATH | sed -e 's/:/ /g'` /tmp; do
     for perl in perl5 perl miniperl; do
-         if test -x "$dir/$perl"; then
-             perl="$dir/$perl"
-             version=`$perl -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
-             versionnum="`echo $version | sed -e 's/\.//g' -e 's/_//g'`"
-             versionnum=`expr $versionnum - $c`
-             echo "$versionnum $version $perl" >>$TMPFILE
+         if test -f "$dir/$perl"; then
+             if test -x "$dir/$perl"; then
+                 perl="$dir/$perl"
+                 version=`$perl -v | grep version | sed -e 's/.* version //' -e 's/ built.*//' -e 's/ with.*//'`
+                 versionnum="`echo $version | sed -e 's/\.//g' -e 's/_//g'`"
+                 versionnum=`expr $versionnum - $c`
+                 echo "$versionnum $version $perl" >>$TMPFILE
+             fi
          fi
     done
     c=`expr $c + 1`
@@ -69,6 +94,11 @@ else
     AC_ERROR([required program ``perl'' not found])
 fi
 
+
+dnl #
+dnl #   determine Perl parameters
+dnl #
+
 AC_MSG_CHECKING([for Perl knowledge of system])
 perl_osname="`$perl_prog -e 'use Config; print $Config{osname}'`";
 perl_osvers="`$perl_prog -e 'use Config; print $Config{osvers}'`";
@@ -98,7 +128,8 @@ AC_SUBST(perl_optimize)
 AC_MSG_CHECKING([for Perl standard compilation flags])
 perl_ccflags="`$perl_prog -e 'use Config; print $Config{ccflags}'`";
 case $perl_os in
-    *hpux* ) perl_ccflags="$perl_ccflags -Wp,-H32768" ;;
+    *hpux*    ) perl_ccflags="$perl_ccflags -Wp,-H32768" ;;
+    *irix-5.* ) perl_ccflags="`echo $perl_ccflags | sed -e 's/-D_POSIX_SOURCE//'`" ;;
 esac
 AC_MSG_RESULT([$perl_ccflags])
 AC_SUBST(perl_ccflags)
@@ -154,6 +185,11 @@ case $perl_ccdlflags in
 esac
 AC_MSG_RESULT([$x])
 AC_SUBST(perl_ccdlflags)
+
+
+dnl #
+dnl #   determine build tools and parameters
+dnl #
 
 AC_CONFIGURE_PART(CHECK: System Build Environment)
 AC_BUILD_USER
@@ -211,6 +247,10 @@ INSTALL_DATA='${INSTALL} -m 644'
 INSTALL_PROGRAM="${INSTALL_PROGRAM} -m 755"
 
 
+dnl #
+dnl #   determine system parameters
+dnl #
+
 AC_CONFIGURE_PART(CHECK: Characteristic of System Headers and Libraries)
 AC_CONST
 AC_STDC_HEADERS
@@ -222,80 +262,12 @@ AC_CHECK_TYPE(bool, char)
 AC_CHECK_FUNCS(memmove)
 AC_CHECK_FUNCS(seteuid)
 AC_CHECK_FUNCS(setegid)
+AC_CHECK_FUNCS(strdup)
 
-AC_UVAR_INIT
-AC_UVAR_VERB([dnl
-#   Imported pathes of the GNU ``configure'' command line:
-#            --srcdir=<srcdir>
-#            --prefix=<prefix>
-#       --exec-prefix=<exec_prefix>
-#   These are used in the above definitions.
-#
-])dnl
-AC_UVAR_SETQUOTE(srcdir, $srcdir)
-AC_UVAR_SETCHKQUOTE(prefix, $prefix)
-AC_UVAR_SETCHKQUOTE(exec_prefix, $prefix)
-AC_UVAR_VERB([dnl
 
-#   Actual installation pathes, Part I [NO EDIT NECESSARY]
-#
-#   Given default values are the exact pathes as recommended
-#   by Richard Stallman in his paper ``GNU Coding Standards'',
-#   as of 28 March 1994.
-#
-#   If these GNU installation pathes do not fit your
-#   individual needs, feel free to edit the given values!!
-#   But remember: than your Push installation is no longer
-#                 compliant to the GNU standards.
-#
-])dnl
-AC_UVAR_SET(bindir,        $exec_prefix/bin)
-AC_UVAR_SET(libdir,        $exec_prefix/lib)
-AC_UVAR_SET(datadir,       $prefix/var)
-AC_UVAR_SET(statdir,       $prefix/lib)
-AC_UVAR_SET(includedir,    $prefix/include)
-AC_UVAR_SET(oldincludedir, /usr/include)
-AC_UVAR_SET(mandir,        $prefix/man/man1)
-dnl AC_UVAR_SET(man1dir,       $prefix/man/man1)
-dnl AC_UVAR_SET(man2dir,       $prefix/man/man2)
-dnl AC_UVAR_SET(man3dir,       $prefix/man/man3)
-dnl AC_UVAR_SET(man4dir,       $prefix/man/man4)
-dnl AC_UVAR_SET(man5dir,       $prefix/man/man5)
-dnl AC_UVAR_SET(man6dir,       $prefix/man/man6)
-dnl AC_UVAR_SET(man7dir,       $prefix/man/man7)
-dnl AC_UVAR_SET(man8dir,       $prefix/man/man8)
-AC_UVAR_SET(manext,        .1)
-dnl AC_UVAR_SET(man1ext,       .1)
-dnl AC_UVAR_SET(man2ext,       .2)
-dnl AC_UVAR_SET(man3ext,       .3)
-dnl AC_UVAR_SET(man4ext,       .4)
-dnl AC_UVAR_SET(man5ext,       .5)
-dnl AC_UVAR_SET(man6ext,       .6)
-dnl AC_UVAR_SET(man7ext,       .7)
-dnl AC_UVAR_SET(man8ext,       .8)
-AC_UVAR_VERB([dnl
-
-#   Actual installation pathes, Part II [NO EDIT NECESSARY]
-#
-#   The following pathes are GenOpt pathes and
-#   are additionally used by the Push installation.
-#
-#   These are not predefined by the GNU standard but
-#   used by the author for a long time.
-#
-])dnl
-AC_UVAR_SET(pkgdir,        $prefix)
-AC_UVAR_SET(infodir,       $prefix/info)
-AC_UVAR_SET(xaddir,        $prefix/xad)
-AC_UVAR_SET(tmpdir,        /tmp)
-AC_UVAR_OUTPUT
-
-eval libdir=$libdir
-case $libdir in
-    *eperl* ) ;;
-          * ) libdir="${exec_prefix}/lib/eperl" ;;
-esac
-
+dnl #
+dnl #   finally: source file substitution...
+dnl #
 
 AC_CONFIGURE_PART(RESULT: Sourcefile Substitution)
 AC_OUTPUT(dnl

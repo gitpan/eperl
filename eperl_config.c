@@ -30,62 +30,26 @@
 **
 **  ======================================================================
 **
-**  eperl_global.h -- ePerl global header file
+**  eperl_global.c -- ePerl configuration stuff
 */
-#ifndef EPERL_GLOBAL_H
-#define EPERL_GLOBAL_H 1
+
+#include "eperl_config.h"
 
 
-/*
-**
-**  The ePerl block delimiters
-**
-*/
-#define BEGIN_DELIMITER_FILTER "<:"
-#define   END_DELIMITER_FILTER ":>"
-#define BEGIN_DELIMITER_CGI    "<?"
-#define   END_DELIMITER_CGI    "!>"
+/*  some systems (like Ultrix) don't not have a strdup() function :-( */
+#ifndef HAVE_STRDUP
+char *strdup(const char *str)
+{
+    size_t len;
+    char *copy;
 
-
-/*
-**
-**  The ePerl runtime mode
-**
-*/
-#define MODE_UNKNOWN    1
-#define MODE_FILTER     2
-#define MODE_CGI        4
-#define MODE_NPHCGI     8
-
-
-/* 
-**
-**   debugging
-**
-*/
-#ifdef DEBUG_ENABLED
-#ifdef HAVE_DMALLOC
-#define DMALLOC_FUNC_CHECK 1
-#include <dmalloc.h>
-#endif
+    len = strlen(str) + 1;
+    if ((copy = malloc(len)) == NULL)
+        return (NULL);
+    memcpy(copy, str, len);
+    return (copy);
+}
 #endif
 
 
-/*
-**
-**  CU() -- CleanUp Makro (implemented in a safety way)
-**
-*/
-#define DECL_EXRC int rc
-#define EXRC rc
-#define ZERO 0
-#define STMT(stuff) do { stuff } while (ZERO)
-#define CU(returncode) STMT( rc = returncode; goto CUS; )
-#define VCU STMT( goto CUS; )
-#define RETURN_WVAL(val) return (val)
-#define RETURN_EXRC return (rc)
-#define RETURN_NORC return
-
-
-#endif /* EPERL_GLOBAL_H */
 /*EOF*/

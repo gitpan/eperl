@@ -30,7 +30,7 @@
 **
 **  ======================================================================
 **
-**  eperl_egetopt.c -- egetopt() function
+**  eperl_getopt.c -- GNU getopt() function
 */
 
 /* Getopt for GNU.
@@ -62,6 +62,7 @@
 #define _NO_PROTO
 #endif
 
+#include "eperl_config.h"
 #include "eperl_global.h"
 
 #if !defined (__STDC__) || !__STDC__

@@ -41,8 +41,6 @@ ac_help="$ac_help
   --with-perl=PATH        force the usage of a specific installed Perl"
 ac_help="$ac_help
   --enable-debug          to enable the debugging options for compilation"
-ac_help="$ac_help
-  --with-uvar             support for Runtime User Variable Setup"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -552,16 +550,28 @@ fi
 
 
 
+
+
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+eval "dir=$prefix"
+case $dir in
+    *eperl* ) libsubdir= ;;
+          * ) libsubdir="/eperl" ;;
+esac
+
+
+
+
 echo "$ac_t""" 1>&6
 echo "$ac_t""__ CHECK: Configuration of Perl Language __" 1>&6
 
 echo $ac_n "checking for Perl language""... $ac_c" 1>&6
-echo "configure:560: checking for Perl language" >&5
+echo "configure:570: checking for Perl language" >&5
 # Check whether --with-perl or --without-perl was given.
 if test "${with_perl+set}" = set; then
   withval="$with_perl"
   perlprog=$with_perl
-perlvers=`$perlprog -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
+perlvers=`$perlprog -v | grep version | sed -e 's/.* version //' -e 's/ built.*//' -e 's/ with.*//'`
 
 else
   TMPFILE=/tmp/x.$$
@@ -570,12 +580,14 @@ touch $TMPFILE
 c=0
 for dir in `echo $PATH | sed -e 's/:/ /g'` /tmp; do
     for perl in perl5 perl miniperl; do
-         if test -x "$dir/$perl"; then
-             perl="$dir/$perl"
-             version=`$perl -v | grep version | sed -e 's/.* version //' -e 's/ with.*//'`
-             versionnum="`echo $version | sed -e 's/\.//g' -e 's/_//g'`"
-             versionnum=`expr $versionnum - $c`
-             echo "$versionnum $version $perl" >>$TMPFILE
+         if test -f "$dir/$perl"; then
+             if test -x "$dir/$perl"; then
+                 perl="$dir/$perl"
+                 version=`$perl -v | grep version | sed -e 's/.* version //' -e 's/ built.*//' -e 's/ with.*//'`
+                 versionnum="`echo $version | sed -e 's/\.//g' -e 's/_//g'`"
+                 versionnum=`expr $versionnum - $c`
+                 echo "$versionnum $version $perl" >>$TMPFILE
+             fi
          fi
     done
     c=`expr $c + 1`
@@ -613,8 +625,10 @@ else
     { echo "configure: error: required program ``perl'' not found" 1>&2; exit 1; }
 fi
 
+
+
 echo $ac_n "checking for Perl knowledge of system""... $ac_c" 1>&6
-echo "configure:618: checking for Perl knowledge of system" >&5
+echo "configure:632: checking for Perl knowledge of system" >&5
 perl_osname="`$perl_prog -e 'use Config; print $Config{osname}'`";
 perl_osvers="`$perl_prog -e 'use Config; print $Config{osvers}'`";
 perl_os="$perl_osname-$perl_osvers"
@@ -624,7 +638,7 @@ perl_os="$perl_osname-$perl_osvers"
 echo "$ac_t""$perl_os" 1>&6
 
 echo $ac_n "checking for Perl standard compiler""... $ac_c" 1>&6
-echo "configure:628: checking for Perl standard compiler" >&5
+echo "configure:642: checking for Perl standard compiler" >&5
 perl_cc="`$perl_prog -e 'use Config; print $Config{cc}'`";
 if test ".$CC" = .; then
     CC=$perl_cc
@@ -637,22 +651,23 @@ fi
 
 
 echo $ac_n "checking for Perl standard optimization flags""... $ac_c" 1>&6
-echo "configure:641: checking for Perl standard optimization flags" >&5
+echo "configure:655: checking for Perl standard optimization flags" >&5
 perl_optimize="`$perl_prog -e 'use Config; print $Config{optimize}'`";
 echo "$ac_t""$perl_optimize" 1>&6
 
 
 echo $ac_n "checking for Perl standard compilation flags""... $ac_c" 1>&6
-echo "configure:647: checking for Perl standard compilation flags" >&5
+echo "configure:661: checking for Perl standard compilation flags" >&5
 perl_ccflags="`$perl_prog -e 'use Config; print $Config{ccflags}'`";
 case $perl_os in
-    *hpux* ) perl_ccflags="$perl_ccflags -Wp,-H32768" ;;
+    *hpux*    ) perl_ccflags="$perl_ccflags -Wp,-H32768" ;;
+    *irix-5.* ) perl_ccflags="`echo $perl_ccflags | sed -e 's/-D_POSIX_SOURCE//'`" ;;
 esac
 echo "$ac_t""$perl_ccflags" 1>&6
 
 
 echo $ac_n "checking for Perl standard link flags""... $ac_c" 1>&6
-echo "configure:656: checking for Perl standard link flags" >&5
+echo "configure:671: checking for Perl standard link flags" >&5
 perl_ldflags="`$perl_prog -e 'use Config; print $Config{ldflags}'`";
 case $perl_os in
     *irix-6.* ) perl_ldflags="$perl_ldflags '-Wl,-woff 85'" ;;
@@ -661,19 +676,19 @@ echo "$ac_t""$perl_ldflags" 1>&6
 
 
 echo $ac_n "checking for Perl library files""... $ac_c" 1>&6
-echo "configure:665: checking for Perl library files" >&5
+echo "configure:680: checking for Perl library files" >&5
 perl_libs="`$perl_prog -e 'use Config; print $Config{libs}'`"
 echo "$ac_t""$perl_libs" 1>&6
 
 
 echo $ac_n "checking for Perl architecture directory""... $ac_c" 1>&6
-echo "configure:671: checking for Perl architecture directory" >&5
+echo "configure:686: checking for Perl architecture directory" >&5
 perl_archlib="`$perlprog -e 'use Config; print $Config{archlib}'`";
 echo "$ac_t""$perl_archlib" 1>&6
 
 
 echo $ac_n "checking for Perl dynamic loading support""... $ac_c" 1>&6
-echo "configure:677: checking for Perl dynamic loading support" >&5
+echo "configure:692: checking for Perl dynamic loading support" >&5
 usedl="`$perlprog -e 'use Config; print $Config{usedl}'`";
 case $usedl in
     define )
@@ -693,7 +708,7 @@ esac
 echo "$ac_t""$rc" 1>&6
 
 echo $ac_n "checking for Perl dynamic loading compilation flags""... $ac_c" 1>&6
-echo "configure:697: checking for Perl dynamic loading compilation flags" >&5
+echo "configure:712: checking for Perl dynamic loading compilation flags" >&5
 perl_cccdlflags="`$perlprog -e 'use Config; print $Config{cccdlflags}'`";
 case $perl_cccdlflags in
     " " ) x="none" ;;
@@ -703,7 +718,7 @@ echo "$ac_t""$x" 1>&6
 
 
 echo $ac_n "checking for Perl dynamic loading link flags""... $ac_c" 1>&6
-echo "configure:707: checking for Perl dynamic loading link flags" >&5
+echo "configure:722: checking for Perl dynamic loading link flags" >&5
 perl_ccdlflags="`$perlprog -e 'use Config; print $Config{ccdlflags}'`";
 case $perl_ccdlflags in
     " " ) x="none" ;;
@@ -712,11 +727,13 @@ esac
 echo "$ac_t""$x" 1>&6
 
 
+
+
 echo "$ac_t""" 1>&6
 echo "$ac_t""__ CHECK: System Build Environment __" 1>&6
 
 echo $ac_n "checking for build user""... $ac_c" 1>&6
-echo "configure:720: checking for build user" >&5
+echo "configure:737: checking for build user" >&5
 username="$LOGNAME"
 if test ".$username" = .; then
     username="$USER"
@@ -737,7 +754,7 @@ if test ".$hostname" = .; then
         hostname="unknown"
     fi
 fi
-hostname="`echo $hostname | sed -e 's/\..*//'`"
+hostname="`echo $hostname | sed -e 's/\..*//' -e 's/\n$//'`"
 if test -f /etc/resolv.conf; then
     domainname="`grep domain /etc/resolv.conf | sed -e 's/.*domain//' -e 's/^ *//' -e 's/^	*//' -e 's/^\.//' -e 's/^/./'`"
     if test ".$domainname" = .; then
@@ -746,14 +763,18 @@ if test -f /etc/resolv.conf; then
 else
     domainname="";
 fi
+domainname="`echo $domainname | sed -e 's/\n$//'`"
 build_user="$username@$hostname$domainname"
 
 echo "$ac_t""$build_user" 1>&6
 
 echo $ac_n "checking for build time""... $ac_c" 1>&6
-echo "configure:755: checking for build time" >&5
+echo "configure:773: checking for build time" >&5
 build_time_ctime="`date | sed -e 's/\n$//'`"
-build_time_iso="`date '+%d-%b-%Y' | sed -e 's/\n$//'`"
+build_time_iso="`date '+%d-%b-%Y' 2>/dev/null | sed -e 's/\n$//'`"
+if test ".$build_time_iso" = .; then
+    build_time_iso="`date '+%d-%m-19%y' | sed -e 's/\n$//'`"
+fi
 echo "$ac_t""$build_time_iso" 1>&6
 
 
@@ -761,7 +782,7 @@ echo "$ac_t""$build_time_iso" 1>&6
 # Extract the first word of "gcc", so it can be a program name with args.
 set dummy gcc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:765: checking for $ac_word" >&5
+echo "configure:786: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -790,7 +811,7 @@ if test -z "$CC"; then
   # Extract the first word of "cc", so it can be a program name with args.
 set dummy cc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:794: checking for $ac_word" >&5
+echo "configure:815: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -838,7 +859,7 @@ fi
 fi
 
 echo $ac_n "checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works""... $ac_c" 1>&6
-echo "configure:842: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works" >&5
+echo "configure:863: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works" >&5
 
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -848,11 +869,11 @@ ac_link='${CC-cc} -o conftest $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS 
 cross_compiling=$ac_cv_prog_cc_cross
 
 cat > conftest.$ac_ext <<EOF
-#line 852 "configure"
+#line 873 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
-if { (eval echo configure:856: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:877: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   ac_cv_prog_cc_works=yes
   # If we can't run a trivial program, we are probably using a cross compiler.
   if (./conftest; exit) 2>/dev/null; then
@@ -872,12 +893,12 @@ if test $ac_cv_prog_cc_works = no; then
   { echo "configure: error: installation or configuration problem: C compiler cannot create executables." 1>&2; exit 1; }
 fi
 echo $ac_n "checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler""... $ac_c" 1>&6
-echo "configure:876: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler" >&5
+echo "configure:897: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler" >&5
 echo "$ac_t""$ac_cv_prog_cc_cross" 1>&6
 cross_compiling=$ac_cv_prog_cc_cross
 
 echo $ac_n "checking whether we are using GNU C""... $ac_c" 1>&6
-echo "configure:881: checking whether we are using GNU C" >&5
+echo "configure:902: checking whether we are using GNU C" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gcc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -886,7 +907,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:890: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:911: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gcc=yes
 else
   ac_cv_prog_gcc=no
@@ -901,7 +922,7 @@ if test $ac_cv_prog_gcc = yes; then
   ac_save_CFLAGS="$CFLAGS"
   CFLAGS=
   echo $ac_n "checking whether ${CC-cc} accepts -g""... $ac_c" 1>&6
-echo "configure:905: checking whether ${CC-cc} accepts -g" >&5
+echo "configure:926: checking whether ${CC-cc} accepts -g" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_cc_g'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -931,7 +952,7 @@ fi
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:935: checking for $ac_word" >&5
+echo "configure:956: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_RANLIB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -960,7 +981,7 @@ fi
 # Extract the first word of "ar", so it can be a program name with args.
 set dummy ar; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:964: checking for $ac_word" >&5
+echo "configure:985: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_AR'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -988,7 +1009,7 @@ fi
 # Extract the first word of "size", so it can be a program name with args.
 set dummy size; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:992: checking for $ac_word" >&5
+echo "configure:1013: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_SIZE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1018,7 +1039,7 @@ case $perl_os in
 esac
 
 echo $ac_n "checking for compilation debug mode""... $ac_c" 1>&6
-echo "configure:1022: checking for compilation debug mode" >&5
+echo "configure:1043: checking for compilation debug mode" >&5
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
@@ -1048,7 +1069,7 @@ echo "$ac_t""$x" 1>&6
 
 if test "$debug" = "on"; then
     echo $ac_n "checking for dmalloc library""... $ac_c" 1>&6
-echo "configure:1052: checking for dmalloc library" >&5
+echo "configure:1073: checking for dmalloc library" >&5
     dmalloc=""
     x=no
     if test -f /sw/include/dmalloc.h; then
@@ -1068,7 +1089,7 @@ EOF
 fi
 
 echo $ac_n "checking whether ${MAKE-make} sets \${MAKE}""... $ac_c" 1>&6
-echo "configure:1072: checking whether ${MAKE-make} sets \${MAKE}" >&5
+echo "configure:1093: checking whether ${MAKE-make} sets \${MAKE}" >&5
 set dummy ${MAKE-make}; ac_make=`echo "$2" | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_prog_make_${ac_make}_set'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1105,7 +1126,7 @@ fi
 # SVR4 /usr/ucb/install, which tries to use the nonexistent group "staff"
 # ./install, which can be erroneously created by make from ./install.sh.
 echo $ac_n "checking for a BSD compatible install""... $ac_c" 1>&6
-echo "configure:1109: checking for a BSD compatible install" >&5
+echo "configure:1130: checking for a BSD compatible install" >&5
 if test -z "$INSTALL"; then
 if eval "test \"`echo '$''{'ac_cv_path_install'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1158,16 +1179,17 @@ INSTALL_DATA='${INSTALL} -m 644'
 INSTALL_PROGRAM="${INSTALL_PROGRAM} -m 755"
 
 
+
 echo "$ac_t""" 1>&6
 echo "$ac_t""__ CHECK: Characteristic of System Headers and Libraries __" 1>&6
 
 echo $ac_n "checking for working const""... $ac_c" 1>&6
-echo "configure:1166: checking for working const" >&5
+echo "configure:1188: checking for working const" >&5
 if eval "test \"`echo '$''{'ac_cv_c_const'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1171 "configure"
+#line 1193 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -1216,7 +1238,7 @@ ccp = (char const *const *) p;
 
 ; return 0; }
 EOF
-if { (eval echo configure:1220: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1242: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_c_const=yes
 else
@@ -1237,7 +1259,7 @@ EOF
 fi
 
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
-echo "configure:1241: checking how to run the C preprocessor" >&5
+echo "configure:1263: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.
 if test -n "$CPP" && test -d "$CPP"; then
   CPP=
@@ -1252,13 +1274,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1256 "configure"
+#line 1278 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1262: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1284: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1269,13 +1291,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1273 "configure"
+#line 1295 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1279: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1301: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1298,12 +1320,12 @@ fi
 echo "$ac_t""$CPP" 1>&6
 
 echo $ac_n "checking for ANSI C header files""... $ac_c" 1>&6
-echo "configure:1302: checking for ANSI C header files" >&5
+echo "configure:1324: checking for ANSI C header files" >&5
 if eval "test \"`echo '$''{'ac_cv_header_stdc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1307 "configure"
+#line 1329 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <stdarg.h>
@@ -1311,7 +1333,7 @@ else
 #include <float.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1315: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1337: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1328,7 +1350,7 @@ rm -f conftest*
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 1332 "configure"
+#line 1354 "configure"
 #include "confdefs.h"
 #include <string.h>
 EOF
@@ -1346,7 +1368,7 @@ fi
 if test $ac_cv_header_stdc = yes; then
   # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 1350 "configure"
+#line 1372 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
@@ -1367,7 +1389,7 @@ if test "$cross_compiling" = yes; then
   :
 else
   cat > conftest.$ac_ext <<EOF
-#line 1371 "configure"
+#line 1393 "configure"
 #include "confdefs.h"
 #include <ctype.h>
 #define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
@@ -1378,7 +1400,7 @@ if (XOR (islower (i), ISLOWER (i)) || toupper (i) != TOUPPER (i)) exit(2);
 exit (0); }
 
 EOF
-if { (eval echo configure:1382: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1404: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
 then
   :
 else
@@ -1405,17 +1427,17 @@ for ac_hdr in stdio.h stdarg.h stdlib.h string.h ctype.h                 unistd.
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1409: checking for $ac_hdr" >&5
+echo "configure:1431: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1414 "configure"
+#line 1436 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1419: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1441: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1442,12 +1464,12 @@ fi
 done
 
 echo $ac_n "checking for bool""... $ac_c" 1>&6
-echo "configure:1446: checking for bool" >&5
+echo "configure:1468: checking for bool" >&5
 if eval "test \"`echo '$''{'ac_cv_type_bool'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1451 "configure"
+#line 1473 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #if STDC_HEADERS
@@ -1477,12 +1499,12 @@ fi
 for ac_func in memmove
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1481: checking for $ac_func" >&5
+echo "configure:1503: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1486 "configure"
+#line 1508 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1505,7 +1527,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1509: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1531: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1532,12 +1554,12 @@ done
 for ac_func in seteuid
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1536: checking for $ac_func" >&5
+echo "configure:1558: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1541 "configure"
+#line 1563 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1560,7 +1582,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1564: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1586: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1587,12 +1609,12 @@ done
 for ac_func in setegid
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1591: checking for $ac_func" >&5
+echo "configure:1613: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1596 "configure"
+#line 1618 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1615,7 +1637,62 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1619: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1641: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=yes"
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=no"
+fi
+rm -f conftest*
+fi
+
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_func=HAVE_`echo $ac_func | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
+for ac_func in strdup
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
+echo "configure:1668: checking for $ac_func" >&5
+if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1673 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char $ac_func();
+
+int main() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+$ac_func();
+#endif
+
+; return 0; }
+EOF
+if { (eval echo configure:1696: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1640,227 +1717,6 @@ fi
 done
 
 
-# Check whether --with-uvar or --without-uvar was given.
-if test "${with_uvar+set}" = set; then
-  withval="$with_uvar"
-  ac_with_uvar=yes
-else
-  ac_with_uvar=no
-
-fi
-test "x$prefix"      = xNONE && prefix=$ac_default_prefix
-test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
-if test .$ac_with_uvar = .yes; then
-ac_uvar_editfile=/tmp/usrvar.tmp
-rm -f $ac_uvar_editfile
-echo "##" >>$ac_uvar_editfile
-echo "##  RunTime User Variable Setup" >>$ac_uvar_editfile
-echo -n "##  GNU autoconf Version " >>$ac_uvar_editfile
-echo "2.12" >>$ac_uvar_editfile
-echo "##  created: `date`" >>$ac_uvar_editfile
-echo "##" >>$ac_uvar_editfile
-echo "" >>$ac_uvar_editfile
-
-fi
-
-if test .$ac_with_uvar = .yes; then
-cat >>$ac_uvar_editfile <<'EOF'
-#   Imported pathes of the GNU ``configure'' command line:
-#            --srcdir=<srcdir>
-#            --prefix=<prefix>
-#       --exec-prefix=<exec_prefix>
-#   These are used in the above definitions.
-#
-EOF
-
-fi
-srcdir="$srcdir"
-  if test .$ac_with_uvar = .yes; then
-    echo -n 'srcdir="' >>$ac_uvar_editfile
-    echo -n "$srcdir" >>$ac_uvar_editfile
-    echo '"' >>$ac_uvar_editfile
-
-fi
-
-if test -z "$prefix"; then
-prefix="$prefix"
-  if test .$ac_with_uvar = .yes; then
-    echo 'prefix="$prefix"' >>$ac_uvar_editfile
-
-fi
- else
-if test .$prefix = .NONE; then
-prefix="$prefix"
-  if test .$ac_with_uvar = .yes; then
-    echo 'prefix="$prefix"' >>$ac_uvar_editfile
-
-fi
- else
-if test .$ac_with_uvar = .yes; then
-    echo -n 'prefix="' >>$ac_uvar_editfile
-    echo -n "$prefix" >>$ac_uvar_editfile
-    echo '"' >>$ac_uvar_editfile
-
-fi
-fi
-fi
-
-if test -z "$exec_prefix"; then
-exec_prefix="$prefix"
-  if test .$ac_with_uvar = .yes; then
-    echo 'exec_prefix="$prefix"' >>$ac_uvar_editfile
-
-fi
- else
-if test .$exec_prefix = .NONE; then
-exec_prefix="$prefix"
-  if test .$ac_with_uvar = .yes; then
-    echo 'exec_prefix="$prefix"' >>$ac_uvar_editfile
-
-fi
- else
-if test .$ac_with_uvar = .yes; then
-    echo -n 'exec_prefix="' >>$ac_uvar_editfile
-    echo -n "$prefix" >>$ac_uvar_editfile
-    echo '"' >>$ac_uvar_editfile
-
-fi
-fi
-fi
-
-if test .$ac_with_uvar = .yes; then
-cat >>$ac_uvar_editfile <<'EOF'
-
-#   Actual installation pathes, Part I [NO EDIT NECESSARY]
-#
-#   Given default values are the exact pathes as recommended
-#   by Richard Stallman in his paper ``GNU Coding Standards'',
-#   as of 28 March 1994.
-#
-#   If these GNU installation pathes do not fit your
-#   individual needs, feel free to edit the given values!!
-#   But remember: than your Push installation is no longer
-#                 compliant to the GNU standards.
-#
-EOF
-
-fi
-bindir="$exec_prefix/bin"
-  if test .$ac_with_uvar = .yes; then
-    echo 'bindir="$exec_prefix/bin"' >>$ac_uvar_editfile
-
-fi
-
-libdir="$exec_prefix/lib"
-  if test .$ac_with_uvar = .yes; then
-    echo 'libdir="$exec_prefix/lib"' >>$ac_uvar_editfile
-
-fi
-
-datadir="$prefix/var"
-  if test .$ac_with_uvar = .yes; then
-    echo 'datadir="$prefix/var"' >>$ac_uvar_editfile
-
-fi
-
-statdir="$prefix/lib"
-  if test .$ac_with_uvar = .yes; then
-    echo 'statdir="$prefix/lib"' >>$ac_uvar_editfile
-
-fi
-
-includedir="$prefix/include"
-  if test .$ac_with_uvar = .yes; then
-    echo 'includedir="$prefix/include"' >>$ac_uvar_editfile
-
-fi
-
-oldincludedir="/usr/include"
-  if test .$ac_with_uvar = .yes; then
-    echo 'oldincludedir="/usr/include"' >>$ac_uvar_editfile
-
-fi
-
-mandir="$prefix/man/man1"
-  if test .$ac_with_uvar = .yes; then
-    echo 'mandir="$prefix/man/man1"' >>$ac_uvar_editfile
-
-fi
-
-manext=".1"
-  if test .$ac_with_uvar = .yes; then
-    echo 'manext=".1"' >>$ac_uvar_editfile
-
-fi
-
-if test .$ac_with_uvar = .yes; then
-cat >>$ac_uvar_editfile <<'EOF'
-
-#   Actual installation pathes, Part II [NO EDIT NECESSARY]
-#
-#   The following pathes are GenOpt pathes and
-#   are additionally used by the Push installation.
-#
-#   These are not predefined by the GNU standard but
-#   used by the author for a long time.
-#
-EOF
-
-fi
-pkgdir="$prefix"
-  if test .$ac_with_uvar = .yes; then
-    echo 'pkgdir="$prefix"' >>$ac_uvar_editfile
-
-fi
-
-infodir="$prefix/info"
-  if test .$ac_with_uvar = .yes; then
-    echo 'infodir="$prefix/info"' >>$ac_uvar_editfile
-
-fi
-
-xaddir="$prefix/xad"
-  if test .$ac_with_uvar = .yes; then
-    echo 'xaddir="$prefix/xad"' >>$ac_uvar_editfile
-
-fi
-
-tmpdir="/tmp"
-  if test .$ac_with_uvar = .yes; then
-    echo 'tmpdir="/tmp"' >>$ac_uvar_editfile
-
-fi
-
-if test .$ac_with_uvar = .yes; then
-cat >>$ac_uvar_editfile <<'EOF'
-
-##EOF##
-EOF
-if test x$withval = xyes ; then
-    ${EDITOR-vi} $ac_uvar_editfile
-    . $ac_uvar_editfile
-else
-    if test -r $withval ; then
-        cp $withval $ac_uvar_editfile
-        ${EDITOR-vi} $ac_uvar_editfile
-        . $ac_uvar_editfile
-        cp $ac_uvar_editfile $withval
-    else
-        ${EDITOR-vi} $ac_uvar_editfile
-        . $ac_uvar_editfile
-        cp $ac_uvar_editfile $withval
-    fi
-fi
-rm -f $ac_uvar_editfile
-
-fi
-
-
-eval libdir=$libdir
-case $libdir in
-    *eperl* ) ;;
-          * ) libdir="${exec_prefix}/lib/eperl" ;;
-esac
 
 
 echo "$ac_t""" 1>&6
@@ -1997,6 +1853,7 @@ s%@includedir@%$includedir%g
 s%@oldincludedir@%$oldincludedir%g
 s%@infodir@%$infodir%g
 s%@mandir@%$mandir%g
+s%@libsubdir@%$libsubdir%g
 s%@PATH_PERL@%$PATH_PERL%g
 s%@perlprog@%$perlprog%g
 s%@perlvers@%$perlvers%g
@@ -2027,12 +1884,6 @@ s%@SET_MAKE@%$SET_MAKE%g
 s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
 s%@INSTALL_DATA@%$INSTALL_DATA%g
 s%@CPP@%$CPP%g
-s%@srcdir@%$srcdir%g
-s%@statdir@%$statdir%g
-s%@manext@%$manext%g
-s%@pkgdir@%$pkgdir%g
-s%@xaddir@%$xaddir%g
-s%@tmpdir@%$tmpdir%g
 
 CEOF
 EOF

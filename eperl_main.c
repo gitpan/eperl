@@ -33,6 +33,7 @@
 **  eperl_main.c -- ePerl main procedure 
 */
 
+#include "eperl_config.h"
 #include "eperl_global.h"
 #include "eperl_security.h"
 #include "eperl_getopt.h"
@@ -111,7 +112,7 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
         printf("</html>\n");
     }
     else {
-        fprintf(stderr, "ERROR: %s\n", ca);
+        fprintf(stderr, "ePerl:Error: %s\n", ca);
         if (logfile != NULL) {
             if ((cpBuf = ePerl_ReadErrorFile(logfile, scriptfile, scripturl)) != NULL) {
                 fprintf(stderr, "\n");
@@ -145,8 +146,7 @@ void give_version(void)
 
 void give_version_extended(void)
 {
-    fprintf(stdout, "%s\n", ePerl_Hello);
-    fprintf(stdout, "\n");
+    give_version();
     fprintf(stdout, "Characteristics of this binary:\n");
     fprintf(stdout, "  Perl Version    : %s (%s)\n", AC_perl_vers, AC_perl_prog);
     fprintf(stdout, "  Perl I/O Layer  : %s\n", PERL_IO_LAYER_ID);
@@ -186,29 +186,35 @@ void give_img_powered(void)
 
 void give_usage(char *name)
 {
-    fprintf(stderr, "Usage: %s [options] [file]\n", name);
-    fprintf(stderr, "  where options are:\n");
-    fprintf(stderr, "   -d name=value  define global Perl variable ($main::name)\n");
-    fprintf(stderr, "   -D name=value  define environment variable ($ENV{'name'})\n");
-    fprintf(stderr, "   -B str         set begin block delimiter\n");
-    fprintf(stderr, "   -E str         set end block delimiter\n");
-    fprintf(stderr, "   -i             block delimiters are case-insensitive\n");
-    fprintf(stderr, "   -m f|c|n       force runtime mode to FILTER, CGI or NPH-CGI\n");
-    fprintf(stderr, "   -o outputfile  force the output to be send to this file (default=stdout)\n");
-    fprintf(stderr, "   -k             force keeping of current working directory\n");
-    fprintf(stderr, "   -x             force debugging output to console (/dev/tty)\n");
-    fprintf(stderr, "   -I directory   specify @INC/#include directory\n");
-    fprintf(stderr, "   -P             enable ePerl Preprocessor\n");
-    fprintf(stderr, "   -C             enable HTML entity conversion for ePerl blocks\n");
-    fprintf(stderr, "   -L             enable line continuation via backslashes\n");
-    fprintf(stderr, "   -T             enable Perl Tainting\n");
-    fprintf(stderr, "   -w             enable Perl Warnings\n");
-    fprintf(stderr, "   -c             run syntax check only and exit (no execution)\n");
-    fprintf(stderr, "   -r             display ePerl README file\n");
-    fprintf(stderr, "   -l             display ePerl license files (COPYING and ARTISTIC)\n");
-    fprintf(stderr, "   -v             display ePerl VERSION id\n");
-    fprintf(stderr, "   -V             display ePerl VERSION id & compilation parameters\n");
-    fprintf(stderr, "   -h             display ePerl usage list (this one)\n");
+    fprintf(stderr, "Usage: %s [options] [scriptfile]\n", name);
+    fprintf(stderr, "\n");
+    fprintf(stderr, "Input Options:\n");
+    fprintf(stderr, "  -d, --define=NAME=VALUE   define global Perl variable ($main::name)\n");
+    fprintf(stderr, "  -D, --setenv=NAME=VALUE   define environment variable ($ENV{'name'})\n");
+    fprintf(stderr, "  -I, --includedir=PATH     add @INC/#include directory\n");
+    fprintf(stderr, "  -B, --block-begin=STR     set begin block delimiter\n");
+    fprintf(stderr, "  -E, --block-end=STR       set end block delimiter\n");
+    fprintf(stderr, "  -n, --nocase              force block delimiters to be case insensitive\n");
+    fprintf(stderr, "  -k, --keepcwd             force keeping of current working directory\n");
+    fprintf(stderr, "  -P, --preprocess          enable ePerl Preprocessor\n");
+    fprintf(stderr, "  -C, --convert-entity      enable HTML entity conversion for ePerl blocks\n");
+    fprintf(stderr, "  -L, --line-continue       enable line continuation via backslashes\n");
+    fprintf(stderr, "\n");
+    fprintf(stderr, "Output Options:\n");
+    fprintf(stderr, "  -T, --tainting            enable Perl Tainting\n");
+    fprintf(stderr, "  -w, --warnings            enable Perl Warnings\n");
+    fprintf(stderr, "  -x, --debug               enable ePerl debugging output on console\n");
+    fprintf(stderr, "  -m, --mode=STR            force runtime mode to FILTER, CGI or NPH-CGI\n");
+    fprintf(stderr, "  -o, --outputfile=PATH     force the output to be send to this file (default=stdout)\n");
+    fprintf(stderr, "  -c, --check               run syntax check only and exit (no execution)\n");
+    fprintf(stderr, "\n");
+    fprintf(stderr, "Giving Feedback:\n");
+    fprintf(stderr, "  -r, --readme              display ePerl README file\n");
+    fprintf(stderr, "  -l, --license             display ePerl license files (COPYING and ARTISTIC)\n");
+    fprintf(stderr, "  -v, --version             display ePerl VERSION id\n");
+    fprintf(stderr, "  -V, --ingredients         display ePerl VERSION id & compilation parameters\n");
+    fprintf(stderr, "  -h, --help                display ePerl usage list (this one)\n");
+    fprintf(stderr, "\n");
 }
 
 char *RememberedINC[1024] = { NULL };
@@ -268,6 +274,30 @@ void myexit(int rc)
     /* die gracefully */
     exit(rc);
 }
+
+struct option options[] = {
+    { "define",         1, NULL, 'd' },
+    { "setenv",         1, NULL, 'D' },
+    { "includedir",     1, NULL, 'I' },
+    { "block-begin",    1, NULL, 'B' },
+    { "block-end",      1, NULL, 'E' },
+    { "nocase",         0, NULL, 'n' },
+    { "keepcwd",        0, NULL, 'k' },
+    { "preprocess",     0, NULL, 'P' },
+    { "convert-entity", 0, NULL, 'C' },
+    { "line-continue",  0, NULL, 'L' },
+    { "tainting",       0, NULL, 'T' },
+    { "warnings",       0, NULL, 'w' },
+    { "debug",          0, NULL, 'x' },
+    { "mode",           1, NULL, 'm' },
+    { "outputfile",     1, NULL, 'o' },
+    { "check",          0, NULL, 'c' },
+    { "readme",         0, NULL, 'r' },
+    { "license",        0, NULL, 'l' },
+    { "version",        0, NULL, 'v' },
+    { "ingredients",    0, NULL, 'V' },
+    { "help",           0, NULL, 'h' }
+};
 
 /*
  *  main procedure
@@ -333,24 +363,18 @@ int main(int argc, char **argv, char **env)
 
     /*  parse the option arguments */
     opterr = 0;
-    while ((c = getopt(argc, argv, ":m:B:E:id:D:a:o:kxI:PCLTwcvVrlh")) != -1) {
+    while ((c = getopt_long(argc, argv, ":d:D:I:B:E:nkPCLTwxm:o:crlvVh", options, NULL)) != -1) {
         if (optarg == NULL) 
             optarg = "(null)";
         switch (c) {
-            case 'm':
-                if (strcasecmp(optarg, "f") == 0) {
-                    mode = MODE_FILTER;
-                }
-                else if (strcasecmp(optarg, "c") == 0) {
-                    mode = MODE_CGI;
-                }
-                else if (strcasecmp(optarg, "n") == 0) {
-                    mode = MODE_NPHCGI;
-                }
-                else {
-                    PrintError(mode, "", NULL, NULL, "Unknown runtime mode `%s'", optarg);
-                    CU(EX_USAGE);
-                }
+            case 'd':
+                Perl5_RememberScalar(optarg);
+                break;
+            case 'D':
+                env = Perl5_SetEnvVar(env, optarg);
+                break;
+            case 'I':
+                RememberINC(optarg);
                 break;
             case 'B':
                 ePerl_begin_delimiter = strdup(optarg);
@@ -358,26 +382,11 @@ int main(int argc, char **argv, char **env)
             case 'E':
                 ePerl_end_delimiter = strdup(optarg);
                 break;
-            case 'i':
+            case 'n':
                 fNoCase = TRUE;
-                break;
-            case 'd':
-                Perl5_RememberScalar(optarg);
-                break;
-            case 'D':
-                env = Perl5_SetEnvVar(env, optarg);
-                break;
-            case 'o':
-                outputfile = strdup(optarg);
                 break;
             case 'k':
                 keepcwd = TRUE;
-                break;
-            case 'x':
-                fDebug = TRUE;
-                break;
-            case 'I':
-                RememberINC(optarg);
                 break;
             case 'P':
                 fPP = TRUE;
@@ -394,37 +403,63 @@ int main(int argc, char **argv, char **env)
             case 'w':
                 fWarn = TRUE;
                 break;
+            case 'x':
+                fDebug = TRUE;
+                break;
+            case 'm':
+                if (strcasecmp(optarg, "f") == 0     ||
+                    strcasecmp(optarg, "filter") == 0  ) {
+                    mode = MODE_FILTER;
+                }
+                else if (strcasecmp(optarg, "c") == 0   ||
+                         strcasecmp(optarg, "cgi") == 0   ) {
+                    mode = MODE_CGI;
+                }
+                else if (strcasecmp(optarg, "n") == 0      ||
+                         strcasecmp(optarg, "nph") == 0    ||
+                         strcasecmp(optarg, "nphcgi") == 0 ||
+                         strcasecmp(optarg, "nph-cgi") == 0  ) {
+                    mode = MODE_NPHCGI;
+                }
+                else {
+                    PrintError(mode, "", NULL, NULL, "Unknown runtime mode `%s'", optarg);
+                    CU(EX_USAGE);
+                }
+                break;
+            case 'o':
+                outputfile = strdup(optarg);
+                break;
             case 'c':
                 fCheck = TRUE;
                 break;
-            case 'v':
-                give_version();
-                myexit(EX_OK);
-            case 'V':
-                give_version_extended();
-                myexit(EX_OK);
             case 'r':
                 give_readme();
                 myexit(EX_OK);
             case 'l':
                 give_license();
                 myexit(EX_OK);
+            case 'v':
+                give_version();
+                myexit(EX_OK);
+            case 'V':
+                give_version_extended();
+                myexit(EX_OK);
             case 'h':
                 give_usage(progname);
                 myexit(EX_OK);
             case '?':
                 if (isprint(optopt))
-                    fprintf(stderr, "%s: Unknown option `-%c'.\n\n", progname, optopt);
+                    fprintf(stderr, "ePerl:Error: Unknown option `-%c'.\n", optopt);
                 else
-                    fprintf(stderr, "%s: Unknown option character `\\x%x'.\n\n", progname, optopt);
-                give_usage(progname);
+                    fprintf(stderr, "ePerl:Error: Unknown option character `\\x%x'.\n", optopt);
+                fprintf(stderr, "Try `%s --help' for more information.\n", progname);
                 myexit(EX_USAGE);
             case ':':
                 if (isprint(optopt))
-                    fprintf(stderr, "%s: Missing argument for option `-%c'.\n\n", progname, optopt);
+                    fprintf(stderr, "ePerl:Error: Missing argument for option `-%c'.\n", optopt);
                 else
-                    fprintf(stderr, "%s: Missing argument for option character `\\x%x'.\n\n", progname, optopt);
-                give_usage(progname);
+                    fprintf(stderr, "ePerl:Error: Missing argument for option character `\\x%x'.\n", optopt);
+                fprintf(stderr, "Try `%s --help' for more information.\n", progname);
                 myexit(EX_USAGE);
         }
     }
@@ -435,7 +470,7 @@ int main(int argc, char **argv, char **env)
 
     if ((cp = getenv("GATEWAY_INTERFACE")) != NULL) {
         if (strncasecmp(cp, "CGI/1", 5) != 0) {
-            fprintf(stderr, "%s: Unknown gateway interface: NOT CGI/1.x\n", progname);
+            fprintf(stderr, "ePerl:Error: Unknown gateway interface: NOT CGI/1.x\n");
             CU(EX_IOERR);
         }
 
@@ -495,9 +530,9 @@ int main(int argc, char **argv, char **env)
     }
     else {
         /* else we are used in a wrong way... */
-        fprintf(stderr, "%s: Missing required file to process\n", progname);
-        fprintf(stderr, "%s: Use either a filename, ``-'' for stdin or PATH_TRANSLATED.\n\n", progname);
-        give_usage(progname);
+        fprintf(stderr, "ePerl:Error: Missing required file to process\n");
+        fprintf(stderr, "ePerl:Error: Use either a filename, `-' for STDIN or PATH_TRANSLATED.\n");
+        fprintf(stderr, "Try `%s --help' for more information.\n", progname);
         myexit(EX_USAGE);
     }
 

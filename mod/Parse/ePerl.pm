@@ -53,8 +53,7 @@ use Cwd qw(fastcwd);
 @EXPORT = qw();
 
 #   private version number
-$VERSION = "2.2.5";
-
+$VERSION = do { my @v=("2.2.6"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
 
 #   autoloading (currently unused)
 sub AUTOLOAD {
@@ -199,7 +198,7 @@ sub Precompile ($) {
     }
     else {
         ${$p->{Result}} = $func;
-        $@ = "";
+        $@ = '';
         return 1;
     }
 }
@@ -241,7 +240,7 @@ sub Evaluate ($) {
     #   usually are send to STDERR (and which
     #   cannot be captured by our tie!) plus
     #   disable the die of the interpreter
-    $error = "";
+    $error = '';
     local $SIG{'__WARN__'} = sub { $error .= $_[0]; };
     local $SIG{'__DIE__'} = sub { $error .= $_[0]; };
 
@@ -288,7 +287,7 @@ sub Evaluate ($) {
         return 0;
     }
     else {
-        $@ = "";
+        $@ = '';
         return 1;
     }
 }
@@ -340,6 +339,10 @@ sub PRINTF {
     my ($fmt) = shift;
     ${$self} .= sprintf($fmt, @_);
 }
+
+
+#   sometimes Perl wants it...
+sub DESTROY { };
 
 
 1;

@@ -29,7 +29,7 @@
 ##
 ##  ======================================================================
 ##
-##  ePerl.pm -- Apache/mod_perl handler for fast emulated ePerl facility
+##  ePerl.pm -- Fast emulated Embedded Perl (ePerl) facility
 ##
 
 package Apache::ePerl;
@@ -51,7 +51,7 @@ use File::Basename qw(dirname);
 use Parse::ePerl;
 
 #   private version number
-$VERSION = "2.2.5";
+$VERSION = do { my @v=("2.2.6"=~/\d+/g); sprintf "%d."."%02d"x$#v,@v }; 
 
 #   globals
 $nDone  = 0;
@@ -97,7 +97,12 @@ sub handler {
     my ($filename, $data, $error, $fh);
     my (%env, $rc, $mtime, $header, $key, $value);
 
+    #   statistic
     $nDone++;
+
+    #   create an request object for Apache::Registory-based
+    #   scripts like newer CGI.pm versions
+    Apache->request($r);
     
     #   import filename from Apache API
     $filename = $r->filename;
@@ -132,7 +137,7 @@ sub handler {
         #   run the preprocessor over the script
         if (not Parse::ePerl::Preprocess({
             Script => $data,
-            Result => \$data,
+            Result => \$data
         })) {
             &send_errorpage($r, "Error on preprocessing script");
             $nFail++;
@@ -147,7 +152,7 @@ sub handler {
             EndDelimiter    => $Config->{'EndDelimiter'},
             CaseDelimiters  => $Config->{'CaseDelimiters'},
             ConvertEntities => $Config->{'ConvertEntities'},
-            Result          => \$data,
+            Result          => \$data
         })) {
             &send_errorpage($r, "Error on translating script from bristled to plain format");
             $nFail++;
@@ -161,7 +166,7 @@ sub handler {
             Name   => $filename, 
             Cwd    => dirname($filename),
             Result => \$data,
-            Error  => \$error,
+            Error  => \$error
         })) {
             &send_errorpage($r, "Error on precompiling script from plain format to P-code:\n$error");
             $nFail++;
@@ -182,7 +187,7 @@ sub handler {
         Cwd     => dirname($filename),
         ENV     => \%env,
         Result  => \$data,
-        Error   => \$error,
+        Error   => \$error
     })) {
         &send_errorpage($r, "Error on evaluating script from P-code:\n$error");
         $nFail++;
@@ -234,13 +239,17 @@ Apache::Status->menu_item(
 ) if Apache->module("Apache::Status");
 
 
+#   sometimes Perl wants it...
+sub DESTROY { };
+
+
 1;
 ##EOF##
 __END__
 
 =head1 NAME
 
-Apache::ePerl - mod_perl handler for fast emulated ePerl facility
+Apache::ePerl - Fast emulated Embedded Perl (ePerl) facility
 
 =head1 SYNOPSIS
 

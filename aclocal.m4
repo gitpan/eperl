@@ -439,7 +439,7 @@ if test ".$hostname" = .; then
         hostname="unknown"
     fi
 fi
-hostname="`echo $hostname | sed -e 's/\..*//'`"
+hostname="`echo $hostname | sed -e 's/\..*//' -e 's/\n$//'`"
 if test -f /etc/resolv.conf; then
     domainname="`grep domain /etc/resolv.conf | sed -e 's/.*domain//' -e 's/^ *//' -e 's/^	*//' -e 's/^\.//' -e 's/^/./'`"
     if test ".$domainname" = .; then
@@ -448,6 +448,7 @@ if test -f /etc/resolv.conf; then
 else
     domainname="";
 fi
+domainname="`echo $domainname | sed -e 's/\n$//'`"
 build_user="$username@$hostname$domainname"
 AC_SUBST(build_user)
 AC_MSG_RESULT($build_user)
@@ -455,7 +456,11 @@ AC_MSG_RESULT($build_user)
 define(AC_BUILD_TIME,[dnl
 AC_MSG_CHECKING(for build time)
 build_time_ctime="`date | sed -e 's/\n$//'`"
-build_time_iso="`date '+%d-%b-%Y' | sed -e 's/\n$//'`"
+build_time_iso="`date '+%d-%b-%Y' 2>/dev/null | sed -e 's/\n$//'`"
+dnl # SunOS has no %b/%Y... ARGL!
+if test ".$build_time_iso" = .; then
+    build_time_iso="`date '+%d-%m-19%y' | sed -e 's/\n$//'`"
+fi
 AC_MSG_RESULT($build_time_iso)
 AC_SUBST(build_time_ctime)
 AC_SUBST(build_time_iso)

@@ -33,6 +33,7 @@
 **  eperl_debug.c -- ePerl debugging functions
 */
 
+#include "eperl_config.h"
 #include "eperl_global.h"
 #include "eperl_proto.h"
 

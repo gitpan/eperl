@@ -33,8 +33,10 @@
 **  eperl_perl5.c -- ePerl Perl5 related stuff
 */
 
+#include "eperl_config.h"
 #include "eperl_global.h"
 #include "eperl_perl5.h"
+#include "eperl_perl5_sm.h"
 #include "eperl_proto.h"
 
 #ifdef HAVE_PERL_DYNALOADER
@@ -48,11 +50,12 @@ extern void boot_DynaLoader _((CV* cv));
 */
 void Perl5_XSInit(void)
 {
-   /* dXSUB_SYS; */
    char *file = __FILE__;
-
+   /* dXSUB_SYS; */
    /* dummy = 0; */ /* make gcc -Wall happy ;-) */
-   newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
+
+   /* do newXS() the available modules */
+   DO_NEWXS_STATIC_MODULES
 }
 #endif /* HAVE_PERL_DYNALOADER */
 

@@ -1,4 +1,27 @@
 
+==============================================================================
+NEWSGROUPS (REGULAR)
+--------------------
+Subject:   ANNOUNCE: ePerl 2.2.0 (Embedded Perl 5 Language)
+Newsgroup: comp.infosystems.www.servers.unix,
+           comp.lang.perl.misc,
+           de.comp.lang.perl,
+           sdm.announce
+
+NEWSGROUPS (MODERATED)
+----------------------
+Subject:   SOFTWARE: ePerl 2.2.0 (Embedded Perl 5 Language)
+To:        www-announce@boutell.com
+Subject:   ePerl 2.2.0 (Embedded Perl 5 Language)
+To:        linux-announce@news.ornl.gov
+
+MAILING-LISTS
+-------------
+Subject:   ANNOUNCE: ePerl 2.2.0 (Embedded Perl 5 Language)
+To:        new-httpd@hyperreal.com,
+           perl5-porters@perl.org
+==============================================================================
+
   After a long 2.2 beta cycle I'm proud to release...
         ____           _ 
     ___|  _ \ ___ _ __| |

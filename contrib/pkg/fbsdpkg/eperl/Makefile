@@ -1,83 +1,53 @@
 # New ports collection makefile for:	eperl
-# Version required:	2.2.0
-# Date created:		Fri May  2 13:16:31 MET DST 1997
+# Version required:	2.2.5
+# Date created:		Wed Sep  3 12:31:36 MET DST 1997
 # Whom:			Ralf S. Engelschall <rse@engelschall.com>
 #
-# $Id: Makefile,v 1.6 1997/05/24 13:17:10 rse Exp $
+# $Id: Makefile,v 1.14 1997/09/03 10:31:41 rse Exp $
 #
 
-DISTNAME=	eperl-2.2.0
+DISTNAME=	eperl-2.2.5
 CATEGORIES=	lang www perl5
-MASTER_SITES=	http://www.engelschall.com/sw/eperl/distrib/ \
+MASTER_SITES=	${MASTER_SITE_PERL_CPAN} \
+		http://www.engelschall.com/sw/eperl/distrib/ \
 		ftp://ftp.engelschall.com/sw/
+MASTER_SITE_SUBDIR=Parse
 
 MAINTAINER=	rse@engelschall.com
 
 # User-controlled variables list
-#
-# Server-Side Scripting Language (SSSL) support:
-# INSTALL_ALSO_AS_SSSL - install ePerl also as SSSL for Apache
-# ENABLE_UID_SWITCHING - allow ePerl to switch the UID/GID to the
-#                        owner of the executed script when operating
-#                        as a SSSL. Implies usage of SetUID bit!
-#
-INSTALL_ALSO_AS_SSSL=	yes
-#ENABLE_UID_SWITCHING=	yes
+# INSTALL_ALSO_AS_SSSL
+#	install ePerl also as a Server-Side
+#	Scripting Language (SSSL) for Apache
+INSTALL_ALSO_AS_SSSL=	no
 
-BUILD_DEPENDS=	perl5.004:${PORTSDIR}/lang/perl5
 .if defined(INSTALL_ALSO_AS_SSSL)
-RUN_DEPENDS=	perl5.004:${PORTSDIR}/lang/perl5 \
-		${PREFIX}/etc/apache/srm.conf:${PORTSDIR}/www/apache
-.else
-RUN_DEPENDS=	perl5.004:${PORTSDIR}/lang/perl5
+RUN_DEPENDS=	${PREFIX}/etc/apache/srm.conf:${PORTSDIR}/www/apache
 .endif
 
-GNU_CONFIGURE=	yes
+USE_PERL5=	yes
+HAS_CONFIGURE=	yes
 CONFIGURE_ARGS+=--with-perl=${PREFIX}/bin/perl
+
+MAN1=	eperl.1
+
+test:
+	@(cd ${WRKSRC}; make test)
 
 do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/eperl ${PREFIX}/bin/eperl
 	${INSTALL_MAN} ${WRKSRC}/eperl.1 ${PREFIX}/man/man1/eperl.1
-.if defined(INSTALL_ALSO_AS_SSSL)
-	@if [ ! -d ${PREFIX}/www/cgi-bin ]; then \
-		${MKDIR} -p ${PREFIX}/www/cgi-bin; \
-	fi
-.if defined(ENABLE_UID_SWITCHING)
-	${INSTALL_PROGRAM} -o root -m u+s ${WRKSRC}/eperl \
-		${PREFIX}/www/cgi-bin/nph-eperl
-.else
-	${INSTALL_PROGRAM} ${WRKSRC}/eperl ${PREFIX}/www/cgi-bin/nph-eperl
-.endif
-.endif
 .if !defined(NOPORTDOCS)
 	@if [ ! -d ${PREFIX}/share/examples/eperl ]; then \
 		${MKDIR} -p ${PREFIX}/share/examples/eperl; \
 	fi
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.cgipm.phtml \
-		${PREFIX}/share/examples/eperl/demo.cgipm.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.env.phtml \
-		${PREFIX}/share/examples/eperl/demo.env.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.errout.phtml \
-		${PREFIX}/share/examples/eperl/demo.errout.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.errsyn.phtml \
-		${PREFIX}/share/examples/eperl/demo.errsyn.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.func.phtml \
-		${PREFIX}/share/examples/eperl/demo.func.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.html.phtml \
-		${PREFIX}/share/examples/eperl/demo.html.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.image.phtml \
-		${PREFIX}/share/examples/eperl/demo.image.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.lwp.phtml \
-		${PREFIX}/share/examples/eperl/demo.lwp.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.net.phtml \
-		${PREFIX}/share/examples/eperl/demo.net.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.pp.phtml \
-		${PREFIX}/share/examples/eperl/demo.pp.phtml
-	${INSTALL_DATA} ${WRKSRC}/eg/demo.table.phtml \
-		${PREFIX}/share/examples/eperl/demo.table.phtml
+	${CP} ${WRKSRC}/eg/* ${PREFIX}/share/examples/eperl/
 .endif
-
 .if defined(INSTALL_ALSO_AS_SSSL)
+	@if [ ! -d ${PREFIX}/www/cgi-bin ]; then \
+		${MKDIR} -p ${PREFIX}/www/cgi-bin; \
+	fi
+	${INSTALL_PROGRAM} ${WRKSRC}/eperl ${PREFIX}/www/cgi-bin/nph-eperl
 	@if [ ".`grep x-httpd-eperl ${PREFIX}/etc/apache/srm.conf`" = . ]; then \
 		${ECHO} "AddType  application/x-httpd-eperl  .phtml .eperl .epl" \
 			>>${PREFIX}/etc/apache/srm.conf; \

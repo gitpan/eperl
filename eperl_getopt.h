@@ -30,7 +30,7 @@
 **
 **  ======================================================================
 **
-**  eperl_egetopt.h -- egetopt() prototypes
+**  eperl_getopt.h -- GNU getopt() prototypes
 */
 
 /* Declarations for getopt.

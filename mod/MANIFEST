@@ -1,5 +1,8 @@
 MANIFEST
+README
 Makefile.PL
+Apache/MANIFEST
+Apache/README
 Apache/Makefile.PL
 Apache/ePerl.pm
 Parse/MANIFEST

@@ -1,16 +1,18 @@
 # New ports collection makefile for:	p5-ePerl
-# Version required:			2.2.0
-# Date created:				Tue Jul 15 12:11:11 MET DST 1997
-# Whom:	      				Ralf S. Engelschall <rse@engelschall.com>
+# Version required:	2.2.5
+# Date created:		Wed Sep  3 12:31:36 MET DST 1997
+# Whom:	      		Ralf S. Engelschall <rse@engelschall.com>
 #
-# $Id: Makefile,v 1.6 1997/05/24 13:17:10 rse Exp $
+# $Id: Makefile,v 1.5 1997/09/03 10:34:13 rse Exp $
 #
 
-DISTNAME=	eperl-2.2.0
-PKGNAME=	p5-ePerl-2.2.0
+DISTNAME=	eperl-2.2.5
+PKGNAME=	p5-ePerl-2.2.5
 CATEGORIES=	lang www perl5
-MASTER_SITES=	${MASTER_SITE_PERL_CPAN}
-MASTER_SITE_SUBDIR=	Parse
+MASTER_SITES=	${MASTER_SITE_PERL_CPAN} \
+		http://www.engelschall.com/sw/eperl/distrib/ \
+		ftp://ftp.engelschall.com/sw/
+MASTER_SITE_SUBDIR=Parse
 
 MAINTAINER=	rse@engelschall.com
 
@@ -20,6 +22,6 @@ MAN3=		Parse::ePerl.3 Apache::ePerl.3
 MANPREFIX=	${PREFIX}/lib/perl5
 
 do-configure:
-		@ cd ${WRKSRC}; ${SETENV} ${MAKE_ENV} ${PREFIX}/bin/perl Makefile.PL
+	@ cd ${WRKSRC}; ${SETENV} ${MAKE_ENV} ${PREFIX}/bin/perl Makefile.PL
 
 .include <bsd.port.mk>

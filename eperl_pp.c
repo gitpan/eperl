@@ -33,6 +33,7 @@
 **  eperl_pp.c -- ePerl preprocessor
 */
 
+#include "eperl_config.h"
 #include "eperl_global.h"
 #include "eperl_proto.h"
 
@@ -144,6 +145,7 @@ char *ePerl_PP_Process(char *cpInput, char **cppINC, int mode)
         cpInBuf[i] = '\0';
         cpBuf = cpInBuf;
         nBuf = i;
+        fclose(fp);
     }
 
     cpEND = cpBuf+nBuf;
