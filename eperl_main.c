@@ -34,6 +34,7 @@
 */
 
 #include "eperl_global.h"
+#include "eperl_security.h"
 #include "eperl_proto.h"
 
 #include <EXTERN.h>
@@ -487,6 +488,12 @@ int main(int argc, char **argv, char **env)
      */
     if (mode == MODE_CGI || mode == MODE_NPHCGI) {
 
+        /*
+         *
+         *  == General Security ==
+         *
+         */
+
         /* general security check: allowed file extension */
         if (CGI_NEEDS_ALLOWED_FILE_EXT) {
             allow = FALSE;
@@ -498,7 +505,7 @@ int main(int argc, char **argv, char **env)
             }
             if (!allow) {
                 PrintError(mode, source, NULL, NULL, "File `%s' is not allowed to be interpreted by ePerl (wrong extension!)", source);
-                CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                CU(EX_OK);
             }
         }
 
@@ -508,7 +515,7 @@ int main(int argc, char **argv, char **env)
          *
          */
 
-        /* we can only do a switching if we have euid == root */
+        /* we can only do a switching if we have euid == 0 (root) */
         if (geteuid() == 0) {
 
             fOkSwitch = TRUE;
@@ -518,8 +525,14 @@ int main(int argc, char **argv, char **env)
     
             /* security check: valid caller uid */
             pw = getpwuid(uid);
-            if (SETUID_NEEDS_VALID_CALLER_UID && pw == NULL)
-                fOkSwitch = FALSE;
+            if (SETUID_NEEDS_VALID_CALLER_UID && pw == NULL) {
+                if (DO_FOR_FAILED_STEP == STOP_AND_ERROR) {
+                    PrintError(mode, source, NULL, NULL, "Invalid UID %d of caller", uid);
+                    CU(EX_OK);
+                }
+                else
+                    fOkSwitch = FALSE;
+            }
             else {
                 /* security check: allowed caller uid */
                 if (SETUID_NEEDS_ALLOWED_CALLER_UID) {
@@ -534,22 +547,38 @@ int main(int argc, char **argv, char **env)
                             break;
                         }
                     }
-                    if (!allow) 
-                        fOkSwitch = FALSE;
+                    if (!allow) {
+                        if (DO_FOR_FAILED_STEP == STOP_AND_ERROR) {
+                            PrintError(mode, source, NULL, NULL, "UID %d of caller not allowed", uid);
+                            CU(EX_OK);
+                        }
+                        else
+                            fOkSwitch = FALSE;
+                    }
                 }
             }
     
             /* security check: valid owner UID */
             pw = getpwuid(st.st_uid);
             if (SETUID_NEEDS_VALID_OWNER_UID && pw == NULL) 
-                fOkSwitch = FALSE;
+                if (DO_FOR_FAILED_STEP == STOP_AND_ERROR) {
+                    PrintError(mode, source, NULL, NULL, "Invalid UID %d of owner", st.st_uid);
+                    CU(EX_OK);
+                }
+                else
+                    fOkSwitch = FALSE;
             else 
                 uid = pw->pw_uid;
     
             /* security check: valid owner GID */
             gr = getgrgid(st.st_gid);
             if (SETUID_NEEDS_VALID_OWNER_GID && gr == NULL) 
-                fOkSwitch = FALSE;
+                if (DO_FOR_FAILED_STEP == STOP_AND_ERROR) {
+                    PrintError(mode, source, NULL, NULL, "Invalid GID %d of owner", st.st_gid);
+                    CU(EX_OK);
+                }
+                else
+                    fOkSwitch = FALSE;
             else 
                 gid = gr->gr_gid;
     
@@ -561,36 +590,58 @@ int main(int argc, char **argv, char **env)
                 /* determine physical homedir of owner */
                 pw = getpwuid(st.st_uid);
                 if (chdir(pw->pw_dir) == -1) {
-                    PrintError(mode, source, NULL, NULL, "Invalid homedir ``%s'' of file owner", pw->pw_dir);
-                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                    if (DO_FOR_FAILED_STEP == STOP_AND_ERROR) {
+                        PrintError(mode, source, NULL, NULL, "Invalid homedir ``%s'' of file owner", pw->pw_dir);
+                        CU(EX_OK);
+                    }
+                    else 
+                        fOkSwitch = FALSE;
                 }
-                dir_home = getcwd(NULL, 1024);
+                else {
+                    dir_home = getcwd(NULL, 1024);
 
-                /* determine physical dir of file */
-                strcpy(dir_tmp, source);
-                if ((cp = strrchr(dir_tmp, '/')) == NULL) {
-                    PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': no absolute path", source);
-                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
-                }
-                *cp = NUL;
-                if (chdir(dir_tmp) == -1) {
-                    PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': cannot chdir to its location", source);
-                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
-                }
-                dir_script = getcwd(NULL, 1024);
-
-                /* dir_home has to be a prefix of dir_script */
-                if (strncmp(dir_script, dir_home, strlen(dir_home)) < 0) {
-                    PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': does not stay below homedir of owner", source);
-                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                    /* determine physical dir of file */
+                    strcpy(dir_tmp, source);
+                    if ((cp = strrchr(dir_tmp, '/')) == NULL) {
+                        if (DO_FOR_FAILED_STEP == STOP_AND_ERROR) {
+                            PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': no absolute path", source);
+                            CU(EX_OK);
+                        }
+                        else 
+                            fOkSwitch = FALSE;
+                    }
+                    else {
+                        *cp = NUL;
+                        if (chdir(dir_tmp) == -1) {
+                            if (DO_FOR_FAILED_STEP == STOP_AND_ERROR) {
+                                PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': cannot chdir to its location", source);
+                                CU(EX_OK);
+                            }
+                            else 
+                                fOkSwitch = FALSE;
+                        }
+                        else {
+                            dir_script = getcwd(NULL, 1024);
+        
+                            /* dir_home has to be a prefix of dir_script */
+                            if (strncmp(dir_script, dir_home, strlen(dir_home)) < 0) {
+                                if (DO_FOR_FAILED_STEP == STOP_AND_ERROR) {
+                                    PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': does not stay below homedir of owner", source);
+                                    CU(EX_OK);
+                                }
+                                else 
+                                    fOkSwitch = FALSE;
+                            }
+            
+                            free(dir_script);
+                        }
+                    }
+                    free(dir_home);
                 }
 
                 /* restore original cwd */
                 chdir(cwd2);
-
-                /* free the allocated buffers from getcwd() */
-                free(dir_script);
-                free(dir_home);
+        
                 free(cwd2);
             }
     
@@ -651,7 +702,9 @@ int main(int argc, char **argv, char **env)
     env = mysetenv(env, "SCRIPT_SRC_SIZE", "%d", nBuf);
     stat(source, &st);
     env = mysetenv(env, "SCRIPT_SRC_MODIFIED", "%d", st.st_mtime);
-    env = mysetenv(env, "SCRIPT_SRC_MODIFIED_CTIME", "%s", ctime(&(st.st_mtime)));
+    cp = ctime(&(st.st_mtime));
+    cp[strlen(cp)-1] = NUL;
+    env = mysetenv(env, "SCRIPT_SRC_MODIFIED_CTIME", "%s", cp);
     env = mysetenv(env, "SCRIPT_SRC_MODIFIED_ISOTIME", "%s", isotime(&(st.st_mtime)));
     pw = getpwuid(st.st_uid);
     env = mysetenv(env, "SCRIPT_SRC_OWNER", "%s", pw->pw_name);

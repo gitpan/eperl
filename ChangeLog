@@ -2,6 +2,24 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.1.0 and 2.1.1
+  -------------------------------
+   
+  070501 o added -P option to etc/newsvers
+         o removed \n at SCRIPT_.._CTIME
+         o replaced the $| = 1 stuff in eperl_perl5.c
+           to the way mod_perl does it
+           [Thanks to Doug MacEachern <dougm@osf.org> for patch]
+         o enhanced the SetUID-based UID/GID checking:
+           now in eperl_global.h is an option
+           DO_ON_FAILED_STEP which either forces
+           ePerl to error on any failed checks
+           or go on but finally don't do the UID/GID
+           switching
+         o moved the security definitions from
+           eperl_global.h to a new eperl_security.h
+           and changed the references in eperl.pod
+
   Changes between 2.1b8 and 2.1.0
   -------------------------------
 

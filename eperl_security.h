@@ -30,51 +30,48 @@
 **
 **  ======================================================================
 **
-**  eperl_perl5.c -- ePerl Perl5 related stuff
+**  eperl_security.h -- ePerl security definitions
 */
+#ifndef EPERL_SECURITY_H
+#define EPERL_SECURITY_H 1
 
-#include "eperl_global.h"
-#include "eperl_proto.h"
 
-#include <EXTERN.h>
-#include <perl.h>                 
+/* General security for CGI modes */
+#define CGI_NEEDS_ALLOWED_FILE_EXT       TRUE
 
-#ifdef HAVE_PERL_DYNALOADER
-
-extern void boot_DynaLoader _((CV* cv));
 
 /*
- *  the Perl XS init function for dynamic library loading
+ * SetUID security checks for CGI modes:
+ * You can enable/disable any checked steps here.
  */
-void ePerl_xs_init(void)
-{
-   /* dXSUB_SYS; */
-   char *file = __FILE__;
+#define SETUID_NEEDS_VALID_CALLER_UID    TRUE
+#define SETUID_NEEDS_ALLOWED_CALLER_UID  TRUE
+#define SETUID_NEEDS_VALID_OWNER_UID     TRUE
+#define SETUID_NEEDS_VALID_OWNER_GID     TRUE
+#define SETUID_NEEDS_BELOW_OWNER_HOME    TRUE
 
-   /* dummy = 0; */ /* make gcc -Wall happy ;-) */
-   newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
-}
-#endif
+#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".ephtml", ".epl", ".pl", ".cgi", NULL };
+#define LIST_OF_ALLOWED_CALLER_UID       { "nobody", "root", NULL }
 
-/*
- *  sets a Perl scalar variable
+
+/* 
+ * Action when a SetUID security check failed.
+ *
+ * Define ``DO_FOR_FAILED_STEP'' to one of the following:
+ *
+ * MARK_AND_GO_ON: step is marked as failed and processing goes on.
+ *                 BUT: No UID/GID switching takes place!
+ *                 (default)
+ *
+ * STOP_AND_ERROR: immediately stop processing print an error.
+ *                 (for the paranoid webmaster who really
+ *                  wants to enable ePerl only succeded UID/GID
+ *                  switching)
  */
-void ePerl_SetScalar(char *pname, char *vname, char *vvalue)
-{
-    char ca[1024];
+#define MARK_AND_GO_ON      1
+#define STOP_AND_ERROR      2
+#define DO_FOR_FAILED_STEP  MARK_AND_GO_ON
 
-    sprintf(ca, "%s::%s", pname, vname);
-    sv_setpv(perl_get_sv(ca, TRUE), vvalue);
-    return;
-}
 
-/*
- *  sets a Perl scalar variable
- */
-void ePerl_ForceUnbufferedStdout(void)
-{
-    IoFLAGS(GvIOp(defoutgv)) |= IOf_FLUSH; /* $|=1 */
-    return;
-}
-
+#endif /* EPERL_SECURITY_H */
 /*EOF*/

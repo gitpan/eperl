@@ -114,7 +114,7 @@ new-betalevel:
 	OPT=-ib; $(_NEWVERS)
 
 new-patchlevel:
-	OPT=-ip; $(_NEWVERS)
+	OPT=-iP; $(_NEWVERS)
 
 new-release:
 	OPT=-r$(R); $(_NEWVERS)

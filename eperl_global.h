@@ -300,25 +300,6 @@ char *vsprintf (char *, char *, va_list);
 
 /*
 **
-**  Security
-**
-*/
-
-/* General security for CGI modes */
-#define CGI_NEEDS_ALLOWED_FILE_EXT       TRUE
-
-/* SetUID security for CGI modes */
-#define SETUID_NEEDS_VALID_CALLER_UID    TRUE
-#define SETUID_NEEDS_ALLOWED_CALLER_UID  TRUE
-#define SETUID_NEEDS_VALID_OWNER_UID     TRUE
-#define SETUID_NEEDS_VALID_OWNER_GID     TRUE
-#define SETUID_NEEDS_BELOW_OWNER_HOME    TRUE
-
-#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".ephtml", ".epl", ".pl", ".cgi", NULL };
-#define LIST_OF_ALLOWED_CALLER_UID       { "nobody", "root", NULL }
-
-/*
-**
 **  The ePerl runtime mode
 **
 */

@@ -332,8 +332,13 @@ order):
      i.e. it has to be found in the systems group file
   6. The script has to stay below or in the owners homedir
 
-B<IF ONLY ONE OF THOSE STEPS FAIL, NO UID/GID SWITCHING TAKES PLACE!> You can
-only disable some steps at compile time. See F<eperl_global.h>.
+B<IF ONLY ONE OF THOSE STEPS FAIL, NO UID/GID SWITCHING TAKES PLACE!>.
+Additionally (if C<DO_ON_FAILED_STEP> was defined as C<STOP_AND_ERROR> in
+F<eperl_security.h> - not per default defined this way!) ePerl can totally stop
+processing and display its error page.  This is for the really paranoid
+webmasters. Per default when any step failed the UID/GID switching is just
+disabled, but ePerl goes on with processing. Alternatively you can disable
+some steps at compile time. See F<eperl_security.h>.
 
 B<Also remember that ePerl always eliminates the effective UID/GID,
 independent of the runtime mode and independent if ePerl has switched to the

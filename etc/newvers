@@ -39,8 +39,8 @@ Usage: newvers [options] versionfile
     Options are:
         -l<lang>          set language to one of "txt", "c" or "perl" 
         -p<progname>      set program name
-        -r<v>.<r>[.bp]<p> set release version string
-        -i{v|r|b|p}       increase version, revision or {batch,patch}level
+        -r<v>.<r>[.pb]<p> set release version string
+        -i{v|r|P|p|b}     increase version, revision or {batch,patch}level
         -d                display current version only
         -D                display current version only (incl. date)
         -V                print NEWVERS version
@@ -54,7 +54,7 @@ PROGNAME="-UNKNOWN-"
 VERSION=unknown
 REPORT=NO
 REPORTFULL=NO
-INCREASE=p
+INCREASE=P
 set -- `getopt l:p:r:i:dDVh $*`
 if [ $? != 0 ]; then
     print_usage
@@ -106,6 +106,10 @@ if [ "$VERSION" = "unknown" ]; then
                 b )
                     bplevel=`expr $bplevel + 1`
 					bptype=b
+                    ;;
+                P )
+                    bplevel=`expr $bplevel + 1`
+					bptype=.
                     ;;
                 p )
                     bplevel=`expr $bplevel + 1`

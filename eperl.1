@@ -73,7 +73,7 @@
 .nr % 0
 .rr F
 .\}
-.TH EPERL 1 "EN" "26/Apr/97" "Ralf S. Engelschall"
+.TH EPERL 1 "EN" "2/May/97" "Ralf S. Engelschall"
 .IX Title "EPERL 1"
 .UC
 .IX Name "ePerl - Embedded Perl 5 Language"
@@ -174,7 +174,7 @@
 ePerl \- Embedded Perl 5 Language
 .SH "VERSION"
 .IX Header "VERSION"
-2.1.0 (26-04-1997)
+2.1.1 (02-05-1997)
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \fBeperl\fR
@@ -476,8 +476,13 @@ order):
 \&     i.e. it has to be found in the systems group file
 \&  6. The script has to stay below or in the owners homedir
 .Ve
-\fB\s-1IF\s0 \s-1ONLY\s0 \s-1ONE\s0 \s-1OF\s0 \s-1THOSE\s0 \s-1STEPS\s0 \s-1FAIL\s0, \s-1NO\s0 \s-1UID\s0/\s-1GID\s0 \s-1SWITCHING\s0 \s-1TAKES\s0 \s-1PLACE\s0!\fR You can
-only disable some steps at compile time. See \fIeperl_global.h\fR.
+\fB\s-1IF\s0 \s-1ONLY\s0 \s-1ONE\s0 \s-1OF\s0 \s-1THOSE\s0 \s-1STEPS\s0 \s-1FAIL\s0, \s-1NO\s0 \s-1UID\s0/\s-1GID\s0 \s-1SWITCHING\s0 \s-1TAKES\s0 \s-1PLACE\s0!\fR.
+Additionally (if \f(CWDO_ON_FAILED_STEP\fR was defined as \f(CWSTOP_AND_ERROR\fR in
+\fIeperl_security.h\fR \- not per default defined this way!) ePerl can totally stop
+processing and display its error page.  This is for the really paranoid
+webmasters. Per default when any step failed the \s-1UID/GID\s0 switching is just
+disabled, but ePerl goes on with processing. Alternatively you can disable
+some steps at compile time. See \fIeperl_security.h\fR.
 .Sp
 \fBAlso remember that ePerl always eliminates the effective \s-1UID/GID\s0,
 independent of the runtime mode and independent if ePerl has switched to the
