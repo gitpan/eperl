@@ -21,7 +21,7 @@
 **  only under the terms of either the Artistic License or the GNU General
 **  Public License, which may be found in the ePerl source distribution.
 **  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
-**  a builtin copy of both license files.
+**  a built-in copy of both license files.
 **
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,14 +33,13 @@
 **  eperl_sys.c -- ePerl system functions
 */
 
-
 #include "eperl_global.h"
 #include "eperl_proto.h"
 
 
 /*
 **
-**  own setenv function which works with Perl
+**  own setenv() function which works with Perl
 **
 */
 char **mysetenv(char **env, char *var, char *str, ...)
@@ -71,7 +70,7 @@ char **mysetenv(char **env, char *var, char *str, ...)
     envN[i++] = cp;
     envN[i++] = NULL;
 
-    /* set the libc/exec variable which Perl uses */
+    /*  set the libc/exec variable which Perl uses */
     if (stillcalled) 
         free(environ);
     stillcalled = TRUE;
@@ -113,7 +112,6 @@ void IO_redirect_stdin(FILE *fp)
     /* and remember the fact */
     IO_redirected_stdin = TRUE;
 }
-
 
 void IO_redirect_stdout(FILE *fp)
 {
@@ -218,45 +216,6 @@ void remove_mytmpfiles(void)
     }
 }
 
-/*
-**
-**
-*/
-
-char *strnchr(char *buf, char chr, int n)
-{
-    char *cp;
-    char *cpe;
-
-    for (cp = buf, cpe = buf+n-1; cp <= cpe; cp++) {
-        if (*cp == chr)
-            return cp;
-    }
-    return NULL;
-}
-
-char *strnstr(char *buf, char *str, int n)
-{
-    char *cp;
-    char *cpe;
-    int len;
-    
-    len = strlen(str);
-    for (cp = buf, cpe = buf+n-len; cp <= cpe; cp++) {
-        if (strncmp(cp, str, len) == 0)
-            return cp;
-    }
-    return NULL;
-}
-
-char *strndup(char *buf, int n)
-{
-    char *cp;
-
-    cp = (char *)malloc(n+1);
-    strncpy(cp, buf, n);
-    return cp;
-}
 
 /*
 **
@@ -274,6 +233,191 @@ char *isotime(time_t *t)
                       tm->tm_mday, tm->tm_mon+1, tm->tm_year,
                       tm->tm_hour, tm->tm_min);
     return strdup(timestr);
+}
+
+
+/*
+**
+**  read source file into internal buffer 
+**
+*/
+char *ePerl_ReadSourceFile(char *filename, char **cpBufC, int *nBufC)
+{
+    char *rc;
+    FILE *fp = NULL;
+    char *cpBuf = NULL;
+    int nBuf;
+    char tmpfile[256];
+    int usetmp = 0;
+    int c;
+
+    if (strcmp(filename, "-") == 0) {
+        /* file is given on stdin */
+        sprintf(tmpfile, "/tmp/eperl.tmp.%d", (int)getpid());
+        if ((fp = fopen(tmpfile, "w")) == NULL) {
+            ePerl_SetError("Cannot open temporary source file %s for writing", tmpfile);
+            CU(NULL);
+        }
+        nBuf = 0;
+        while ((c = fgetc(stdin)) != EOF) {
+            fprintf(fp, "%c", c);
+        }
+        fclose(fp);
+        fp = NULL;
+        filename = tmpfile;
+        usetmp = 1;
+    }
+
+    if ((fp = fopen(filename, "r")) == NULL) {
+        ePerl_SetError("Cannot open source file %s for reading", filename);
+        CU(NULL);
+    }
+    fseek(fp, 0, SEEK_END);
+    nBuf = ftell(fp);
+    if (nBuf == 0) {
+        cpBuf = (char *)malloc(sizeof(char) * 1);
+        *cpBuf = NUL;
+    }
+    else {
+        if ((cpBuf = (char *)malloc(sizeof(char) * nBuf+1)) == NULL) {
+            ePerl_SetError("Cannot allocate %d bytes of memory", nBuf);
+            CU(NULL);
+        }
+        fseek(fp, 0, SEEK_SET);
+        if (fread(cpBuf, nBuf, 1, fp) == 0) {
+            ePerl_SetError("Cannot read from file %s", filename);
+            CU(NULL);
+        }
+        cpBuf[nBuf] = '\0';
+    }
+    *cpBufC = cpBuf;
+    *nBufC  = nBuf;
+    RETURN_WVAL(cpBuf);
+
+    CUS:
+    if (cpBuf)
+        free(cpBuf);
+    if (fp)
+        fclose(fp);
+    if (usetmp)
+        unlink(tmpfile);
+    RETURN_EXRC;
+}
+
+/*
+**
+**  read an error file to internal buffer and substitute the filename
+**
+*/
+char *ePerl_ReadErrorFile(char *filename, char *scriptfile, char *scripturl)
+{
+    char *rc;
+    FILE *fp = NULL;
+    char *cpBuf = NULL;
+    int nBuf;
+    char *cp;
+
+    if ((fp = fopen(filename, "r")) == NULL) {
+        ePerl_SetError("Cannot open error file %s for reading", filename);
+        CU(NULL);
+    }
+    fseek(fp, 0, SEEK_END);
+    nBuf = ftell(fp);
+    if ((cpBuf = (char *)malloc(sizeof(char) * nBuf * 2)) == NULL) {
+        ePerl_SetError("Cannot allocate %d bytes of memory", nBuf * 2);
+        CU(NULL);
+    }
+    fseek(fp, 0, SEEK_SET);
+    if (fread(cpBuf, nBuf, 1, fp) == 0) {
+        ePerl_SetError("Cannot read from file %s", filename);
+        CU(NULL);
+    }
+    cpBuf[nBuf] = '\0';
+    for (cp = cpBuf; cp < cpBuf+nBuf; ) {
+        if ((cp = strstr(cp, scriptfile)) != NULL) {
+#ifdef HAVE_MEMMOVE
+            (void)memmove(cp+strlen(scripturl), cp+strlen(scriptfile), strlen(cp+strlen(scriptfile))+1);
+#else
+            (void)bcopy(cp+strlen(scriptfile), cp+strlen(scripturl), strlen(cp+strlen(scriptfile))+1);
+#endif
+            (void)memcpy(cp, scripturl, strlen(scripturl));
+            cp += strlen(scripturl);
+            continue;
+        }
+        break;
+    }
+    RETURN_WVAL(cpBuf);
+
+    CUS:
+    if (cpBuf)
+        free(cpBuf);
+    if (fp)
+        fclose(fp);
+    RETURN_EXRC;
+}
+
+/*
+**
+**  path support
+**
+*/
+
+char *filename(char *path) 
+{
+    static char file[MAXPATHLEN];
+    char *cp;
+
+    if (path[strlen(path)-1] == '/')
+        return "";
+    else {
+        for (cp = path+strlen(path); cp > path && *(cp-1) != '/'; cp--)
+            ;
+		if (cp == path+1)
+			cp--;
+        strcpy(file, cp);
+        return file;
+    }
+}
+
+char *dirname(char *path) 
+{
+    static char dir[MAXPATHLEN];
+    char *cp;
+
+    if (path[strlen(path)-1] == '/')
+        return path;
+    else {
+        strcpy(dir, path);
+        for (cp = dir+strlen(dir); cp > dir && *(cp-1) != '/'; cp--)
+            ;
+        *cp = NUL;
+        return dir;
+    }
+}
+
+char *abspath(char *path) 
+{
+    static char apath[MAXPATHLEN];
+    static char cwd[MAXPATHLEN];
+    char *cp;
+
+    if (path[0] == '/')
+        return path;
+    else {
+		/* remember current working dir */
+		getcwd(cwd, MAXPATHLEN);
+		/* determine dir of path */
+		cp = dirname(path);
+		chdir(cp);
+		getcwd(apath, MAXPATHLEN);
+		/* restore cwd */
+		chdir(cwd);
+		/* add file part again */
+		if (apath[strlen(apath)-1] != '/')
+		    strcpy(apath+strlen(apath), "/");
+		strcpy(apath+strlen(apath), path);
+        return apath;
+    }
 }
 
 /*EOF*/

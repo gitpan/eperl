@@ -2,23 +2,137 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2b2 and 2.2b3
+  -------------------------------
+  
+  970521 o fixed NEWS and ANNOUNCE files o spellchecked 
+           INSTALL, INSTALL.APACHE and eperl.pod
+  970522 o fixed eperl.pod =back stuff and added a paragraph 
+           about software leverage.
+  970523 o added reference for Parse::ePerl and Apache::ePerl
+           to eperl.pod
+         o changed abstract in all source files
+  970525 o ** added new option -P for an own #include preprocessor. **
+         o added new option -I: same as for "perl" to
+           add directories to @INC and preprocessor
+  970526 o ** added support for URLs to #include **
+         o added a kludge to etc/newvers for systems
+           like BSDI where no "getopt" program is available
+  970527 o added Parse::ePerl::Preprocess which is the
+           interface to the new preprocessor
+         o added six new environment variables:
+           SCRIPT_SRC_PATH, SCRIPT_SRC_PATH_DIR and SCRIPT_SRC_PATH_FILE
+           SCRIPT_SRC_URL, SCRIPT_SRC_URL_DIR and SCRIPT_SRC_URL_FILE
+         o fixed a long-standing bug: temporary files were 
+           not removed :-(
+         o added new option -C for HTML entity conversions 
+           inside ePerl blocks. This is for people who
+           use HTML editors which have now knowledge of ePerl code.
+  970529 o slightly fixed eperl.pod at some places
+
+  Changes between 2.2b1 and 2.2b2
+  -------------------------------
+
+  970518 o fixed ``make install UNINST=1'' case
+           for Makefile.PL
+  970520 o added more POD to Apache::ePerl
+
+  Changes between 2.2a2 and 2.2b1
+  -------------------------------
+
+  970505 o again reorganized the source
+           code and renamed a lot of
+           functions.
+         o created modules/ with h2xs
+           for a Parse::ePerl module
+         o created generation of libeperl.a
+           containing shared objects for
+           Parse::ePerl
+  970506 o created a top-level Makefile.PL
+           for faking a MakeMaker distribution
+  970509 o created a Apache::ePerl module
+  970510 o added option -i for making the
+           delimiters case-sensitive in more
+           explicit way
+  970511 o added t/05* to Parse::ePerl
+           and made delimiter case variable
+  970513 o enhanced Parse::ePerl and 
+           finished Apache::ePerl
+  970515 o fixed tests 4 and 5 for non-Bash users
+           and fixed a char/int problem in eperl_main.c
+           and eperl_sys.c
+           [Thanks to Jarom Smith <jarom@jarom-indy.prophet.com>]
+  970516 o finished Apache::ePerl and Parse::ePerl
+  970517 o added a INSTALL.APACHE which describes the
+           installation of ePerl as an SSSL under Apache
+
+  Changes between 2.2a1 and 2.2a2
+  -------------------------------
+
+  970504 o removed -s and added -m 755 
+           to install in configure
+         o optimized the parser; no 
+           ``print "";'' constructs are
+           never created which at least slightly 
+           speeds up processing.
+
+  Changes between 2.2a0 and 2.2a1
+  -------------------------------
+
+  970503 o now the begin and end delimiters are searched
+           case-insensitive.
+         o added -h for displaying the usage list.
+           Just to be consequent with options.
+         o added leading and trailing whitespaces
+           for Perl blocks when translating the source file
+           to make the -x display more readable.
+
+  Changes between 2.1.1 and 2.2a0
+  -------------------------------
+
+  970502 o added support for '=' prefix: now <:= ... :>
+           automatically gets converted to "print ...".  Now one
+           can interpolate variables in a more shorter way via
+           <?=$variable!> instead of the long <?  print
+           $variable; !> (in conjunction with the next
+           enhancements)
+         o now ePerl is much smarter when converting the ePerl
+           blocks, i.e. it now recognizes final semicolons and
+           automatically puts one if missing. Now <: cmd;cmd :>
+           is also valid.
+         o Whitespaces are not only stripped
+           from the beginning of a ePerl block. Now
+           they are stripped from the end, too.
+         o !!CHANGED THE PARSING AGAIN!!
+           Now again (as in 2.0.3) ePerl block end delimiters are
+           found via plain forward search. No quoted strings are
+           recognized.  The reason is that constructs with odd
+           number of quoting characters are more often seen than
+           end delimiters in quoted string. And one more fact: It
+           is easier to escape the end delimiter in a quotes
+           string (e.g.  via backslahes) than to rewrite a
+           complex construct (e.g.  m|"[^"]+"| !!).
+         o added -T (Tainting) and -w (Warnings) options
+           which can be used like the same in "perl".
+         o added alpha and snap releases to NEWVERS
+
+  ___________________________________________________________________________
+
   Changes between 2.1.0 and 2.1.1
   -------------------------------
    
-  070501 o added -P option to etc/newsvers
+  970501 o added -P option to etc/newsvers
          o removed \n at SCRIPT_.._CTIME
-         o replaced the $| = 1 stuff in eperl_perl5.c
-           to the way mod_perl does it
+  970502 o replaced the $| = 1 stuff in eperl_perl5.c to the way
+           mod_perl does it 
            [Thanks to Doug MacEachern <dougm@osf.org> for patch]
-         o enhanced the SetUID-based UID/GID checking:
-           now in eperl_global.h is an option
-           DO_ON_FAILED_STEP which either forces
-           ePerl to error on any failed checks
-           or go on but finally don't do the UID/GID
-           switching
-         o moved the security definitions from
-           eperl_global.h to a new eperl_security.h
-           and changed the references in eperl.pod
+         o enhanced the SetUID-based UID/GID checking: now in
+           eperl_global.h is an option DO_ON_FAILED_STEP which
+           either forces ePerl to error on any failed checks or go
+           on but finally don't do the UID/GID switching
+         o moved the security definitions from eperl_global.h to
+           a new eperl_security.h and changed the references in
+           eperl.pod
 
   Changes between 2.1b8 and 2.1.0
   -------------------------------

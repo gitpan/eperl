@@ -21,7 +21,7 @@
 **  only under the terms of either the Artistic License or the GNU General
 **  Public License, which may be found in the ePerl source distribution.
 **  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
-**  a builtin copy of both license files.
+**  a built-in copy of both license files.
 **
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -39,14 +39,17 @@
 #include <EXTERN.h>
 #include <perl.h>                 
 
+
 #ifdef HAVE_PERL_DYNALOADER
 
 extern void boot_DynaLoader _((CV* cv));
 
 /*
- *  the Perl XS init function for dynamic library loading
- */
-void ePerl_xs_init(void)
+**
+**  the Perl XS init function for dynamic library loading
+**
+*/
+void Perl5_XSInit(void)
 {
    /* dXSUB_SYS; */
    char *file = __FILE__;
@@ -54,12 +57,55 @@ void ePerl_xs_init(void)
    /* dummy = 0; */ /* make gcc -Wall happy ;-) */
    newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
 }
-#endif
+#endif /* HAVE_PERL_DYNALOADER */
+
 
 /*
- *  sets a Perl scalar variable
- */
-void ePerl_SetScalar(char *pname, char *vname, char *vvalue)
+**
+**  Force Perl to use unbuffered I/O
+**
+*/
+void Perl5_ForceUnbufferedStdout(void)
+{
+    IoFLAGS(GvIOp(defoutgv)) |= IOf_FLUSH; /* $|=1 */
+    return;
+}
+
+
+/*
+**
+**  eval a Perl command
+**
+*/
+void Perl5_EvalCmd(char *cmd)
+{
+    (void)perl_eval_pv(cmd, FALSE);
+    return;
+}
+
+
+/*
+**
+**  set a Perl environment variable
+**
+*/
+char **Perl5_SetEnvVar(char **env, char *str) 
+{
+    char ca[1024];
+    char *cp;
+
+    strcpy(ca, str);
+    cp = strchr(ca, '=');
+    *cp++ = '\0';
+    return mysetenv(env, ca, cp);
+}
+
+/*
+**
+**  sets a Perl scalar variable
+**
+*/
+void Perl5_SetScalar(char *pname, char *vname, char *vvalue)
 {
     char ca[1024];
 
@@ -69,12 +115,75 @@ void ePerl_SetScalar(char *pname, char *vname, char *vvalue)
 }
 
 /*
- *  sets a Perl scalar variable
- */
-void ePerl_ForceUnbufferedStdout(void)
+**
+**  remember a Perl scalar variable
+**  and set it later
+**
+**  (this is needed because we have to
+**   remember the scalars when parsing 
+**   the command line, but actually setting
+**   them can only be done later when the
+**   Perl 5 interpreter is allocated !!)
+**
+*/
+
+char *Perl5_RememberedScalars[1024] = { NULL };
+
+void Perl5_RememberScalar(char *str) 
 {
-    IoFLAGS(GvIOp(defoutgv)) |= IOf_FLUSH; /* $|=1 */
+    int i;
+
+    for (i = 0; Perl5_RememberedScalars[i] != NULL; i++)
+        ;
+    Perl5_RememberedScalars[i++] = strdup(str);
+    Perl5_RememberedScalars[i++] = NULL;
     return;
 }
+
+void Perl5_SetRememberedScalars(void) 
+{
+    char ca[1024];
+    char *cp;
+    int i;
+
+    for (i = 0; Perl5_RememberedScalars[i] != NULL; i++) {
+        strcpy(ca, Perl5_RememberedScalars[i]);
+        cp = strchr(ca, '=');
+        *cp++ = '\0';
+        Perl5_SetScalar("main", ca, cp);
+    }
+}
+
+/*
+**
+**  remember a Perl INC entry
+**  and set it later
+**
+*/
+
+char *Perl5_RememberedINC[1024] = { NULL };
+
+void Perl5_RememberINC(char *str) 
+{
+    int i;
+
+    for (i = 0; Perl5_RememberedINC[i] != NULL; i++)
+        ;
+    Perl5_RememberedINC[i++] = strdup(str);
+    Perl5_RememberedINC[i++] = NULL;
+    return;
+}
+
+void Perl5_SetRememberedINC(void) 
+{
+    char ca[1024];
+    int i;
+
+    for (i = 0; Perl5_RememberedINC[i] != NULL; i++) {
+        sprintf(ca, "push(@INC, '%s');", Perl5_RememberedINC[i]);
+        Perl5_EvalCmd(ca);
+    }
+}
+
 
 /*EOF*/

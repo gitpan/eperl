@@ -21,7 +21,7 @@
 **  only under the terms of either the Artistic License or the GNU General
 **  Public License, which may be found in the ePerl source distribution.
 **  Look at the files ARTISTIC and COPYING or run ``eperl -l'' to receive
-**  a builtin copy of both license files.
+**  a built-in copy of both license files.
 **
 **  This program is distributed in the hope that it will be useful, but
 **  WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -82,6 +82,15 @@
 #endif
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
 #endif
 
 #ifdef SUNOS_LIB_PROTOTYPES

@@ -1,6 +1,6 @@
 dnl #
 dnl #  configure.in -- GNU autoconf configuration spec
-dnl #  Copyright (c) Ralf S. Engelschall, <rse@en.muc.de>
+dnl #  Copyright (c) Ralf S. Engelschall, <rse@engelschall.com>
 dnl #
 dnl #  Process this file with ``autoconf'' to produce a configure script.
 dnl #
@@ -17,6 +17,12 @@ AC_PREFIX_DEFAULT(/usr/local)
 AC_CONFIGURE_PART(CHECK: Build Tools)
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_RANLIB
+AC_PROGRAM_CHECK(AR, ar, ar,)
+if test -z "$AR"; then
+    AC_ERROR([required program ``ar'' not found])
+fi
+
 
 AC_MSG_CHECKING(for compilation debug mode)
 AC_ARG_ENABLE(debug,dnl
@@ -57,8 +63,8 @@ fi
 
 AC_SET_MAKE
 AC_PROG_INSTALL
-INSTALL_DATA='${INSTALL} -m 664'
-INSTALL_PROGRAM="${INSTALL_PROGRAM} -s"
+INSTALL_DATA='${INSTALL} -m 644'
+INSTALL_PROGRAM="${INSTALL_PROGRAM} -m 755"
 AC_PATH_PROGS(PATH_BOURNESHELL, bash sh, /bin/sh) 
 
 AC_CONFIGURE_PART(CHECK: Perl Language)
@@ -131,6 +137,15 @@ AC_SUBST(perldla)
 AC_MSG_RESULT([$rc])
 
 AC_MSG_CHECKING([for Perl DynaLoader compilation flags])
+perlcccdlflags="`$perlprog -e 'use Config; print $Config{cccdlflags}'`";
+case $perlcccdlflags in
+    " " ) x="none" ;;
+    * )   x="$perlcccdlflags" ;;
+esac
+AC_MSG_RESULT([$x])
+AC_SUBST(perlcccdlflags)
+
+AC_MSG_CHECKING([for Perl DynaLoader linking flags])
 perlccdlflags="`$perlprog -e 'use Config; print $Config{ccdlflags}'`";
 case $perlccdlflags in
     " " ) x="none" ;;
@@ -145,7 +160,8 @@ AC_CONST
 AC_STDC_HEADERS
 AC_HAVE_HEADERS(stdio.h stdarg.h stdlib.h string.h ctype.h dnl
                 unistd.h time.h signal.h pwd.h grp.h dnl
-				sys/types.h sys/stat.h sys/param.h)
+				sys/types.h sys/stat.h sys/param.h dnl
+                sys/socket.h netinet/in.h netdb.h)
 AC_CHECK_TYPE(bool, char)
 AC_CHECK_FUNCS(memmove)
 AC_CHECK_FUNCS(seteuid)
