@@ -66,6 +66,7 @@
 #include <stdarg.h>                          
 #include <stdlib.h>                          
 #include <string.h>                          
+#include <ctype.h>
 #include <unistd.h>                          
 #include <time.h>                          
 #include <signal.h>                          
@@ -94,42 +95,10 @@
 **
 */
 
-/* only for back-ward compatibility with older versions of ePerl */
-/* WARNING: these make problems when '>' occur in the Perl block!! */
-#if 0
-#define BEGIN_DELIMITER "<?" 
-#define   END_DELIMITER ">"  
-#endif
-
-/* standard delimiters (DEFAULT) */
-#if 1
-#define BEGIN_DELIMITER "<?"
-#define   END_DELIMITER "!>"
-#endif
-
-/* alternative delimiters */
-#if 0
-#define BEGIN_DELIMITER "<!"
-#define   END_DELIMITER "!>"
-#endif
-
-/* the delimiters of the forthcoming WML */
-#if 0
-#define BEGIN_DELIMITER "<:"
-#define   END_DELIMITER ":>"
-#endif
-
-/* alternative delimiters (JavaScript style) */
-#if 0
-#define BEGIN_DELIMITER "<script language='eperl'>"
-#define   END_DELIMITER "</script>"
-#endif
-
-/* alternative delimiters (NeoScript style) */
-#if 0
-#define BEGIN_DELIMITER "<!--#eperl code='"
-#define   END_DELIMITER "' -->"
-#endif
+#define BEGIN_DELIMITER_FILTER "<:"
+#define   END_DELIMITER_FILTER ":>"
+#define BEGIN_DELIMITER_CGI    "<?"
+#define   END_DELIMITER_CGI    "!>"
 
 
 /*
@@ -138,8 +107,18 @@
 **
 */
 
-#define ALLOWED_FILE_EXT { ".html", ".phtml", ".ephtml", ".epl", ".pl", NULL };
+/* General security for CGI modes */
+#define CGI_NEEDS_ALLOWED_FILE_EXT       TRUE
 
+/* SetUID security for CGI modes */
+#define SETUID_NEEDS_VALID_CALLER_UID    TRUE
+#define SETUID_NEEDS_ALLOWED_CALLER_UID  TRUE
+#define SETUID_NEEDS_VALID_OWNER_UID     TRUE
+#define SETUID_NEEDS_VALID_OWNER_GID     TRUE
+#define SETUID_NEEDS_BELOW_OWNER_HOME    TRUE
+
+#define LIST_OF_ALLOWED_FILE_EXT         { ".html", ".phtml", ".ephtml", ".epl", ".pl", NULL };
+#define LIST_OF_ALLOWED_CALLER_UID       { "nobody", "root", NULL }
 
 /*
 **

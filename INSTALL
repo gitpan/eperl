@@ -11,6 +11,10 @@
      $ ./configure --prefix=/path/to/eperl/root
      $ make
 
+  3. Optionally you can run a test suite now
+
+     $ make test
+
   3. Install it into /path/to/eperl/root/{bin,man}
    
      $ make install
@@ -18,10 +22,15 @@
   4. Aditionally install it into your HTTP Server
   
      $ cp eperl /path/to/apache/cgi-bin/nph-eperl
+
+     When you also want UID-switching, you have to enable the setuid bit:
+
+     $ chown root /path/to/apache/cgi-bin/nph-eperl
+     $ chmod u+s  /path/to/apache/cgi-bin/nph-eperl
      
-     Configure your webserver to process all pages with extension '.phtml' via
-     the ePerl NPH-CGI/1.1 program. For an Apache webserver add the following
-     to your httpd.conf file:
+     Finally configure your webserver to process all pages with extension
+     '.phtml' via the ePerl NPH-CGI/1.1 program. For an Apache webserver add
+     the following to your httpd.conf file:
 
      AddType      application/x-httpd-eperl  .phtml .eperl .epl
      Action       application/x-httpd-eperl  /internal/cgi/nph-eperl

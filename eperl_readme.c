@@ -9,7 +9,7 @@ char *ePerl_README = \
 "                         \n"\
 "  ePerl -- Embedded Perl 5 Language\n"\
 "\n"\
-"  Version 2.1b5 (04-04-1997)\n"\
+"  Version 2.1b6 (10-04-1997)\n"\
 "\n"\
 "  ePerl interprets an ASCII file bristled with Perl 5 program statements by\n"\
 "  evaluating the Perl 5 code while passing through the plain ASCII data. It\n"\

@@ -87,11 +87,11 @@ void ePerl_xs_init(void)
  */
 void ePerl_SetScalar(char *pname, char *vname, char *vvalue)
 {
-	char ca[1024];
+    char ca[1024];
 
-	sprintf(ca, "%s::%s", pname, vname);
-	sv_setpv(perl_get_sv(ca, TRUE), vvalue);
-	return;
+    sprintf(ca, "%s::%s", pname, vname);
+    sv_setpv(perl_get_sv(ca, TRUE), vvalue);
+    return;
 }
 
 /*
@@ -99,8 +99,8 @@ void ePerl_SetScalar(char *pname, char *vname, char *vvalue)
  */
 void ePerl_ForceUnbufferedStdout(void)
 {
-	perl_eval_sv(newSVpv("$| = 1;",0), G_DISCARD);
-	return;
+    perl_eval_sv(newSVpv("$| = 1;",0), G_DISCARD);
+    return;
 }
 
 /*EOF*/

@@ -1,4 +1,13 @@
 
+- eperl.log? Entweder entfernen oder sinnvoll nutuen
+  mit logging bei security fails
+
+- ~/local/bin/wml_p3_eperl test.p2
+> /homes6/burckhar/local/bin/wml_p3_eperl: illegal option -- t
+> )
+
+- m|.."[^"]"| macht Probelem wegen ungerader Anzahl ``"''
+
 - NPH support optional bzw. irgendwie
   erkennen!
 
@@ -11,11 +20,6 @@
 
 - security problems sperl taint?
 
-- security: !!! Als Filter darf natuerlich nicht
-  auf den User geswitcht werden und es sollte
-  das u+x durch ein seteuid(getuid) und seegid(getgid)
-  eliminiert werden.
-
 - Eventuell als Option beim Compilieren oder unter Runtime:
   Entweder seuid und taint mode _ODER_ nonuid und kein taint mode
 
@@ -25,10 +29,6 @@
 
 - neben Apache Anleitung zur Nutzung auch
   NCSA und NSAPI Zeugs und auch CERN
-
-- dumps core for "dumps" file
-
-- bei CGI delimniters anders setzen als bei Standalone
 
 - ausgabe cachen wenn HTTP_PRAGMA=no-cache nicht gesetzt ist.
 
@@ -46,13 +46,9 @@
   also auch kein HTTP/1.1 header.
   StripHTTPHeaders noch erstellen!!!!!!!
 
-- logfile nutzen!!
-
 - age nutzen!!
 
 -------
-
-- typedef bool char fuer Linux mit GNU autoconf testen
 
 - Security:
   ptht is more secure than allowing users access to cgi-bin. In the Safe

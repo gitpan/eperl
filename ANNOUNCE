@@ -9,7 +9,7 @@
 
   <URL:http://www.engelschall.com/sw/eperl/>
 
-  Version 2.1.0 (15-03-1997)
+  Version 2.1.0 (xx-04-1997)
 
   ePerl interprets an ASCII file bristled with Perl 5 program statements by
   evaluating the Perl 5 code while passing through the plain ASCII data. It
@@ -24,7 +24,7 @@
                    - installed Perl 5.003 or higher
   Distribution:    - freely available
                    - no charge
-                   - Engelschall license
+                   - Engelschall Private License (EPL)
   Status:          - Genesis: Februar 1996
                    - First public release: March 1996  (1.0)
                    - Last  public release: Januar 1997 (2.0.3)

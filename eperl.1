@@ -73,7 +73,7 @@
 .nr % 0
 .rr F
 .\}
-.TH EPERL 1 "EN" "4/Apr/97" "Ralf S. Engelschall"
+.TH EPERL 1 "EN" "18/Apr/97" "Ralf S. Engelschall"
 .IX Title "EPERL 1"
 .UC
 .IX Name "ePerl - Embedded Perl 5 Language"
@@ -174,7 +174,7 @@
 ePerl \- Embedded Perl 5 Language
 .SH "VERSION"
 .IX Header "VERSION"
-2.1b5 (04-04-1997)
+2.1b6 (10-04-1997)
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \fBeperl\fR
@@ -186,6 +186,7 @@ ePerl \- Embedded Perl 5 Language
 [\fB\-o\fR \fIoutputfile\fR]
 [\fB\-k\fR]
 [\fB\-x\fR]
+[\fB\-c\fR]
 [\fB\-r\fR]
 [\fB\-l\fR]
 [\fIinputfile\fR]
@@ -307,7 +308,7 @@ directives in the \fIhttpd.conf\fR file
 and creating a symlink to the \fIeperl\fR program:
 .Sp
 .Vb 1
-\&  $ ln -s /sw/pkg/eperl/bin/eperl /path/to/apace/cgi-bin/nph-eperl
+\&  $ ln -s /sw/pkg/eperl/bin/eperl /path/to/apache/cgi-bin/nph-eperl
 .Ve
 .SH "OPTIONS"
 .IX Header "OPTIONS"
@@ -341,9 +342,37 @@ displayed as \s-1HTML\s0 error pages.
 Sets the Perl block begin delimiter string. Use this in conjunction with \f(CW-e\fR
 to set different delimiters when using ePerl as a offline \s-1HTML\s0
 creation-language while still using it as a online \s-1HTML\s0 scripting-language.
+.Sp
+Default delimiters are \f(CW<?\fR and \f(CW!>\fR for \s-1CGI\s0 modes and \f(CW<:\fR and
+\f(CW:>\fR for standalone Unix filtering mode.
+.Sp
+Here are some possible variations you could choose:
+.Sp
+.Vb 2
+\&  "<?" and "!>"
+\&  default ePerl CGI mode delimiters
+.Ve
+.Vb 2
+\&  "<:" and ":>"
+\&  default ePerl stand-alone filtering mode delimiters
+.Ve
+.Vb 2
+\&  "<script language='ePerl'>" and "</script>" 
+\&  standard HTML scripting language style
+.Ve
+.Vb 2
+\&  "<!--#eperl code='" and "' -->"
+\&  NeoScript style
+.Ve
+.Vb 4
+\&  "<?" and ">"
+\&  PHP/FI style (no longer recommended because can lead 
+\&  to parsing problems. Should be used only for backward 
+\&  compatibility to old ePerl versions 1.x)
+.Ve
 .Ip "\fB\-e\fR \fIend_delimiter\fR" 5
 .IX Item "\fB\-e\fR \fIend_delimiter\fR"
-Sets the Perl block end delimiter string.
+Sets the Perl block end delimiter string. See option \fB\-b\fR
 .Ip "\fB\-D\fR \fIname\fR=\fIvalue\fR" 5
 .IX Item "\fB\-D\fR \fIname\fR=\fIvalue\fR"
 Sets a Perl variable in the package \f(CWmain\fR which can be referenced
@@ -389,6 +418,9 @@ a temporary file.
 .IX Item "\fB\-x\fR"
 This sets debug mode where ePerl outputs some interesting information to the
 console.
+.Ip "\fB\-c\fR" 5
+.IX Item "\fB\-c\fR"
+This runs a pure syntax check which is similar to \f(CWperl -c\fR.
 .Ip "\fB\-v\fR" 5
 .IX Item "\fB\-v\fR"
 This prints ePerl version information to the console.
@@ -419,6 +451,33 @@ Perl program file which then gets entirely evaluated by only one internal
 instance of the Perl 5 interpreter.  To archieve this, ePerl translates all
 HTML markup code into (escaped) Perl 5 print constructs while passing through
 all embedded native Perl 5 code. 
+.SH "SECURITY"
+.IX Header "SECURITY"
+When you are installing ePerl as a NPH\-CGI/1.1 program (\fInph-eperl\fR) with
+setuid bit enabled (\f(CWchmod u+s\fR!) then ePerl can switch to the uid/gid of the
+\fBscript owner\fR. Although this is a very useful feature for script programmers
+it can be to risky for you when you are paranoid about security of setuid
+programs. If so just don't install ePerl with enabled setuid bit! This is the
+reason why ePerl is not installed per default as \fInph-eperl\fR for your
+webserver. For those who decided that this feature is essential for them ePerl
+tries hard to make it secure. The following steps have to be successfully
+passed before ePerl actually switches its uid/gid (in this order):
+.PP
+.Vb 11
+\&  1. The script has to match the following extensions:
+\&     .html, .phtml, .ephtml, .epl, .pl
+\&  2. The UID of the calling process has to be a valid UID,
+\&     i.e. it has to be found in the systems password file
+\&  3. The UID of the calling process has to match the 
+\&     following users: root, nobody
+\&  4. The UID of the script owner has to be a valid UID,
+\&     i.e. it has to be found in the systems password file
+\&  5. The GID of the script group has to be a valid GID,
+\&     i.e. it has to be found in the systems group file
+\&  6. The script has to stay below or in the owners homedir
+.Ve
+\fBIF ONLY ONE OF THOSE STEPS FAIL, NO UID/GID SWITCHING TAKES PLACE!\fR
+You can only disable some steps at compile time. See \fIeperl_global.h\fR.
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
 .Ip "\f(CWPATH_TRANSLATED\fR" 5

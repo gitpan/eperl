@@ -74,6 +74,7 @@ extern int mode;
 extern char *begin_delimiter;
 extern char *end_delimiter;
 extern char *allowed_file_ext[];
+extern char *allowed_caller_uid[];
 extern void PrintError P_((int mode, char *scripturl, char *scriptfile, char *logfile, char *str, ...));
 extern void give_version P_((void));
 extern void give_version_extended P_((void));
@@ -144,10 +145,6 @@ extern int egetopt P_((int nargc, char **nargv, char *ostr));
 
 /* eperl_log.c */
 extern void Log P_((char *fmtstr, ...));
-
-/* eperl_brain.c */
-extern int brain_store P_((char *s));
-extern int brain_retrieve P_((char *s));
 
 /* eperl_debug.c */
 extern int fDebug;

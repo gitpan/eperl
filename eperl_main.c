@@ -67,10 +67,11 @@
 
 int mode = MODE_UNKNOWN;
 
-char *begin_delimiter = BEGIN_DELIMITER;
-char   *end_delimiter =   END_DELIMITER;
+char *begin_delimiter = NULL;
+char   *end_delimiter = NULL;
 
-char *allowed_file_ext[] = ALLOWED_FILE_EXT;
+char *allowed_file_ext[]   = LIST_OF_ALLOWED_FILE_EXT;
+char *allowed_caller_uid[] = LIST_OF_ALLOWED_CALLER_UID;
 
 /*
  *  Display an error message and a logfile content as a HTML page
@@ -96,23 +97,23 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
         printf("<head>\n");
         printf("<title>ePerl: ERROR: %s</title>\n", ca);
         printf("</head>\n");
-        printf("<body bgcolor=\"#cccccc\">\n");
+        printf("<body bgcolor=\"#d0d0d0\">\n");
         printf("<blockquote>\n");
         cp = getenv("SCRIPT_NAME");
         if (cp == NULL)
             cp = "UNKNOWN_IMG_DIR";
         printf("<table cellspacing=0 cellpadding=0 border=0>\n");
-		printf("<tr>\n");
+        printf("<tr>\n");
         printf("<td><img src=\"%s/logo.gif\" alt=\"Embedded Perl 5 Language\"></td>\n", cp);
-		printf("</tr>\n");
-		printf("<tr>\n");
+        printf("</tr>\n");
+        printf("<tr>\n");
         printf("<td align=right><b>Version %s</b></td>\n", ePerl_Version);
-		printf("</tr>\n");
-		printf("</table>\n");
+        printf("</tr>\n");
+        printf("</table>\n");
         printf("<p>\n");
         printf("<table bgcolor=\"#f0d0d0\" cellspacing=0 cellpadding=10 border=0>\n");
         printf("<tr><td bgcolor=\"#d0c0c0\">\n");
-        printf("<font face=\"Arial, Helvetica\"><b>ERROR message:</b></font>\n");
+        printf("<font face=\"Arial, Helvetica\"><b>ERROR:</b></font>\n");
         printf("</td></tr>\n");
         printf("<tr><td>\n");
         printf("<h1><font color=\"#cc3333\">%s</font></h1>\n", ca);
@@ -138,7 +139,7 @@ void PrintError(int mode, char *scripturl, char *scriptfile, char *logfile, char
         printf("</html>\n");
     }
     else {
-        fprintf(stderr, "ERROR message: %s\n", ca);
+        fprintf(stderr, "ERROR: %s\n", ca);
         if (logfile != NULL) {
             if ((cpBuf = ePerl_ReadErrorFile(logfile, scriptfile, scripturl)) != NULL) {
                 fprintf(stderr, "\n");
@@ -199,9 +200,10 @@ void give_usage(char *name)
     fprintf(stderr, "Usage: %s [options] [file]\n", name);
     fprintf(stderr, "where options are:\n");
     fprintf(stderr, "   -m f|c|n       force runtime mode to FILTER, CGI or NPH-CGI\n");
-    fprintf(stderr, "   -x             force debug mode\n");
-    fprintf(stderr, "   -b str         set begin delimiter (default is '%s')\n", BEGIN_DELIMITER);
-    fprintf(stderr, "   -e str         set   end delimiter (default is '%s')\n", END_DELIMITER);
+    fprintf(stderr, "   -x             run debugging steps\n");
+    fprintf(stderr, "   -c             run syntax check\n");
+    fprintf(stderr, "   -b str         set begin delimiter\n");
+    fprintf(stderr, "   -e str         set end delimiter\n");
     fprintf(stderr, "   -D name=value  define global Perl variable ($main::name)\n");
     fprintf(stderr, "   -E name=value  define environment variable ($ENV{'name'})\n");
     fprintf(stderr, "   -o outputfile  force the output to be send to this file (default is stdout)\n");
@@ -309,6 +311,9 @@ int main(int argc, char **argv, char **env)
     char perlscript[1024] = "";
     char perlstderr[1024] = "";
     char perlstdout[1024] = "";
+    char dir_tmp[1024];
+    char *dir_home;
+    char *dir_script;
     char ca[1024] = "";
     int myargc;
     char *myargv[20];
@@ -323,6 +328,7 @@ int main(int argc, char **argv, char **env)
     char *cpOut = NULL;
     int size;
     struct passwd *pw;
+    struct passwd *pw2;
     struct group *gr;
     int uid, gid;
     int keepcwd = FALSE;
@@ -332,7 +338,9 @@ int main(int argc, char **argv, char **env)
     int i, n, k;
     char *outputfile = NULL;
     char cwd[MAXPATHLEN];
-
+    int fCheck = FALSE;
+    char *cwd2;
+    int fOkSwitch;
 
     /*  first step: our process initialisation */
     myinit();
@@ -350,7 +358,7 @@ int main(int argc, char **argv, char **env)
     optstart = "-+";
 
     /*  parse the option arguments */
-    while ((c = egetopt(argc, argv, "m+b+e+D+E+a+o+kxvVrl")) != EOF) {
+    while ((c = egetopt(argc, argv, "m+b+e+D+E+a+o+kxcvVrl")) != EOF) {
         if (optarg == NULL) 
             optarg = "(null)";
         switch (c) {
@@ -389,6 +397,9 @@ int main(int argc, char **argv, char **env)
                 break;
             case 'x':
                 fDebug = TRUE;
+                break;
+            case 'c':
+                fCheck = TRUE;
                 break;
             case 'v':
                 give_version();
@@ -460,6 +471,20 @@ int main(int argc, char **argv, char **env)
         myexit(EX_USAGE);
     }
 
+    /* set default delimiters */
+    if (begin_delimiter == NULL) {
+        if (mode == MODE_FILTER)
+            begin_delimiter = BEGIN_DELIMITER_FILTER;
+        else
+            begin_delimiter = BEGIN_DELIMITER_CGI;
+    }
+    if (end_delimiter == NULL) {
+        if (mode == MODE_FILTER)
+            end_delimiter = END_DELIMITER_FILTER;
+        else
+            end_delimiter = END_DELIMITER_CGI;
+    }
+
     /* the builtin GIF images */
     if ((mode == MODE_CGI || mode == MODE_NPHCGI) && (cp = getenv("PATH_INFO")) != NULL) { 
         if (strcmp(cp, "/logo.gif") == 0) {
@@ -479,53 +504,127 @@ int main(int argc, char **argv, char **env)
      */
     if (mode == MODE_CGI || mode == MODE_NPHCGI) {
 
-        /* security check: valid user */
-        uid = getuid();
-        if ((pw = getpwuid(uid)) == NULL) {
-            PrintError(mode, source, NULL, NULL, "Invalid UID %d", uid);
-            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
-        }
-
-        /* security check: UID and GID */
-        if ((pw = getpwuid(st.st_uid)) == NULL) {
-            PrintError(mode, source, NULL, NULL, "Invalid UID %d of file owner", st.st_uid);
-            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
-        }
-        uid = pw->pw_uid;
-        if ((gr = getgrgid(st.st_gid)) == NULL) {
-            PrintError(mode, source, NULL, NULL, "Invalid GID %d of file group", st.st_gid);
-            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
-        }
-        gid = gr->gr_gid;
-
-        /* security check: allowed file extension */
-        allow = FALSE;
-        n = strlen(source);
-        for (i = 0; allowed_file_ext[i] != NULL; i++) {
-            k = strlen(allowed_file_ext[i]);
-            if (strcmp(source+n-k, allowed_file_ext[i]) == 0) 
-                allow = TRUE;
-        }
-        if (!allow) {
-            PrintError(mode, source, NULL, NULL, "File `%s' is not allowed to be interpreted by ePerl (wrong extension!)", source);
-            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
-        }
-
-        /* switch to uid/gid if run as a setuid program */
-        if (geteuid() == 0 && uid != 0 && gid != 0 /* XXX */) {
-            /* XXX */
-            if (((setgid(gid)) != 0) || (initgroups(pw->pw_name,gid) != 0)) {
-                PrintError(mode, source, NULL, NULL, "Failed to set GID %d", gid);
+        /* general security check: allowed file extension */
+        if (CGI_NEEDS_ALLOWED_FILE_EXT) {
+            allow = FALSE;
+            n = strlen(source);
+            for (i = 0; allowed_file_ext[i] != NULL; i++) {
+                k = strlen(allowed_file_ext[i]);
+                if (strcmp(source+n-k, allowed_file_ext[i]) == 0) 
+                    allow = TRUE;
+            }
+            if (!allow) {
+                PrintError(mode, source, NULL, NULL, "File `%s' is not allowed to be interpreted by ePerl (wrong extension!)", source);
                 CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
             }
-            if ((setuid(uid)) != 0) {
-                PrintError(mode, source, NULL, NULL, "Failed to set UID %d", uid);
-                CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+        }
+
+        /*
+         *
+         * == UID/GID switching ==
+         *
+         */
+
+        /* we can only do a switching if we have euid == root */
+        if (geteuid() == 0) {
+
+            fOkSwitch = TRUE;
+
+            /* get our real user id (= caller uid) */
+            uid = getuid();
+    
+            /* security check: valid caller uid */
+            pw = getpwuid(uid);
+            if (SETUID_NEEDS_VALID_CALLER_UID && pw == NULL)
+                fOkSwitch = FALSE;
+            else {
+                /* security check: allowed caller uid */
+                if (SETUID_NEEDS_ALLOWED_CALLER_UID) {
+                    allow = FALSE;
+                    for (i = 0; allowed_caller_uid[i] != NULL; i++) {
+                        if (isdigit(allowed_caller_uid[i][0]))
+                            pw2 = getpwuid(atoi(allowed_caller_uid[i]));
+                        else
+                            pw2 = getpwnam(allowed_caller_uid[i]);
+                        if (pw->pw_name == pw2->pw_name) {
+                            allow = TRUE;
+                            break;
+                        }
+                    }
+                    if (!allow) 
+                        fOkSwitch = FALSE;
+                }
             }
     
-            /* eliminate effective uid/gid */
-            seteuid(uid);
-            setegid(gid);
+            /* security check: valid owner UID */
+            pw = getpwuid(st.st_uid);
+            if (SETUID_NEEDS_VALID_OWNER_UID && pw == NULL) 
+                fOkSwitch = FALSE;
+            else 
+                uid = pw->pw_uid;
+    
+            /* security check: valid owner GID */
+            gr = getgrgid(st.st_gid);
+            if (SETUID_NEEDS_VALID_OWNER_GID && gr == NULL) 
+                fOkSwitch = FALSE;
+            else 
+                gid = gr->gr_gid;
+    
+            /* security check: file has to stay below owner homedir */
+            if (fOkSwitch && SETUID_NEEDS_BELOW_OWNER_HOME) {
+                /* preserve current working directory */
+                cwd2 = getcwd(NULL, 1024);
+
+                /* determine physical homedir of owner */
+                pw = getpwuid(st.st_uid);
+                if (chdir(pw->pw_dir) == -1) {
+                    PrintError(mode, source, NULL, NULL, "Invalid homedir ``%s'' of file owner", pw->pw_dir);
+                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                }
+                dir_home = getcwd(NULL, 1024);
+
+                /* determine physical dir of file */
+                strcpy(dir_tmp, source);
+                if ((cp = strrchr(dir_tmp, '/')) == NULL) {
+                    PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': no absolute path", source);
+                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                }
+                *cp = NUL;
+                if (chdir(dir_tmp) == -1) {
+                    PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': cannot chdir to its location", source);
+                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                }
+                dir_script = getcwd(NULL, 1024);
+
+                /* dir_home has to be a prefix of dir_script */
+                if (strncmp(dir_script, dir_home, strlen(dir_home)) < 0) {
+                    PrintError(mode, source, NULL, NULL, "Invalid script ``%s'': does not stay below homedir of owner", source);
+                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                }
+
+                /* restore original cwd */
+                chdir(cwd2);
+
+                /* free the allocated buffers from getcwd() */
+                free(dir_script);
+                free(dir_home);
+                free(cwd2);
+            }
+    
+            if (fOkSwitch && uid != 0 && gid != 0) {
+                /* switch to new uid/gid */
+                if (((setgid(gid)) != 0) || (initgroups(pw->pw_name,gid) != 0)) {
+                    PrintError(mode, source, NULL, NULL, "Unable to set GID %d: setgid/initgroups failed", gid);
+                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                }
+                if ((setuid(uid)) != 0) {
+                    PrintError(mode, source, NULL, NULL, "Unable to set UID %d: setuid failed", uid);
+                    CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+                }
+                /* eliminate effective root permissions */
+                seteuid(uid);
+                setegid(gid);
+            }
         }
     }
 
@@ -579,6 +678,23 @@ int main(int argc, char **argv, char **env)
     fwrite(cpScript, strlen(cpScript), 1, fp);
     fclose(fp);
 
+    /* in Debug mode output the script to the console and exit */
+    if (fDebug) {
+        if ((fp = fopen("/dev/tty", "w")) == NULL) {
+            PrintError(mode, source, NULL, NULL, "Cannot open /dev/tty for debugging message");
+            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+        }
+        fprintf(fp, "----internally created Perl script-----------------------------------\n");
+        fwrite(cpScript, strlen(cpScript)-1, 1, fp);
+        if (cpScript[strlen(cpScript)-1] == '\n') 
+            fprintf(fp, "%c", cpScript[strlen(cpScript)-1]);
+        else 
+            fprintf(fp, "%c\n", cpScript[strlen(cpScript)-1]);
+        fprintf(fp, "----internally created Perl script-----------------------------------\n");
+        fclose(fp);
+        CU(EX_OK);
+    }
+
     /* open a file for Perl's STDOUT channel
        and redirect stdout to the new channel */
     strcpy(perlstdout, mytmpfile("ePerl.stdout"));
@@ -621,9 +737,28 @@ int main(int argc, char **argv, char **env)
     rc = perl_parse(my_perl, NULL, myargc, myargv, env);
 #endif
     if (rc != 0) { 
+        if (fCheck && mode == MODE_FILTER) {
+            fclose(er);
+            IO_restore_stdout();
+            IO_restore_stderr();
+            if ((cpBuf = ePerl_ReadErrorFile(perlstderr, perlscript, source)) != NULL) {
+                fprintf(stderr, cpBuf);
+            }
+            CU(EX_IOERR);
+        }
+        else {
+            fclose(er);
+            PrintError(mode, source, perlscript, perlstderr, "Perl parsing error (interpreter rc=%d)", rc);
+            CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+        }
+    }
+    /* Stop when we are just doing a syntax check */
+    if (fCheck && mode == MODE_FILTER) {
         fclose(er);
-        PrintError(mode, source, perlscript, perlstderr, "Perl parsing error (interpreter rc=%d)", rc);
-        CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
+        IO_restore_stdout();
+        IO_restore_stderr();
+        fprintf(stderr, "%s syntax OK\n", source);
+        CU(EX_OK);
     }
 
     /* change to directory of script:

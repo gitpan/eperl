@@ -21,6 +21,7 @@ B<eperl>
 [B<-o> I<outputfile>]
 [B<-k>]
 [B<-x>]
+[B<-c>]
 [B<-r>]
 [B<-l>]
 [I<inputfile>]
@@ -143,7 +144,7 @@ directives in the F<httpd.conf> file
 
 and creating a symlink to the F<eperl> program:
 
-  $ ln -s @prefix@/bin/eperl /path/to/apace/cgi-bin/nph-eperl
+  $ ln -s @prefix@/bin/eperl /path/to/apache/cgi-bin/nph-eperl
 
 =back
 
@@ -184,9 +185,31 @@ Sets the Perl block begin delimiter string. Use this in conjunction with C<-e>
 to set different delimiters when using ePerl as a offline HTML
 creation-language while still using it as a online HTML scripting-language.
 
+Default delimiters are C<E<lt>?> and C<!E<gt>> for CGI modes and C<E<lt>:> and
+C<:E<gt>> for standalone Unix filtering mode.
+
+Here are some possible variations you could choose:
+
+  "<?" and "!>"
+  default ePerl CGI mode delimiters
+
+  "<:" and ":>"
+  default ePerl stand-alone filtering mode delimiters
+
+  "<script language='ePerl'>" and "</script>" 
+  standard HTML scripting language style
+
+  "<!--#eperl code='" and "' -->"
+  NeoScript style
+
+  "<?" and ">"
+  PHP/FI style (no longer recommended because can lead 
+  to parsing problems. Should be used only for backward 
+  compatibility to old ePerl versions 1.x)
+
 =item B<-e> I<end_delimiter>
 
-Sets the Perl block end delimiter string.
+Sets the Perl block end delimiter string. See option B<-b>
 
 =item B<-D> I<name>=I<value>
 
@@ -234,6 +257,10 @@ a temporary file.
 This sets debug mode where ePerl outputs some interesting information to the
 console.
 
+=item B<-c>
+
+This runs a pure syntax check which is similar to C<perl -c>.
+
 =item B<-v>
 
 This prints ePerl version information to the console.
@@ -270,6 +297,33 @@ Perl program file which then gets entirely evaluated by only one internal
 instance of the Perl 5 interpreter.  To archieve this, ePerl translates all
 HTML markup code into (escaped) Perl 5 print constructs while passing through
 all embedded native Perl 5 code. 
+
+=head1 SECURITY
+
+When you are installing ePerl as a NPH-CGI/1.1 program (F<nph-eperl>) with
+setuid bit enabled (C<chmod u+s>!) then ePerl can switch to the uid/gid of the
+B<script owner>. Although this is a very useful feature for script programmers
+it can be to risky for you when you are paranoid about security of setuid
+programs. If so just don't install ePerl with enabled setuid bit! This is the
+reason why ePerl is not installed per default as F<nph-eperl> for your
+webserver. For those who decided that this feature is essential for them ePerl
+tries hard to make it secure. The following steps have to be successfully
+passed before ePerl actually switches its uid/gid (in this order):
+
+  1. The script has to match the following extensions:
+     .html, .phtml, .ephtml, .epl, .pl
+  2. The UID of the calling process has to be a valid UID,
+     i.e. it has to be found in the systems password file
+  3. The UID of the calling process has to match the 
+     following users: root, nobody
+  4. The UID of the script owner has to be a valid UID,
+     i.e. it has to be found in the systems password file
+  5. The GID of the script group has to be a valid GID,
+     i.e. it has to be found in the systems group file
+  6. The script has to stay below or in the owners homedir
+
+B<IF ONLY ONE OF THOSE STEPS FAIL, NO UID/GID SWITCHING TAKES PLACE!>
+You can only disable some steps at compile time. See F<eperl_global.h>.
 
 =head1 ENVIRONMENT
 

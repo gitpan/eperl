@@ -20,7 +20,7 @@ EOT
 );
 $testfile2 = &TEST::tmpfile_with_name("page2.html", <<"EOT"
 some stuff
-<: print "foo bar"; :>
+<? print "foo bar"; !>
 some more stuff
 EOT
 );
@@ -54,9 +54,9 @@ print ($rc == 0 ? "ok\n" : "not ok\n");
 
 #   test if filter mode actually works for embedded Perl 5 blocks
 $tempfile3 = &TEST::tmpfile;
-&TEST::system("../eperl -b '<:' -e ':>' -m c $testfile2 >$tempfile3");
+&TEST::system("../eperl -m c $testfile2 >$tempfile3");
 $rc = &TEST::system("cmp $tempfile3 $testfile3");
 print ($rc == 0 ? "ok\n" : "not ok\n");
 
-&TEST::cleanup;
+#&TEST::cleanup;
 

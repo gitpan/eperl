@@ -2,7 +2,7 @@
 
 char *ePerl_LICENSE = \
 "\n"\
-"  e P e r l   L I C E N S E   A G R E E M E N T\n"\
+"  E N G E L S C H A L L   P R I V A T E   L I C E N S E\n"\
 "\n"\
 "  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.\n"\
 "  \n"\

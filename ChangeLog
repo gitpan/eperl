@@ -2,6 +2,22 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.1b5 and 2.1b6
+  -------------------------------
+
+  970414 o slightly changed the error message page
+  970418 o created -c for syntax check like "perl -c"
+         o now the default delimiters are
+                <? .. !> for CGI modes
+           and  <: ...:> for Filter mode
+         o removed the delimiters defs in eperl_global.h
+           but added a table to eperl.pod
+         o completely rewritten the setuid security stuff !!
+         o added security information to eperl.pod
+         o now -x does something useful: it outputs
+           the internally generated Perl script to /dev/tty
+           and exits
+
   Changes between 2.1b4 and 2.1b5
   -------------------------------
 
