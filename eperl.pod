@@ -1,0 +1,289 @@
+##
+##  eperl.pod -- ePerl Documentation in Plain Old Document (POD) Format
+##
+
+=head1 NAME
+
+ePerl - Embedded Perl 5 Language
+
+=head1 VERSION
+
+@V@
+
+=head1 SYNOPSIS
+
+B<eperl>
+[B<-m> f|c|n]
+[B<-b> I<begin_delimiter>]
+[B<-e> I<end_delimiter>]
+[B<-D> I<name>=I<value>]
+[B<-E> I<name>=I<value>]
+[B<-o> I<outputfile>]
+[B<-k>]
+[B<-x>]
+[B<-v>]
+[B<-V>]
+[B<-r>]
+[B<-l>]
+[I<inputfile>]
+
+=head1 DESCRIPTION
+
+=head2 Abstract
+
+ePerl interprets an ASCII file bristled with Perl 5 program statements by
+evaluating the Perl 5 code while passing through the plain ASCII data. It can
+operate both as a standard Unix filter for file generation and as a Webserver
+scripting language for dynamic HTML page programming. 
+
+=head2 Introduction
+
+The F<eperl> program is the I<Embedded Perl 5 Language>. This really is a
+full-featured Perl 5 interpreter, but with a different calling environment and
+source file format then the default Perl interpreter (the executable F<perl>).
+It is designed for ASCII file generation with the philosophy of I<embedding>
+the Perl 5 program code into the ASCII data instead of the usual way where you
+embed the ASCII data into a Perl 5 program.
+
+Instead of writing a generation program with code like
+
+   print "foo bar\n";
+   print "baz quux\n";
+   for ($i = 0; $i < 10; $i++) { print "foo #${i}\n"; }
+   print "foo bar\n";
+   print "baz quux\n";
+
+you now code it as
+
+   foo bar
+   baz quux
+   <: for ($i = 0; $i < 10; $i++) { print "foo #${i}\n"; } :>
+   foo bar
+   baz quux
+
+=head2 Intention
+
+ePerl is simply a glue code which combines the programming power of the Perl 5
+interpreter with a tricky embedding technique.  The embedding trick is:
+ePerl itself only converts the source file into a valid Perl script which then
+gets I<entirely> evaluated by only one internal instance of the Perl 5
+interpreter. To archieve this, ePerl translates all plain code into (escaped)
+Perl 5 F<print> constructs while passing through all embedded native Perl 5
+code.
+
+Due to the nature of such bristled code, ePerl is really the better attempt
+when the generated ASCII data contains really more static as dynamic data. Or
+in other words: Use ePerl if you want to keep the most of the ASCII data in
+plain format while just programming some bristled stuff. Do not use it when
+generating pure dynamic data. There it brings no advantage to an ordinary
+program code.
+
+ePerl was actually designed to be used as a webserver scripting-language for
+HTML pages. Here you have the typical case that 90% of the data consists of
+pure static HTML tags and plain ASCII while the remaining 10% are actually
+dynamically generated stuff. 
+
+=head2 Usage
+
+The F<eperl> program can be used in three different ways of calling:
+
+=over 4
+
+=item I<Stand-Alone Unix compliant Filter>
+
+This is the basic operation when used as a generation tool from the Unix shell
+or from within other tools:
+
+  $ eperl [options] - < inputfile > outputfile
+  $ eperl [options] inputfile > outputfile
+  $ eperl [options] -o outputfile inputfile
+
+Use this to take advantage of Perl's programming power for generating
+complicated data. 
+
+=item I<Shebang NPH-CGI/1.1 Script>
+
+Here ePerl is used in conjunction with the Unix shebang magic technique to
+directly transform a HTML file into a CGI/1.1 script. First just
+prefix the file with the following (shebang-)line:
+
+  #!@prefix@/bin/eperl [options]
+
+Then rename it from F<file.html> to F<file.cgi> and set
+its execution bit via
+
+  $ mv file.html file.cgi
+  $ chmod a+rx file.cgi
+
+Now when the script F<file.cgi> is run by the webserver it actually displays
+its HTML data. Usually (because up to now the CGI script had no advantage over
+the plain HTML file) you bristle the file with Perl 5 blocks where you need
+dynamic content.
+
+Notice that usually this does only run F<file.cgi> as pure CGI/1.1 compliant
+program and not as Non-Parsed-Header (NPH) CGI/1.1 one.
+
+=item I<NPH-CGI/1.1 compliant Server-Side Scripting Language>
+
+Modern webservers (like Apache) provide the ability to integrate server-side
+scripting languages in a really seemless manner. There you can force all files
+with a specific extension (or associated MIME-type) to be on-the-fly filtered
+by a script. Use this feature to use ePerl as a fully integrated server-side
+scripting language.
+
+For Apache you can transform any HTML page into a ePerl source file by just
+renaming it from F<file.html> to F<file.phtml> while setting up the following
+directives in the F<httpd.conf> file
+
+  AddType      application/x-httpd-eperl  .phtml .eperl .epl
+  Action       application/x-httpd-eperl  /internal/cgi/nph-eperl
+  ScriptAlias  /internal/cgi              /path/to/apache/cgi-bin
+
+and creating a symlink to the F<eperl> program:
+
+  $ ln -s @prefix@/bin/eperl /path/to/apace/cgi-bin/nph-eperl
+
+=back
+
+=head1 OPTIONS
+
+=over
+
+=item B<-m> f|c|n
+
+This forces ePerl to act in a specific runtime mode.  Either as a stand-alone
+filter (B<-mf>), where no HTTP response headers are printed and errors are
+displayed without surrounding HTML code. This mode is choosen per default when
+no CGI/1.1 variables are set in the environment.
+
+Or as a CGI/1.1 (B<-mc>) compliant program, where HTTP response headers are
+printed and errors are encapsulated in HTML code. In this mode only a few
+specific HTTP headers can be generated like C<Location>.  Because these
+headers are post-processed by the webserver. This mode is automatically
+choosen when CGI/1.1 variables exists in the environment and the script
+filename does B<not> begin with the NPH prefix ``F<nph->''.
+
+Additionally B<-mn> forces the NPH-CGI/1.1 mode which is similar to CGI but
+here I<No-Parseable-Header> mode is also switched on, i.e. any HTTP response
+headers can be generated while ePerl fills the missing gaps. The result is a
+full HTTP response which is not further processed by the webserver. This mode
+is automatically choosen when CGI/1.1 variables exists in the environment and
+the script does begin with the NPH prefix ``F<nph->''.
+
+=item B<-c>
+
+This forces ePerl to act as a NPH-CGI/1.1 compliant program, i.e. HTTP
+response headers are printed in front of the HTML code and errors are
+displayed as HTML error pages.
+
+=item B<-b> I<begin_delimiter>
+
+Sets the Perl block begin delimiter string. Use this in conjunction with C<-e>
+to set different delimiters when using ePerl as a offline HTML
+creation-language while still using it as a online HTML scripting-language.
+
+=item B<-e> I<end_delimiter>
+
+Sets the Perl block end delimiter string.
+
+=item B<-D> I<name>=I<value>
+
+Sets a Perl variable in the package C<main> which can be referenced
+via C<$name> or more explicitly via C<$main::name>. The command
+
+  eperl -D name=value ..
+  
+is actually equivalent to having
+
+  <? $name = value; !>
+
+at the beginning of I<inputfile>.
+
+=item B<-E> I<name>=I<value>
+
+Sets a environment variable which can be referenced via C<$ENV{'variable'}>
+inside the Perl blocks. The command
+
+  eperl -E name=value ..
+  
+is actually equivalent to 
+
+  export name=value; eperl ...
+
+but the advantage of this option is that it doesn't manipulate the callers
+environment.
+
+=item B<-o> I<outputfile>
+
+Forces the output to be written to F<outputfile> instead of F<stdout>. Use
+this option when using ePerl as a filter. The outputfile ``F<->'' sets stdout
+as the output handle explicitly.
+
+=item B<-k>
+
+Forces ePerl to keep the current working directory from where it was started.
+Per default ePerl will change to the directory where the file to be executed
+stays. This option is useful if you use ePerl as a offline filter on
+a temporary file.
+
+=item B<-x>
+
+This sets debug mode where ePerl outputs some interesting information to the
+console.
+
+=item B<-v>
+
+This prints ePerl version information to the console.
+
+=item B<-V>
+
+Same as option B<-v> but additionally shows the Perl compilation parameters.
+
+=item B<-r>
+
+This prints the internal ePerl README file to the console.
+
+=item B<-l>
+
+This prints the internal ePerl LICENSE file to the console.
+
+=back
+
+=head1 INTERNALS
+
+It is simply a tricky glue code which only combines the programming power of
+Perl 5 with the markup power of HTML. 
+
+A pure standard HTML document will be bristled with native Perl 5 code to
+create a so-called HTML document with embedded Perl 5 code. This document is
+then on-the-fly piped through the NPH-CGI program C<nph-eperl> when the webserver
+receives a request for this document from the client. At this preprocessing
+pass ePerl expands the mixed language (HTML and Perl) to pure HTML by
+evaluating all Perl statements and passing through (without changing) all HTML
+statements.  The result is send back to the webbrowser. 
+
+The trick is: ePerl itself only converts the ePerl source file into a valid
+Perl program file which then gets entirely evaluated by only one internal
+instance of the Perl 5 interpreter.  To archieve this, ePerl translates all
+HTML markup code into (escaped) Perl 5 print constructs while passing through
+all embedded native Perl 5 code. 
+
+=head1 ENVIRONMENT
+
+=over
+
+=item C<PATH_TRANSLATED>
+
+This CGI/1.1 variable is used to determine the source file when ePerl operates
+as a NPH-CGI/1.1 program under the environment of a webserver.
+
+=back
+
+=head1 AUTHOR
+
+  Ralf S. Engelschall
+  rse@engelschall.com
+  www.engelschall.com
+
+=cut
+

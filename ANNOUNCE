@@ -1,21 +1,33 @@
   ______________________________________________________________________
-                              ____           _ 
-                          ___|  _ \ ___ _ __| |
-                         / _ \ |_) / _ \ '__| |
-                        |  __/  __/  __/ |  | |
-                         \___|_|   \___|_|  |_|
-                                               
-                   ePerl -- Embedded Perl 5 for HTML
+        ____           _ 
+    ___|  _ \ ___ _ __| |
+   / _ \ |_) / _ \ '__| |
+  |  __/  __/  __/ |  | |
+   \___|_|   \___|_|  |_|
+                         
+  ePerl -- Embedded Perl 5 Language
 
-                 http://www.engelschall.com/sw/eperl/
+  <URL:http://www.engelschall.com/sw/eperl/>
 
-                       Version 2.0.3 (04-01-1997)
+  Version 2.1.0 (15-03-1997)
 
-  ePerl interprets a HTML markup file bristled with Perl 5 program
-  statements by expanding the Perl 5 code. It operates as a stand-alone 
-  NPH-CGI/1.0 compliant Unix program and produces pure HTML markup code 
-  as the resulting data.
+  ePerl interprets an ASCII file bristled with Perl 5 program statements by
+  evaluating the Perl 5 code while passing through the plain ASCII data. It
+  can operate both as a standard Unix filter for file generation and as a
+  Webserver scripting language for dynamic HTML page programming. 
 
-    Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
+  Copyright (c) 1996,1997 Ralf S. Engelschall, All rights reserved.
+  ______________________________________________________________________
+
+  Implementation:  - ANSI C compiler
+  Requirements:    - underlaying Unix derivate
+                   - installed Perl 5.003 or higher
+  Distribution:    - freely available
+                   - no charge
+                   - Engelschall license
+  Status:          - Genesis: Februar 1996
+                   - First public release: March 1996  (1.0)
+                   - Last  public release: Januar 1997 (2.0.3)
+                   - stable
   ______________________________________________________________________
 

@@ -1,0 +1,32 @@
+<html>
+<head>
+<title>demo-08: More programming</title>
+</head>
+<body>
+<h1>demo-08: More programming</h1>
+
+<table border=2>
+<?
+    $end = 12;
+
+    # top bar
+    print "<tr><th></th>";
+    for ($i=1; $i <= $end; $i++) {
+        print "<th>$i</th>";
+    }
+    print "</tr>";
+
+    # side bar and content
+    print"</tr>\n";
+    for ($i=1; $i <= $end; $i++) {
+        print "<tr><th>$i</th>";
+        for ($j=1; $j<= $end; $j++) {
+            print "<td>", $i*$j, "</td>";
+        }
+        print"</tr>\n"; 
+    }
+!>
+</table>
+
+</body>
+</html>

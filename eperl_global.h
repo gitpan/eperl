@@ -9,7 +9,7 @@
 **
 **  ePerl interprets a HTML markup file bristled with Perl 5 program
 **  statements by expanding the Perl 5 code. It can operate both as a 
-**  stand-alone CGI/1.0 compliant program or as a integrated API module
+**  stand-alone CGI/1.1 compliant program or as a integrated API module
 **  for the Apache webserver. The resulting data is pure HTML markup code.
 ** 
 **  =====================================================================
@@ -56,11 +56,42 @@
 **
 **  =====================================================================
 **
-**  eperl.h -- ePerl library header file
+**  eperl_global.h -- ePerl global header file
 */
-#ifndef EPERL_H
-#define EERPL_H 1
+#ifndef EPERL_GLOBAL_H
+#define EPERL_GLOBAL_H 1
 
+/* from the Unix system */
+#include <stdio.h>                          
+#include <stdarg.h>                          
+#include <stdlib.h>                          
+#include <string.h>                          
+#include <unistd.h>                          
+#include <time.h>                          
+#include <signal.h>                          
+#include <pwd.h>                          
+#include <grp.h>                          
+#include <sys/types.h>
+#include <sys/stat.h>
+
+/* from our own */
+#include "config_ac.h"
+#include "config_sc.h"
+
+/* debugging! */
+#ifdef DEBUG_ENABLED
+#ifdef HAVE_DMALLOC
+#define DMALLOC_FUNC_CHECK 1
+#include <dmalloc.h>
+#endif
+#endif
+
+
+/*
+**
+**  The ePerl block delimiters
+**
+*/
 
 /* only for back-ward compatibility with older versions of ePerl */
 /* WARNING: these make problems when '>' occur in the Perl block!! */
@@ -69,19 +100,19 @@
 #define   END_DELIMITER ">"  
 #endif
 
-/* standard delimiters (RSE 1) */
+/* standard delimiters (DEFAULT) */
 #if 1
 #define BEGIN_DELIMITER "<?"
 #define   END_DELIMITER "!>"
 #endif
 
-/* alternative delimiters (RSE 2) */
+/* alternative delimiters */
 #if 0
 #define BEGIN_DELIMITER "<!"
 #define   END_DELIMITER "!>"
 #endif
 
-/* new delimiters (RSE 3) */
+/* the delimiters of the forthcoming WML */
 #if 0
 #define BEGIN_DELIMITER "<:"
 #define   END_DELIMITER ":>"
@@ -98,6 +129,34 @@
 #define BEGIN_DELIMITER "<!--#eperl code='"
 #define   END_DELIMITER "' -->"
 #endif
+
+
+/*
+**
+**  Security
+**
+*/
+
+#define ALLOWED_FILE_EXT { ".html", ".phtml", ".ephtml", ".epl", ".pl", NULL };
+
+
+/*
+**
+**  The ePerl runtime mode
+**
+*/
+
+#define MODE_UNKNOWN    1
+#define MODE_FILTER     2
+#define MODE_CGI        4
+#define MODE_NPHCGI     8
+
+
+/*
+**
+**  OS Return Values
+**
+*/
 
 #define EX__BASE        64      /* base value for error messages */
 #define EX_USAGE        64      /* command line usage error */
@@ -127,9 +186,11 @@
 
 
 /*
- *  CU() -- CleanUp Makro
- *  implemented in a safety way
- */
+**
+**  CU() -- CleanUp Makro (implemented in a safety way)
+**
+*/
+
 #define DECL_EXRC int rc
 #define EXRC rc
 #define ZERO 0
@@ -140,10 +201,13 @@
 #define RETURN_EXRC return (rc)
 #define RETURN_NORC return
 
+
 /*
- *  Yeah, here it comes...all ASCII control codes.
- *  Defined as their correct acronyms.
- */
+**
+**  ASCII Control Codes
+**
+*/
+
 #define ASC_NUL '\x00'
 #define ASC_SOH '\x01'
 #define ASC_STX '\x02'
@@ -184,9 +248,13 @@
 #define ASC_NL    ASC_LF
 #define NL        ASC_NL
 
-/*   define the boolean values in a general and
- *   portable way.
- */
+
+/*
+**
+**  Boolean Values -- defined in a general and portable way
+**
+*/
+
 #undef  TRUE
 #define TRUE  (0 || !(0))
 #undef  FALSE
@@ -194,6 +262,7 @@
 /* typedef enum { false = FALSE, true = TRUE } bool; */
 
 /*   some other names for true and false */
+
 #define YES   TRUE
 #define NO    FALSE
 
@@ -207,14 +276,64 @@
 #define SOME  TRUE
 #define NONE  FALSE
 
-/* forward declarations */
-void DoError(char *str, ...);
-void DoErrorWithLogFile(char *scripturl, char *scriptfile, char *logfile, char *str, ...);
-void escfwrite(char *cpBuf, int nBuf, int count, FILE *fp);
-char *ePerl_ReadSourceFile(char *filename, char **buf, int *num);
-char *ePerl_ReadErrorFile(char *filename, char *scriptfile, char *scripturl);
-char *ePerl_Bristled2Perl(char *buffer);
-int ePerl_HeadersExists(char *cpBuf);
 
-#endif /* EPERL_H */
+#ifdef SUNOS_LIB_PROTOTYPES
+/* Prototypes needed to get a clean compile with gcc -Wall.
+ * Believe it or not, these do have to be declared, at least on SunOS,
+ * because they aren't mentioned in the relevant system headers.
+ * Sun Quality Software.  Gotta love it.
+ */
+
+int getopt (int, char **, char *);
+
+int strcasecmp (char *, char *);
+int strncasecmp (char *, char *, int);
+int toupper(int);
+int tolower(int);     
+     
+int printf (char *, ...);     
+int fprintf (FILE *, char *, ...);
+int fputs (char *, FILE *);
+int fread (char *, int, int, FILE *);     
+int fwrite (char *, int, int, FILE *);     
+int fflush (FILE *);
+int fclose (FILE *);
+int ungetc (int, FILE *);
+int _filbuf (FILE *);		/* !!! */
+int _flsbuf (unsigned char, FILE *); /* !!! */
+int sscanf (char *, char *, ...);
+void setbuf (FILE *, char *);
+void perror (char *);
+     
+time_t time (time_t *);
+int strftime (char *, int, char *, struct tm *);
+     
+int initgroups (char *, int);     
+int wait3 (int *, int, void*);	/* Close enough for us... */
+int lstat (const char *, struct stat *);
+int stat (const char *, struct stat *);     
+int flock (int, int);
+#ifndef NO_KILLPG
+int killpg(int, int);
+#endif
+int socket (int, int, int);     
+int setsockopt (int, int, int, const char*, int);
+int listen (int, int);     
+int bind (int, struct sockaddr *, int);     
+int connect (int, struct sockaddr *, int);
+int accept (int, struct sockaddr *, int *);
+int shutdown (int, int);     
+
+int getsockname (int s, struct sockaddr *name, int *namelen);
+int getpeername (int s, struct sockaddr *name, int *namelen);
+int gethostname (char *name, int namelen);     
+void syslog (int, char *, ...);
+char *mktemp (char *);
+     
+long vfprintf (FILE *, char *, va_list);
+char *vsprintf (char *, char *, va_list);
+     
+#endif
+
+#endif /* EPERL_GLOBAL_H */
 /*EOF*/

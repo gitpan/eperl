@@ -17,6 +17,18 @@
     interface for dynamic library loading */
 #undef HAVE_PERL_DYNALOADER
 
+/*  define type bool for Perl 5 headers if missing */
+#undef bool
+
+/*  define DEBUG if we compile with debugging */
+#undef DEBUG_ENABLED
+
+/*  define if libdmalloc.a is available */
+#undef HAVE_DMALLOC
+
+/* Define if you have the memmove function.  */
+#undef HAVE_MEMMOVE
+
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H
 

@@ -1,0 +1,34 @@
+
+  New from ePerl Version 2.0.3 to 2.1.0
+  =====================================
+
+  o   now compiles and runs out-of-the-box under
+      Solaris, SunOS, HP/UX, FreeBSD and Linux with Perl 5.003, 5.003_93.
+
+  o   new runtime modes: FILTER CGI AND NPHCGI
+
+  o   all builtin: README, LICENSE, VERSION and GIF IMAGES
+
+  o   more IO: can read von stdin and can write through explicit outpugile
+
+  o   shebang support
+
+  o   begin and end delimiter are variable now
+
+  o   env and real perl variables can be set via -D and -E
+
+  o   new -k option to keep the cwd
+
+  o   now there is a real Unix manpage which describes all
+      neccessary things.
+
+  o   big source code changes, mkproto, no lib.a etc.
+
+  o   now contains a test suite based on the
+      Perl module Test::Harness
+  
+  o   new feature: now can write a logfile for security reasons
+  o   new feature: setuid switching
+  o   new security checks: file has to end in .phtml
+  o   new security checks: existing uid
+

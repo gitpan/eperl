@@ -7,7 +7,14 @@
 **
 */
 
-#define perlprog "@perlprog@"
-#define perlvers "@perlvers@"
+#define AC_perlprog "@perlprog@"
+#define AC_perlvers "@perlvers@"
+#define AC_perlarch "@perlarch@"
+#define AC_perllibs "@perllibs@"
+#define AC_perldla  "@perldla@"
+
+#define AC_prefix   "@prefix@"
+
+#define LOGFILE     "@logfile@"
 
 #endif /* SC_H */
