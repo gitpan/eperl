@@ -215,6 +215,19 @@ void give_usage(char *name)
     fprintf(stderr, "   -h             display ePerl usage list (this one)\n");
 }
 
+char *RememberedINC[1024] = { NULL };
+
+void RememberINC(char *str) 
+{
+    int i;
+
+    for (i = 0; RememberedINC[i] != NULL; i++)
+        ;
+    RememberedINC[i++] = strdup(str);
+    RememberedINC[i++] = NULL;
+    return;
+}
+
 void mysighandler(int rc)
 {
     /* ignore more signals */
@@ -368,7 +381,7 @@ int main(int argc, char **argv, char **env)
                 fDebug = TRUE;
                 break;
             case 'I':
-                Perl5_RememberINC(optarg);
+                RememberINC(optarg);
                 break;
             case 'P':
                 fPP = TRUE;
@@ -530,7 +543,7 @@ int main(int argc, char **argv, char **env)
         fPP = TRUE;
         ePerl_convert_entities = TRUE;
         if ((cp = getenv("DOCUMENT_ROOT")) != NULL)
-            Perl5_RememberINC(cp);
+            RememberINC(cp);
     }
 
     /* check for valid source file */
@@ -818,7 +831,7 @@ int main(int argc, char **argv, char **env)
         *cp = NUL;
         chdir(sourcedir);
         /* run the preprocessor */
-        if ((cpBuf3 = ePerl_PP(cpScript, Perl5_RememberedINC)) == NULL) {
+        if ((cpBuf3 = ePerl_PP(cpScript, RememberedINC)) == NULL) {
             PrintError(mode, source, NULL, NULL, "Preprocessing failed for `%s': %s", source, ePerl_PP_GetError());
             CU(mode == MODE_FILTER ? EX_IOERR : EX_OK);
         }
@@ -886,22 +899,31 @@ int main(int argc, char **argv, char **env)
     }
     IO_redirect_stderr(er);
 
-    /* now allocate the Perl interpreter */
+    /*  now allocate the Perl interpreter  */
     my_perl = perl_alloc();   
     perl_construct(my_perl); 
     /* perl_destruct_level = 0; */
     /* perl_init_i18nl10n(1); */
 
-    /* now parse the script
-       NOTICE: At this point, the script gets 
-               only _parsed_, not evaluated/executed! */
+    /*  create command line...  */
     myargc = 0;
+    /*  - program name and possible -T -w options */
     myargv[myargc++] = progname;
     if (fTaint) 
         myargv[myargc++] = "-T";
     if (fWarn) 
         myargv[myargc++] = "-w";
+    /*  - previously remembered Perl 5 INC entries (option -I) */
+    for (i = 0; RememberedINC[i] != NULL; i++) {
+        myargv[myargc++] = "-I";
+        myargv[myargc++] = RememberedINC[i];
+    }
+    /*  - and the script itself  */
     myargv[myargc++] = perlscript;   
+
+    /*  now parse the script! 
+        NOTICE: At this point, the script gets 
+        only _parsed_, not evaluated/executed!  */
 #ifdef HAVE_PERL_DYNALOADER
     rc = perl_parse(my_perl, Perl5_XSInit, myargc, myargv, env);
 #else
@@ -951,8 +973,6 @@ int main(int argc, char **argv, char **env)
 
     /*  Set the previously remembered Perl 5 scalars (option -d) */
     Perl5_SetRememberedScalars();
-    /*  Set the previously remembered Perl 5 INC entries (option -I) */
-    Perl5_SetRememberedINC();
 
     /*  Force unbuffered I/O */
     Perl5_ForceUnbufferedStdout();

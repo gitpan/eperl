@@ -49,6 +49,8 @@ extern void give_license(void);
 extern void give_img_logo(void);
 extern void give_img_powered(void);
 extern void give_usage(char *name);
+extern char *RememberedINC[1024];
+extern void RememberINC(char *str);
 extern void mysighandler(int rc);
 extern void myinit(void);
 extern void myexit(int rc);
@@ -57,15 +59,11 @@ extern int main(int argc, char **argv, char **env);
 /* eperl_perl5.c */
 extern void Perl5_XSInit(void);
 extern void Perl5_ForceUnbufferedStdout(void);
-extern void Perl5_EvalCmd(char *cmd);
 extern char **Perl5_SetEnvVar(char **env, char *str);
 extern void Perl5_SetScalar(char *pname, char *vname, char *vvalue);
 extern char *Perl5_RememberedScalars[1024];
 extern void Perl5_RememberScalar(char *str);
 extern void Perl5_SetRememberedScalars(void);
-extern char *Perl5_RememberedINC[1024];
-extern void Perl5_RememberINC(char *str);
-extern void Perl5_SetRememberedINC(void);
 
 /* eperl_parse.c */
 extern char *ePerl_begin_delimiter;

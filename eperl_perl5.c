@@ -141,33 +141,4 @@ void Perl5_SetRememberedScalars(void)
     }
 }
 
-/*
-**
-**  remember a Perl INC entry
-**  and set it later
-**
-*/
-
-char *Perl5_RememberedINC[1024] = { NULL };
-
-void Perl5_RememberINC(char *str) 
-{
-    int i;
-
-    for (i = 0; Perl5_RememberedINC[i] != NULL; i++)
-        ;
-    Perl5_RememberedINC[i++] = strdup(str);
-    Perl5_RememberedINC[i++] = NULL;
-    return;
-}
-
-void Perl5_SetRememberedINC(void) 
-{
-    int i;
-
-    for (i = 0; Perl5_RememberedINC[i] != NULL; i++)
-        av_push(GvAV(incgv), newSVpv(Perl5_RememberedINC[i],0));
-}
-
-
 /*EOF*/

@@ -39,7 +39,7 @@ package Apache::ePerl;
 require 5.00325;
 use strict;
 use vars qw($VERSION);
-use vars qw($nDone $nOk $nFail $Cache);
+use vars qw($nDone $nOk $nFail $Cache $Config);
 
 #   imports
 use Carp;
@@ -51,14 +51,21 @@ use File::Basename qw(dirname);
 use Parse::ePerl;
 
 #   private version number
-$VERSION = "2.2.3";
+$VERSION = "2.2.4";
 
 #   globals
-$nDone = 0;
-$nOk   = 0;
-$nFail = 0;
-$Cache = {};
+$nDone  = 0;
+$nOk    = 0;
+$nFail  = 0;
+$Cache  = {};
 
+#   configuration
+$Config = {
+    'BeginDelimiter'  => '<?',
+    'EndDelimiter'    => '!>',
+    'CaseDelimiters'  => 0,
+    'ConvertEntities' => 1
+};
 
 #
 #   send HTML error page
@@ -136,9 +143,10 @@ sub handler {
         #   ePerl format to plain Perl format
         if (not Parse::ePerl::Translate({
             Script          => $data,
-            BeginDelimiter  => '<?',
-            EndDelimiter    => '!>',
-            ConvertEntities => 1,
+            BeginDelimiter  => $Config->{'BeginDelimiter'},
+            EndDelimiter    => $Config->{'EndDelimiter'},
+            CaseDelimiters  => $Config->{'CaseDelimiters'},
+            ConvertEntities => $Config->{'ConvertEntities'},
             Result          => \$data,
         })) {
             &send_errorpage($r, "Error on translating script from bristled to plain format");
@@ -220,7 +228,7 @@ Apache::Status->menu_item(
         my (@s);
         push(@s, "<b>Information about Apache::ePerl</b><br>");
         push(@s, "Interpreted documents: <b>$nDone</b> ($nOk ok, $nFail failed)<br>");
-        push(@s, "Version: <b>$VERSION</b>");
+        push(@s, "Versions: Apache::ePerl <b>$VERSION</b>, Parse::ePerl <b>$Parse::ePerl::VERSION</b>");
         return \@s;
     }
 ) if Apache->module("Apache::Status");
@@ -236,18 +244,26 @@ Apache::ePerl - mod_perl handler for fast emulated ePerl facility
 
 =head1 SYNOPSIS
 
-   #   httpd.conf
+   #   Apache's httpd.conf
+   #   mandatory:
    PerlModule Apache::ePerl
    <Files ~ "/root/of/webmaster/area/.+\.iphtml$">
        Options     +ExecCGI
        SetHandler  perl-script
        PerlHandler Apache::ePerl
    </Files>
+   #   optional:
+   <Perl>
+   $Apache::ePerl::Config->{'BeginDelimiter'}  = '<?';
+   $Apache::ePerl::Config->{'EndDelimiter'}    = '!>';
+   $Apache::ePerl::Config->{'CaseDelimiters'}  = 0;
+   $Apache::ePerl::Config->{'ConvertEntities'} = 1;
+   </Perl>
 
 =head1 DESCRIPTION
 
 This packages provides a handler function for Apache/mod_perl which can be
-used to emulate the stand-alone Server-Side-Scripting-Language ePerl (see
+used to emulate the stand-alone Server-Side-Scripting-Language I<ePerl> (see
 eperl(3) for more details) in a very fast way. This is not a real 100%
 replacement for F<nph-eperl> because of reduced functionality, principal
 runtime restrictions and speedup decisions. For instance this variant does not
@@ -266,13 +282,49 @@ problems exists for him, because all risk is at his own hands. For the average
 user you should B<not> use Apache::ePerl. Instead install the regular
 stand-alone ePerl facility (F<nph-eperl>) for your users.
 
-=head1 ADVANTAGE
+So, the advantage of Apache::ePerl against the regular F<nph-eperl> is better
+performance and nothing else. Actually scripts executed under Apache::ePerl
+are at least twice as fast as under F<nph-eperl>. The reason its not that
+ePerl itself is faster. The reason is the runtime in-core environment of
+Apache/mod_perl which does not use forking.
 
-The advantage of Apache::ePerl against the regular F<nph-eperl> is better
-performance. Actually scripts executed under Apache::ePerl are at least twice
-as fast as under F<nph-eperl>. The reason its not that ePerl itself is faster.
-The reason are the runtime in-core environment of Apache+mod_perl which does
-not use forking.
+=head2 Installation and Configuration
+
+First you have to install Apache::ePerl so that Apache/mod_perl can find it.
+This is usually done via configuring the ePerl distribution via the same Perl
+interpreter as was used when building Apache/mod_perl.
+
+Second, you have to add the following config snippet to Apache's F<httpd.conf>
+file:
+
+   PerlModule Apache::ePerl
+   <Files ~ "/root/of/webmaster/area/.+\.iphtml$">
+       Options     +ExecCGI
+       SetHandler  perl-script
+       PerlHandler Apache::ePerl
+   </Files>
+
+Third, when you want to change the defaults of the ePerl parser, you also can
+add something like this to the end of the snippet above.
+
+   <Perl>
+   $Apache::ePerl::Config->{'BeginDelimiter'}  = '<?';
+   $Apache::ePerl::Config->{'EndDelimiter'}    = '!>';
+   $Apache::ePerl::Config->{'CaseDelimiters'}  = 0;
+   $Apache::ePerl::Config->{'ConvertEntities'} = 1;
+   </Perl>
+
+Fourth you can additionally enable the mod_perl runtime status for
+Apache::ePerl by using the following snippet.
+
+   <Location /perl-status>
+   SetHandler perl-script
+   PerlHandler Apache::Status
+   </Location>
+
+This enables the URL C</perl-status> in general and the URL
+C</perl-status?ePerl> in special. Use it to see how much scripts where run and
+which version of ePerl you are currently using.
 
 =head1 AUTHOR
 

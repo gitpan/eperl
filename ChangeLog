@@ -2,6 +2,21 @@
   C h a n g e L o g   o f   e P e r l
   ___________________________________________________________________________
 
+  Changes between 2.2.3 and 2.2.4
+  -------------------------------
+  [Bugfix and Enhancement]
+
+  970901 o added more hints to PORTING file
+         o fixed a bug in Parse::ePerl for case where $error was undefined
+           [Thanks to Joe Norton <norton@alum.mit.edu> for patch]
+         o fixed -I option: now it works as expected even for
+           cases where you want to add stuff to @INC which is
+           needed at _parse_ time.
+         o now the webmaster can configure the delimiters and other stuff via
+           Apache::ePerl::Config hash from within <Perl>...</Perl> sections in
+           Apache. An example is added to the synopsis of Apache::ePerl
+           manpage.
+
   Changes between 2.2.2 and 2.2.3
   -------------------------------
   [Security Bugfix and Enhancement]
